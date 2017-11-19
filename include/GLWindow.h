@@ -32,10 +32,11 @@ public :
     ~GLWindow();
     void mouseMove(QMouseEvent * _event);
     void mouseClick(QMouseEvent * _event);
-
+    QImage intensity();
 
 public slots:
-    void saveImage( std::string _destination );
+    void saveImage(QImage _image, std::string _destination );
+
 protected:
 
     /// @brief  The following methods must be implimented in the sub class

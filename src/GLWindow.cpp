@@ -116,8 +116,9 @@ void GLWindow::init()
 
     addTexture( "images/blah.jpg" );
 //    glViewport( 0, 0, m_image.width()/m_image.height(), m_image.width()/m_image.height() );
-    threshold();
-    saveImage( "images/blah2.jpg" );
+    //threshold();
+    QImage testImage = intensity();
+    saveImage(testImage, "images/grayscale.jpg" );
 
     glUniform1i( m_colourTextureAddress, 0 );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
@@ -126,6 +127,8 @@ void GLWindow::init()
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
     glGenerateMipmap( GL_TEXTURE_2D );
     glActiveTexture( GL_TEXTURE0 );
+
+
 
 }
 
@@ -203,7 +206,22 @@ void GLWindow::threshold()
 }
 
 
-void GLWindow::saveImage( std::string _destination )
+void GLWindow::saveImage(QImage _image, std::string _destination )
 {
-    m_image.save( _destination.c_str(), 0, -1 );
+    _image.save( _destination.c_str(), 0, -1 );
+}
+
+QImage GLWindow::intensity()
+{
+    QImage result = QImage(m_image.width(),m_image.height(),QImage::Format_Grayscale8);
+    for(int i =0; i<m_image.width(); ++i)
+    {
+        for(int j=0 ; j<m_image.height();++j)
+        {
+            QColor myColor = m_image.pixelColor(i,j);
+            int average = (myColor.red() + myColor.green() + myColor.blue()) / 3;
+            result.setPixelColor(i,j,QColor(average,average,average));
+        }
+    }
+    return result;
 }
