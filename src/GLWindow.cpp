@@ -118,7 +118,7 @@ void GLWindow::init()
 //    glViewport( 0, 0, m_image.width()/m_image.height(), m_image.width()/m_image.height() );
     //threshold();
     QImage testImage = intensity();
-//    std::vector<std::vector<float>> testvec = chroma( testImage );
+    std::vector<std::vector<std::vector<float>>> testvec = chroma( testImage );
 
     saveImage(testImage, "images/grayscale.jpg" );
 
@@ -231,16 +231,18 @@ QImage GLWindow::intensity()
 
 //------------------------------------------------------------------------------------------------------------------------------
 
-std::vector<std::vector<float>> GLWindow::chroma( QImage & _intensity )
+std::vector< std::vector< std::vector< float > > > GLWindow::chroma( QImage & _intensity )
 {
 //    QImage result = m_image.copy();
     QColor color;
     std::vector<float> pixel;
     pixel.resize(3);
-    std::vector<std::vector<float>> result;
-//    result.resize( _intensity.width() * intensity().height() );
+    std::vector<std::vector<std::vector<float>>> result; // 2d vector containing RGB Values
+    result.resize( _intensity.width() );
+
     for ( int i = 0; i < _intensity.width(); ++i )
     {
+        result[i].resize( _intensity.height() );
         for ( int j = 0; j < _intensity.height(); ++j )
         {
            int intensity = _intensity.pixelColor(i,j).red();
@@ -250,7 +252,8 @@ std::vector<std::vector<float>> GLWindow::chroma( QImage & _intensity )
            pixel[0] = red;
            pixel[1] = green;
            pixel[2] = blue;
-           result.push_back(pixel);
+           result[i][j] = pixel;
+//           result.push_back(pixel);
 //           color.setHsv(red, green, blue);
 //           result.setPixelColor( i, j, color );
         }
