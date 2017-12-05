@@ -118,6 +118,8 @@ void GLWindow::init()
 //    glViewport( 0, 0, m_image.width()/m_image.height(), m_image.width()/m_image.height() );
     //threshold();
     QImage testImage = intensity();
+//    std::vector<std::vector<float>> testvec = chroma( testImage );
+
     saveImage(testImage, "images/grayscale.jpg" );
 
     glUniform1i( m_colourTextureAddress, 0 );
@@ -184,7 +186,7 @@ void GLWindow::renderTexture()
 
 void GLWindow::threshold()
 {
-    for(int i = 0; i< m_image.width(); ++i)
+    for(int i = 0; i < m_image.width(); ++i)
     {
         for(int j = 0; j< m_image.height(); ++j)
         {
@@ -205,6 +207,7 @@ void GLWindow::threshold()
     }
 }
 
+//------------------------------------------------------------------------------------------------------------------------------
 
 void GLWindow::saveImage(QImage _image, std::string _destination )
 {
@@ -225,3 +228,34 @@ QImage GLWindow::intensity()
     }
     return result;
 }
+
+//------------------------------------------------------------------------------------------------------------------------------
+
+std::vector<std::vector<float>> GLWindow::chroma( QImage & _intensity )
+{
+//    QImage result = m_image.copy();
+    QColor color;
+    std::vector<float> pixel;
+    pixel.resize(3);
+    std::vector<std::vector<float>> result;
+//    result.resize( _intensity.width() * intensity().height() );
+    for ( int i = 0; i < _intensity.width(); ++i )
+    {
+        for ( int j = 0; j < _intensity.height(); ++j )
+        {
+           int intensity = _intensity.pixelColor(i,j).red();
+           float red = float(m_image.pixelColor(i,j).red()) / float(intensity);
+           float green = float(m_image.pixelColor(i,j).green()) / float(intensity);
+           float blue = 3.0f - red - green; // HELP ????????????
+           pixel[0] = red;
+           pixel[1] = green;
+           pixel[2] = blue;
+           result.push_back(pixel);
+//           color.setHsv(red, green, blue);
+//           result.setPixelColor( i, j, color );
+        }
+    }
+    return result;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------

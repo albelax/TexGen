@@ -33,6 +33,7 @@ public :
     void mouseMove(QMouseEvent * _event);
     void mouseClick(QMouseEvent * _event);
     QImage intensity();
+    std::vector<std::vector<float> > chroma( QImage & _intensity );
 
 public slots:
     void saveImage(QImage _image, std::string _destination );
@@ -54,6 +55,7 @@ protected:
     void renderTexture();
     void renderScene();
     void threshold();
+
 private :
     //----------------------------------------------------------------------------------------------------------------------
     void init();
