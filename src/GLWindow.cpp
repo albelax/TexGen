@@ -117,12 +117,12 @@ void GLWindow::init()
     addTexture( "images/blah.jpg" );
 //    glViewport( 0, 0, m_image.width()/m_image.height(), m_image.width()/m_image.height() );
     //threshold();
-    QImage intensityImage = intensity();
-    std::vector<std::vector<std::vector<float>>> chromaImage = chroma( intensityImage );
+		std::vector<std::vector<std::vector<float>>> intensityImage = intensity();
+//    std::vector<std::vector<std::vector<float>>> chromaImage = chroma( intensityImage );
 
-    separation(intensityImage,chromaImage);
+//    separation(intensityImage,chromaImage);
 
-    //saveImage(testImage, "images/grayscale.jpg" );
+		saveImage(intensityImage, "images/grayscale.jpg" );
 
     glUniform1i( m_colourTextureAddress, 0 );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
@@ -211,45 +211,63 @@ void GLWindow::threshold()
 
 //------------------------------------------------------------------------------------------------------------------------------
 
-void GLWindow::saveImage(QImage _image, std::string _destination )
+void GLWindow::saveImage( std::vector<std::vector<std::vector<float>>> & _image, std::string _destination )
 {
-    _image.save( _destination.c_str(), 0, -1 );
-}
+	QImage out;
+	out = m_image.copy();
 
-QImage GLWindow::intensity()
-{
-    QImage result = QImage(m_image.width(),m_image.height(),QImage::Format_Grayscale8);
-    for(int i =0; i<m_image.width(); ++i)
-    {
-        for(int j=0 ; j<m_image.height();++j)
-        {
-            QColor myColor = m_image.pixelColor(i,j);
-            int average = (myColor.red() + myColor.green() + myColor.blue()) / 3;
-            result.setPixelColor(i,j,QColor(average,average,average));
-        }
-    }
-    return result;
+	for ( int i = 0; i < _image.size(); ++i )
+	{
+		for (int j = 0; j < _image[i].size(); ++j )
+		{
+			float r = _image[i][j][0]*255.0f;
+			float g = _image[i][j][1]*255.0f;
+			float b = _image[i][j][2]*255.0f;
+			out.setPixel(i,j,qRgb( r,g,b ));
+		}
+	}
+	out.save( _destination.c_str(), 0, -1 );
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
 
-std::vector< std::vector< std::vector< float > > > GLWindow::chroma( QImage & _intensity )
+std::vector<std::vector<std::vector<float>>> GLWindow::intensity()
+{
+	std::vector<std::vector<std::vector<float>>> result;
+	result.resize(m_image.width());
+	for(int i =0; i<m_image.width(); ++i)
+		{
+			result[i].resize(m_image.height());
+			for(int j=0 ; j<m_image.height();++j)
+				{
+					result[i][j].resize(3);
+					QColor myColor = m_image.pixelColor(i,j);
+					float average = (myColor.redF() + myColor.greenF() + myColor.blueF()) / 3.0f;
+					result[i][j][0] = average; result[i][j][1] = average; result[i][j][2] = average;
+				}
+		}
+	return result;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+
+std::vector< std::vector< std::vector< float > > > GLWindow::chroma( std::vector<std::vector<std::vector<float>>> & _intensity )
 {
 //    QImage result = m_image.copy();
     QColor color;
     std::vector<float> pixel;
     pixel.resize(3);
     std::vector<std::vector<std::vector<float>>> result; // 2d vector containing RGB Values
-    result.resize( _intensity.width() );
+		result.resize( _intensity.size() );
 
-    for ( int i = 0; i < _intensity.width(); ++i )
+		for ( int i = 0; i < _intensity.size(); ++i )
     {
-        result[i].resize( _intensity.height() );
-        for ( int j = 0; j < _intensity.height(); ++j )
+				result[i].resize( _intensity[i].size() );
+				for ( int j = 0; j < _intensity[i].size(); ++j )
         {
-           int intensity = _intensity.pixelColor(i,j).red();
-           float red = float(m_image.pixelColor(i,j).red()) / float(intensity);
-           float green = float(m_image.pixelColor(i,j).green()) / float(intensity);
+					 int intensity = _intensity[i][j][0];
+					 float red = float(m_image.pixelColor(j,i).red()) / float(intensity);
+					 float green = float(m_image.pixelColor(j,i).green()) / float(intensity);
            float blue = 3.0f - red - green; // HELP ????????????
            pixel[0] = red;
            pixel[1] = green;
@@ -323,7 +341,7 @@ void GLWindow::separation(QImage intensity, std::vector<std::vector<std::vector<
 //                            (1.0f/NOmega)*sum1*((1.0f/numRegions[z])*sumRegions[z])/(((1/(20*20))*sum2)*((1/(20*20))*sum2)))*
 //                            (pid - ((1.0f/numRegions[z])*sumRegions[z])/(((1/(20*20))*sum2))));
                     F0[i][j] = (2.0f *
-                                (1.0f +(1.0f/NOmega)*sum1*
+										(1.0f -(1.0f/NOmega)*sum1*
 
                                     ((1.0f/numRegions[z])*sumRegions[z])
                                             /
