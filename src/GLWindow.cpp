@@ -117,10 +117,12 @@ void GLWindow::init()
     addTexture( "images/blah.jpg" );
 //    glViewport( 0, 0, m_image.width()/m_image.height(), m_image.width()/m_image.height() );
     //threshold();
-    QImage testImage = intensity();
-    std::vector<std::vector<std::vector<float>>> testvec = chroma( testImage );
+    QImage intensityImage = intensity();
+    std::vector<std::vector<std::vector<float>>> chromaImage = chroma( intensityImage );
 
-    saveImage(testImage, "images/grayscale.jpg" );
+    separation(intensityImage,chromaImage);
+
+    //saveImage(testImage, "images/grayscale.jpg" );
 
     glUniform1i( m_colourTextureAddress, 0 );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
@@ -262,3 +264,83 @@ std::vector< std::vector< std::vector< float > > > GLWindow::chroma( QImage & _i
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
+
+void GLWindow::separation(QImage intensity, std::vector<std::vector<std::vector<float>>> chroma)
+{
+    float NOmega = 20*20;
+    QImage albedoIntensityMap = QImage(intensity);
+    float sum1 = 0.0f;
+    float sum2 = 0.0f;
+
+    std::vector<QColor> regions;
+    std::vector<int> numRegions;
+    std::vector<float> sumRegions;
+
+    float step = 1.5f/20.0f;
+
+    for(int i =0; i<20; ++i)
+    {
+        for(int j =0; j<20 ; ++j)
+        {
+            float albedoF = float(albedoIntensityMap.pixelColor(i,j).red());
+            float intensityF = float(intensity.pixelColor(i,j).red());
+            sum1+=intensityF/(albedoF*albedoF);
+            sum2+=intensityF/albedoF;
+            bool foundregion = false;
+            for(int z =0; z<regions.size(); ++z)
+            {
+                if( chroma[i][j][0]-float(regions[z].red()) < step && chroma[i][j][1]-float(regions[z].green()) < step )
+                {
+                    numRegions[z]++;
+                    sumRegions[z]+=intensityF;
+                    foundregion=true;
+                }
+            }
+            if(!foundregion)
+            {
+                regions.push_back(QColor(chroma[i][j][0],chroma[i][j][1],chroma[i][j][2]));
+                numRegions.push_back(1);
+                sumRegions.push_back(intensityF);
+            }
+        }
+    }
+
+    std::vector<std::vector<float>> F0;
+    F0.resize(20);
+
+    for(int i =0; i<20; ++i)
+    {
+        F0[i].resize(20);
+        for(int j =0; j<20; ++j)
+        {
+            bool done = false;
+            for(int z =0; z<regions.size(); ++z)
+            {
+                if( chroma[i][j][0]-float(regions[z].red()) < step && chroma[i][j][1]-float(regions[z].green()) < step )
+                {
+                    float pid = float(albedoIntensityMap.pixelColor(i,j).red());
+//                    F0[i][j]=(2.0f*(1.0f +
+//                            (1.0f/NOmega)*sum1*((1.0f/numRegions[z])*sumRegions[z])/(((1/(20*20))*sum2)*((1/(20*20))*sum2)))*
+//                            (pid - ((1.0f/numRegions[z])*sumRegions[z])/(((1/(20*20))*sum2))));
+                    F0[i][j] = (2.0f *
+                                (1.0f +(1.0f/NOmega)*sum1*
+
+                                    ((1.0f/numRegions[z])*sumRegions[z])
+                                            /
+                                    (((1.0f/(20.0f*20.0f))*sum2)*((1.0f/(20.0f*20.0f))*sum2)))*
+                                (pid - ((1.0f/numRegions[z])*sumRegions[z])/(((1.0f/(20.0f*20.0f))*sum2))));
+                    done =true;
+                }
+                if(done) break;
+            }
+        }
+    }
+
+    for(auto &i : F0)
+    {
+        for(auto &j : i)
+        {
+            std::cout << j <<'\n';
+        }
+    }
+}

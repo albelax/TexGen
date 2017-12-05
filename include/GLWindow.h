@@ -55,6 +55,7 @@ protected:
     void renderTexture();
     void renderScene();
     void threshold();
+    void separation(QImage intensity, std::vector<std::vector<std::vector<float>>> chroma);
 
 private :
     //----------------------------------------------------------------------------------------------------------------------
