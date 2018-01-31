@@ -32,11 +32,12 @@ public :
     ~GLWindow();
     void mouseMove(QMouseEvent * _event);
     void mouseClick(QMouseEvent * _event);
-		std::vector<std::vector<std::vector<float>>> intensity();
-		std::vector< std::vector< std::vector<float> > > chroma(std::vector<std::vector<std::vector<float> > > &_intensity );
+    std::vector<std::vector<float>> intensity();
+    std::vector< std::vector< std::vector<float> > > chroma(std::vector<std::vector<float> > &_intensity );
 
 public slots:
-		void saveImage(std::vector< std::vector< std::vector<float> > >  & _image, std::string _destination );
+    void saveImage3f(std::vector< std::vector< std::vector<float> > >  & _image, std::string _destination );
+    void saveImage1f(std::vector< std::vector<float > >  & _image, std::string _destination );
 
 protected:
 
@@ -55,7 +56,7 @@ protected:
     void renderTexture();
     void renderScene();
     void threshold();
-    void separation(std::vector<std::vector<std::vector<float>>> intensity, std::vector<std::vector<std::vector<float>>> chroma);
+    void separation(std::vector<std::vector<float>> intensity, std::vector<std::vector<std::vector<float>>> chroma);
 private :
     //----------------------------------------------------------------------------------------------------------------------
     void init();

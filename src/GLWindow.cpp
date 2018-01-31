@@ -117,12 +117,12 @@ void GLWindow::init()
     addTexture( "images/sky_xneg.png" );
     //    glViewport( 0, 0, m_image.width()/m_image.height(), m_image.width()/m_image.height() );
     //threshold();
-    std::vector<std::vector<std::vector<float>>> intensityImage = intensity();
+    std::vector<std::vector<float>> intensityImage = intensity();
     std::vector<std::vector<std::vector<float>>> chromaImage = chroma( intensityImage );
 
     separation(intensityImage,chromaImage);
 
-    saveImage(intensityImage, "images/grayscale.jpg" );
+    saveImage1f(intensityImage, "images/grayscale.jpg" );
 
     glUniform1i( m_colourTextureAddress, 0 );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
@@ -211,7 +211,7 @@ void GLWindow::threshold()
 
 //------------------------------------------------------------------------------------------------------------------------------
 
-void GLWindow::saveImage( std::vector<std::vector<std::vector<float>>> & _image, std::string _destination )
+void GLWindow::saveImage3f( std::vector<std::vector<std::vector<float>>> & _image, std::string _destination )
 {
     QImage out;
     out = m_image.copy();
@@ -229,21 +229,38 @@ void GLWindow::saveImage( std::vector<std::vector<std::vector<float>>> & _image,
     out.save( _destination.c_str(), 0, -1 );
 }
 
+void GLWindow::saveImage1f( std::vector<std::vector<float>> & _image, std::string _destination )
+{
+    QImage out;
+    out = m_image.copy();
+
+    for ( int i = 0; i < (int)_image.size(); ++i )
+    {
+        for (int j = 0; j < (int)_image[i].size(); ++j )
+        {
+            float r = _image[i][j]*255.0f;
+            float g = _image[i][j]*255.0f;
+            float b = _image[i][j]*255.0f;
+            out.setPixel(i,j,qRgb( r,g,b ));
+        }
+    }
+    out.save( _destination.c_str(), 0, -1 );
+}
+
 //------------------------------------------------------------------------------------------------------------------------------
 
-std::vector<std::vector<std::vector<float>>> GLWindow::intensity()
+std::vector<std::vector<float>> GLWindow::intensity()
 {
-    std::vector<std::vector<std::vector<float>>> result;
+    std::vector<std::vector<float>> result;
     result.resize(m_image.width());
     for(int i =0; i<m_image.width(); ++i)
     {
         result[i].resize(m_image.height());
         for(int j=0 ; j<m_image.height();++j)
         {
-            result[i][j].resize(3);
             QColor myColor = m_image.pixelColor(i,j);
             float average = (myColor.redF() + myColor.greenF() + myColor.blueF()) / 3.0f;
-            result[i][j][0] = average; result[i][j][1] = average; result[i][j][2] = average;
+            result[i][j] = average;
         }
     }
     return result;
@@ -251,7 +268,7 @@ std::vector<std::vector<std::vector<float>>> GLWindow::intensity()
 
 //------------------------------------------------------------------------------------------------------------------------------
 
-std::vector< std::vector< std::vector< float > > > GLWindow::chroma( std::vector<std::vector<std::vector<float>>> & _intensity )
+std::vector< std::vector< std::vector< float > > > GLWindow::chroma( std::vector<std::vector<float>> & _intensity )
 {
     //    QImage result = m_image.copy();
     QColor color;
@@ -265,7 +282,7 @@ std::vector< std::vector< std::vector< float > > > GLWindow::chroma( std::vector
         result[i].resize( _intensity[i].size() );
         for ( int j = 0; j < _intensity[i].size(); ++j )
         {
-            float intensity = _intensity[i][j][0];
+            float intensity = _intensity[i][j];
             float red = float(m_image.pixelColor(i,j).redF()) / float(intensity);
             float green = float(m_image.pixelColor(i,j).greenF()) / float(intensity);
             float blue = 3.0f - red - green; // HELP ????????????
@@ -283,11 +300,11 @@ std::vector< std::vector< std::vector< float > > > GLWindow::chroma( std::vector
 
 //------------------------------------------------------------------------------------------------------------------------------
 
-void GLWindow::separation(std::vector<std::vector<std::vector<float>>> intensity, std::vector<std::vector<std::vector<float>>> chroma)
+void GLWindow::separation(std::vector<std::vector<float>> intensity, std::vector<std::vector<std::vector<float>>> chroma)
 {
     float res = 20.0f;
     float NOmega = res*res;
-    std::vector<std::vector<std::vector<float>>> albedoIntensityMap =intensity;
+    std::vector<std::vector<float>> albedoIntensityMap =intensity;
     float sum1 = 0.0f;
     float sum2 = 0.0f;
 
@@ -301,8 +318,8 @@ void GLWindow::separation(std::vector<std::vector<std::vector<float>>> intensity
     {
         for(int j =0; j<int(res) ; ++j)
         {
-            float albedoF = float(albedoIntensityMap[i][j][0]);
-            float intensityF = float(intensity[i][j][0]);
+            float albedoF = float(albedoIntensityMap[i][j]);
+            float intensityF = float(intensity[i][j]);
             sum1+=intensityF/(albedoF*albedoF);
             sum2+=intensityF/albedoF;
             bool foundregion = false;
@@ -338,7 +355,7 @@ void GLWindow::separation(std::vector<std::vector<std::vector<float>>> intensity
             {
                 if( chroma[i][j][0]-float(regions[z][0]) < step && chroma[i][j][1]-float(regions[z][1]) < step )
                 {
-                    float pid = float(albedoIntensityMap[i][j][0]);
+                    float pid = float(albedoIntensityMap[i][j]);
                     F0[i][j] = (2.0f *
                                 (1.0f -(1.0f/NOmega)*sum1*
 
