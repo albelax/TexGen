@@ -379,24 +379,29 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
   //------------------------FIND CHROMA REGIONS------------------------------------
   for(int x = 0; x<int(regionSizeX); ++x)
   {
-    int indexX = res*x;
-    if(indexX>_chroma.size()-1) break;
     for(int y = 0; y<int(regionSizeY) ; ++y)
     {
       int indexY = res*y;
       if(indexY>_chroma[0].size()-1) break;
+
+      int indexX = res*x;
+      if(indexX>_chroma.size()-1) break;
+
       whichPixelWhichRegion[x][y].resize(res);
       // Now we go through the 20*20 region's pixels
 
       for(int i = 0; i<res; ++i)
       {
         whichPixelWhichRegion[x][y][i].resize(res);
+        indexY = res*y;
+        if(indexY>_chroma[0].size()-1) break;
+
         for(int j = 0; j<res; ++j)
         {
 
           // See if the pixel is in any existing regions.
           bool found = false;
-          for(int z =0; z<regions.size(); ++z)
+          for(int z =0; z<regions[x][y].size(); ++z)
           {
             // If within an existing region
             if(_chroma[indexX][indexY][0]>regions[x][y][z][0] && _chroma[indexX][indexY][0]<regions[x][y][z][0]+regionStep &&
@@ -424,8 +429,10 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
             regions[x][y].push_back(temp);
           }
           indexY++;
+          if(indexY>=sizeY) break;
         }
         indexX++;
+        if(indexX>=sizeX) break;
       }
     }
   }
@@ -433,12 +440,13 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
   //------------------------UPDATE SUMS------------------------------------
   for(int x = 0; x<int(regionSizeX); ++x)
   {
-    int indexX = res*x;
-    if(indexX>_chroma.size()-1) break;
     for(int y = 0; y<int(regionSizeY) ; ++y)
     {
       int indexY = res*y;
       if(indexY>_chroma[0].size()-1) break;
+
+      int indexX = res*x;
+      if(indexX>_chroma.size()-1) break;
 
       sum3[x][y].resize(regions[x][y].size());
       for(int p = 0; p<sum3[x][y].size();++p)
@@ -447,28 +455,37 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
       }
       for(int i = 0; i<res; ++i)
       {
+        indexY = res*y;
+        if(indexY>_chroma[0].size()-1) break;
+
         for(int j = 0; j<res; ++j)
         {
           sum1[x][y]+=_imageIntensity[indexX][indexY]/(albedoIntensityMap[indexX][indexY]*albedoIntensityMap[indexX][indexY]);
           sum2[x][y]+=_imageIntensity[indexX][indexY]/albedoIntensityMap[indexX][indexY];
           sum3[x][y][whichPixelWhichRegion[x][y][i][j]]+=_imageIntensity[indexX][indexY];
           indexY++;
+          if(indexY>=sizeY) break;
         }
         indexX++;
+        if(indexX>=sizeX) break;
       }
     }
   }
 
   for(int x = 0; x<int(regionSizeX); ++x)
   {
-    int indexX = res*x;
-    if(indexX>_chroma.size()-1) break;
     for(int y = 0; y<int(regionSizeY) ; ++y)
     {
       int indexY = res*y;
       if(indexY>_chroma[0].size()-1) break;
+
+      int indexX = res*x;
+      if(indexX>_chroma.size()-1) break;
+
       for(int i = 0; i<res; ++i)
       {
+        indexY = res*y;
+        if(indexY>_chroma[0].size()-1) break;
         for(int j = 0; j<res; ++j)
         {
           int ourChromaRegion = whichPixelWhichRegion[x][y][i][j];
@@ -482,8 +499,10 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
           std::cout<<indexX<<", "<<indexY<<": "<<DiffF0<<"\n";
 
           indexY++;
+          if(indexY>=sizeY) break;
         }
         indexX++;
+        if(indexX>=sizeX) break;
       }
     }
   }
