@@ -5,7 +5,7 @@
 #include <QGLWidget>
 #include <QImage>
 #include <QColor>
-
+#include <math.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -309,6 +309,27 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
   float regionSizeX = ceil(float(sizeX)/float(res));
   float regionSizeY = ceil(float(sizeY)/float(res));
 
+  std::vector<std::vector<float>> prevDiffF0;
+  std::vector<std::vector<std::vector<float>>> totDiffF0;
+  int iterations = 10;
+  totDiffF0.resize(iterations); // iterations
+  for(int i =0; i<iterations; ++i)
+  {
+    totDiffF0[i].resize(sizeX);
+    for(int j =0; j<sizeX; ++j)
+    {
+      totDiffF0[i][j].resize(sizeY);
+    }
+  }
+
+
+
+  prevDiffF0.resize(sizeX);
+  for(int i =0; i<sizeX; ++i)
+  {
+    prevDiffF0[i].resize(sizeY);
+  }
+
   std::vector<std::vector<float>> albedoIntensityMap = _imageIntensity;
 
   // Tells us which region each pixel belongs to
@@ -437,8 +458,9 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
     }
   }
 
+  bool firstTime = true;
 
-  for(int r =0; r<10 ; ++r)
+  for(int r =0; r<iterations; ++r)
   {
   //------------------------UPDATE SUMS------------------------------------
 
@@ -482,8 +504,15 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
 
         for(int j = 0; j<res; ++j)
         {
+          // CHeck if dividing by zero
+          if(albedoIntensityMap[indexX][indexY]<0.000001f)
+          {
+            albedoIntensityMap[indexX][indexY] = 0.000001f;
+          }
+
           sum1[x][y]+=_imageIntensity[indexX][indexY]/(albedoIntensityMap[indexX][indexY]*albedoIntensityMap[indexX][indexY]);
           sum2[x][y]+=_imageIntensity[indexX][indexY]/albedoIntensityMap[indexX][indexY];
+          if(isinf(sum2[x][y])) std::cout<<"is inf: "<<albedoIntensityMap[indexX][indexY]<<"\n";
           sum3[x][y][whichPixelWhichRegion[x][y][i][j]]+=_imageIntensity[indexX][indexY];
           indexY++;
           if(indexY>=sizeY) break;
@@ -516,31 +545,34 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
           float DiffF0 = 2*(1 + (1.0f/(20.0f*20.0f))*sum1[x][y] *
                             (((1.0f/noPixelsChroma)*sum3[x][y][ourChromaRegion])
                              /
-                             (((1.0f/(20.0f*20.0f))*sum2[x][y])*((1.0f/(20.0f*20.0f))*sum2[x][y])))
+                             (((1.0f/(20.0f*20.0f))*sum2[x][y])*((1.0f/(20.0f*20.0f))*sum2[x][y]))))
                             *
-                            (albedoIntensityMap[indexX][indexY] - (((1.0f/noPixelsChroma)*sum3[x][y][noPixelsChroma])/((1.0f/(20.0f*20.0f))*sum2[x][y]))));
-          std::cout<<"Time"<<r<<":"<<indexX<<", "<<indexY<<": "<<DiffF0<<"\n";
-
+                            (albedoIntensityMap[indexX][indexY] - (((1.0f/noPixelsChroma)*sum3[x][y][noPixelsChroma])/((1.0f/(20.0f*20.0f))*sum2[x][y])));
+          //std::cout<<"Time"<<r<<":"<<indexX<<", "<<indexY<<": "<<DiffF0<<"\n";
+          totDiffF0[r][indexX][indexY] = DiffF0;
           //  Change albedo based on DiffF0
-          if(DiffF0 > 0.1f) albedoIntensityMap[indexX][indexY]-=0.2f;
-          else if(DiffF0 < -0.1f) albedoIntensityMap[indexX][indexY]+=0.2f;
+          if(DiffF0 > 0.1f) albedoIntensityMap[indexX][indexY]-=0.01f;
+          else if(DiffF0 < -0.1f) albedoIntensityMap[indexX][indexY]+=0.01f;
 
-          if(DiffF0 != DiffF0)
+          if(DiffF0 == 2.0f)
           {
-            std::cout<<"shiit\n";
-            /*
-            std::cout << 1.0f/(20.0f*20.0f)*sum1[x][y] << '\n'
-                      << (1.0f/noPixelsChroma)*sum3[x][y][ourChromaRegion] << '\n'
-                      << (((1.0f/(20.0f*20.0f))*sum2[x][y])*((1.0f/(20.0f*20.0f))*sum2[x][y])) << '\n'
-                      <<  (albedoIntensityMap[indexX][indexY] - (((1.0f/noPixelsChroma)*sum3[x][y][noPixelsChroma])/((1.0f/(20.0f*20.0f))*sum2[x][y]))) <<'\n'
-                       << "sum1" <<sum1[x][y]<<" sum2:"<<sum2[x][y]<<"\n";
-                       */
-            float a = ( (2.0f*(1.0f + (1.0f/(20.0f*20.0f))*sum1[x][y])));
-            std::cout << "intendisty: " <<_imageIntensity[indexX][indexY] << " albedo: " << albedoIntensityMap[indexX][indexY]
-                                      << " result " << _imageIntensity[indexX][indexY]/(albedoIntensityMap[indexX][indexY]*albedoIntensityMap[indexX][indexY]) <<" sum1: " << sum1[x][y] <<
-                                       " next " << a << "\n";
+//            std::cout<<"NAN ALERT\n";
+
+//            std::cout << "sum1: " << sum1[x][y] << " sum2: " << sum2[x][y] << " sum3: " << sum3[x][y][ourChromaRegion] << "\n" ;
           }
 
+//          if(!firstTime)
+//          {
+//            if(abs(prevDiffF0[indexX][indexY]) > DiffF0)
+//            {
+//              std::cout<<"CONVERGING\n";
+//            }
+//            else
+//            {
+//              std::cout<<"DIVERGING\n";
+//            }
+//          }
+          prevDiffF0[indexX][indexY] = DiffF0;
 
           indexY++;
           if(indexY>=sizeY) break;
@@ -550,7 +582,23 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
       }
     }
   }
+
+  firstTime=false;
   }
+
+
+    for(int j =0; j<sizeX; ++j)
+    {
+      for ( int k = 0; k < sizeY; ++k )
+      {
+        for(int i =0; i<iterations; ++i)
+        {
+          std::cout << totDiffF0[i][j][k] << ",";
+        }
+        std::cout<<"\n";
+
+      }
+    }
 
 
 
