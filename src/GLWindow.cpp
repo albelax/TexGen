@@ -310,15 +310,15 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
   float regionSizeY = ceil(float(sizeY)/float(res));
 
   std::vector<std::vector<float>> prevDiffF0;
-  std::vector<std::vector<std::vector<float>>> totDiffF0;
-  int iterations = 10;
-  totDiffF0.resize(iterations); // iterations
-  for(int i =0; i<iterations; ++i)
+
+
+  m_totDiffF0.resize(m_iterations); // iterations
+  for(int i =0; i<m_iterations; ++i)
   {
-    totDiffF0[i].resize(sizeX);
+    m_totDiffF0[i].resize(sizeX);
     for(int j =0; j<sizeX; ++j)
     {
-      totDiffF0[i][j].resize(sizeY);
+      m_totDiffF0[i][j].resize(sizeY);
     }
   }
 
@@ -460,7 +460,7 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
 
   bool firstTime = true;
 
-  for(int r =0; r<iterations; ++r)
+  for(int r =0; r<m_iterations; ++r)
   {
   //------------------------UPDATE SUMS------------------------------------
 
@@ -549,7 +549,7 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
                             *
                             (albedoIntensityMap[indexX][indexY] - (((1.0f/noPixelsChroma)*sum3[x][y][noPixelsChroma])/((1.0f/(20.0f*20.0f))*sum2[x][y])));
           //std::cout<<"Time"<<r<<":"<<indexX<<", "<<indexY<<": "<<DiffF0<<"\n";
-          totDiffF0[r][indexX][indexY] = DiffF0;
+          m_totDiffF0[r][indexX][indexY] = DiffF0;
           //  Change albedo based on DiffF0
           if(DiffF0 > 0.1f) albedoIntensityMap[indexX][indexY]-=0.01f;
           else if(DiffF0 < -0.1f) albedoIntensityMap[indexX][indexY]+=0.01f;
@@ -561,17 +561,17 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
 //            std::cout << "sum1: " << sum1[x][y] << " sum2: " << sum2[x][y] << " sum3: " << sum3[x][y][ourChromaRegion] << "\n" ;
           }
 
-//          if(!firstTime)
-//          {
-//            if(abs(prevDiffF0[indexX][indexY]) > DiffF0)
-//            {
-//              std::cout<<"CONVERGING\n";
-//            }
-//            else
-//            {
-//              std::cout<<"DIVERGING\n";
-//            }
-//          }
+          if(!firstTime)
+          {
+            if(abs(prevDiffF0[indexX][indexY]) > DiffF0)
+            {
+              std::cout<<"CONVERGING\n";
+            }
+            else
+            {
+              std::cout<<"DIVERGING\n";
+            }
+          }
           prevDiffF0[indexX][indexY] = DiffF0;
 
           indexY++;
@@ -585,98 +585,25 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
 
   firstTime=false;
   }
+    exportCSV("result.csv");
+ }
 
 
-    for(int j =0; j<sizeX; ++j)
+void GLWindow::exportCSV( std::string _file )
+{
+    std::ofstream out;
+    out.open( _file );
+    out.clear();
+    for(int j =0; j< m_totDiffF0[0].size(); ++j)
     {
-      for ( int k = 0; k < sizeY; ++k )
-      {
-        for(int i =0; i<iterations; ++i)
+        for ( int k = 0; k <  m_totDiffF0[0][0].size(); ++k )
         {
-          std::cout << totDiffF0[i][j][k] << ",";
-        }
-        std::cout<<"\n";
-
-      }
-    }
-
-
-
-  /*
-    float res = 20.0f;
-    float NOmega = res*res;
-    std::vector<std::vector<float>> albedoIntensityMap =intensity;
-    float sum1 = 0.0f;
-    float sum2 = 0.0f;
-
-    std::vector<std::vector<float>> regions;
-    std::vector<int> numRegions;
-    std::vector<float> sumRegions;
-
-    float step = 1.5f/20.0f;
-
-    for(int i =0; i<int(res); ++i)
-    {
-        for(int j =0; j<int(res) ; ++j)
-        {
-            float albedoF = float(albedoIntensityMap[i][j]);
-            float intensityF = float(intensity[i][j]);
-            sum1+=intensityF/(albedoF*albedoF);
-            sum2+=intensityF/albedoF;
-            bool foundregion = false;
-            //std::cout<<chroma[i][j][0]<<", "<<chroma[i][j][1]<<", "<<chroma[i][j][2]<<"\n ";
-            for(int z =0; z<regions.size(); ++z)
+            for(int i = 0; i< m_iterations; ++i)
             {
-                if( chroma[i][j][0]-float(regions[z][0]) < step && chroma[i][j][1]-float(regions[z][1]) < step )
-                {
-                    numRegions[z]++;
-                    sumRegions[z]+=intensityF;
-                    foundregion=true;
-                }
+                out << m_totDiffF0[i][j][k] << ",";
             }
-            if(!foundregion)
-            {
-                regions.push_back(chroma[i][j]);
-                numRegions.push_back(1);
-                sumRegions.push_back(intensityF);
-            }
+            out << "\n";
         }
     }
 
-    std::vector<std::vector<float>> F0;
-    F0.resize(int(res));
-
-    for(int i =0; i<int(res); ++i)
-    {
-        F0[i].resize(int(res));
-        for(int j =0; j<int(res); ++j)
-        {
-            bool done = false;
-            for(int z =0; z<regions.size(); ++z)
-            {
-                if( chroma[i][j][0]-float(regions[z][0]) < step && chroma[i][j][1]-float(regions[z][1]) < step )
-                {
-                    float pid = float(albedoIntensityMap[i][j]);
-                    F0[i][j] = (2.0f *
-                                (1.0f -(1.0f/NOmega)*sum1*
-
-                                 ((1.0f/numRegions[z])*sumRegions[z])
-                                 /
-                                 (((1.0f/NOmega)*sum2)*((1.0f/NOmega)*sum2)))*
-                                (pid - ((1.0f/numRegions[z])*sumRegions[z])/(((1.0f/NOmega)*sum2))));
-                    done =true;
-                }
-                if(done) break;
-            }
-        }
-    }
-
-    for(auto &i : F0)
-    {
-        for(auto &j : i)
-        {
-            std::cout << j <<'\n';
-        }
-    }
-    */
 }
