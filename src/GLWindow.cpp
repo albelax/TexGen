@@ -311,7 +311,6 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
 
   std::vector<std::vector<float>> prevDiffF0;
 
-
   m_totDiffF0.resize(m_iterations); // iterations
   for(int i =0; i<m_iterations; ++i)
   {
@@ -321,8 +320,6 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
       m_totDiffF0[i][j].resize(sizeY);
     }
   }
-
-
 
   prevDiffF0.resize(sizeX);
   for(int i =0; i<sizeX; ++i)
@@ -437,12 +434,12 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
           if(!found)
           {
             numberOfPixelsInChromaRegions[x][y].push_back(1);
-            whichPixelWhichRegion[x][y][i][j]=numberOfPixelsInChromaRegions[x][y].size()-1;
+            whichPixelWhichRegion[x][y][i][j]=(numberOfPixelsInChromaRegions[x][y].size()-1);
             // Quantize the chroma regions and add it to the list of regions
             float rTemp = _chroma[indexX][indexY][0]/regionStep;
-            float gTemp = _chroma[indexX][indexY][0]/regionStep;
-            float r = floor(rTemp);
-            float g = floor(gTemp);
+            float gTemp = _chroma[indexX][indexY][1]/regionStep;
+            float r = floor(rTemp) * regionStep;
+            float g = floor(gTemp) * regionStep;
             std::vector<float> temp;
             temp.push_back(r);
             temp.push_back(g);
@@ -515,6 +512,7 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
           B[x][y]+=_imageIntensity[indexX][indexY]/albedoIntensityMap[indexX][indexY];
           if(isinf(B[x][y])) std::cout<<"is inf: "<<albedoIntensityMap[indexX][indexY]<<"\n";
           A[x][y][whichPixelWhichRegion[x][y][i][j]]+=_imageIntensity[indexX][indexY];
+
           indexY++;
           if(indexY>=sizeY) break;
         }
@@ -543,22 +541,15 @@ void GLWindow::separation(std::vector<std::vector<float>> _imageIntensity, std::
           int ourChromaRegion = whichPixelWhichRegion[x][y][i][j];
           float noPixelsChroma = float(numberOfPixelsInChromaRegions[x][y][ourChromaRegion]);  
 
-//          float DiffF0 = 2*(1 + (1.0f/(20.0f*20.0f))*sum1[x][y] *
-//                            (((1.0f/noPixelsChroma)*A[x][y][ourChromaRegion])
-//                             /
-//                             (((1.0f/(20.0f*20.0f))*B[x][y])*((1.0f/(20.0f*20.0f))*B[x][y]))))
-//                            *
-//                            (albedoIntensityMap[indexX][indexY] - (((1.0f/noPixelsChroma)*A[x][y][noPixelsChroma])/((1.0f/(20.0f*20.0f))*B[x][y])));
-
           float y = albedoIntensityMap[indexX][indexY];
           float C = _imageIntensity[indexX][indexY]/(res*res);
           float ourB = (1.0f/(res*res))*(B[x][y] - (_imageIntensity[indexX][indexY]/albedoIntensityMap[indexX][indexY]));
-          float ourA = A[x][y][ourChromaRegion] * (1.0f/(noPixelsChroma));
+          float ourA = A[x][y][ourChromaRegion] * (1.0f/noPixelsChroma);
           float DiffF0 = (y - ourA/(ourB+C/y)*(1.0f - (ourA/((ourB+C/y)*(ourB+C/y)))*(C/(y*y))));
-
 
           //std::cout<<"Time"<<r<<":"<<indexX<<", "<<indexY<<": "<<DiffF0<<"\n";
           m_totDiffF0[r][indexX][indexY] = DiffF0;
+
           //  Change albedo based on DiffF0
           if(DiffF0 > 0.1f) {albedoIntensityMap[indexX][indexY]-=0.01f; count++;}
           else if(DiffF0 < -0.1f) {albedoIntensityMap[indexX][indexY]+=0.01f; count++;}
