@@ -16,7 +16,7 @@ Shader::Shader(std::string _name, std::string _vertex, std::string _fragment)
 	// creation of the vertex shader
 	tmp_shader = glCreateShader(GL_VERTEX_SHADER);
 	std::string pippo = loadShader(_vertex);
-	GLchar * tmp_shaderSource = (GLchar *)pippo.c_str();
+  const GLchar * tmp_shaderSource = (GLchar *)pippo.c_str();
 	glShaderSource(tmp_shader, 1, &tmp_shaderSource, NULL);
 	glCompileShader(tmp_shader);
 	glAttachShader(m_shaderProgram, tmp_shader);

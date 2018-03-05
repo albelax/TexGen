@@ -21,6 +21,7 @@ HEADERS += include/MainWindow.h \
            include/Shader.h \
            include/Camera.h \
            include/TrackballCamera.h \
+           include/Image.h
 
 
 SOURCES += src/main.cpp \
@@ -29,7 +30,8 @@ SOURCES += src/main.cpp \
            src/Mesh.cpp \
            src/Shader.cpp \
            src/Camera.cpp \
-           src/TrackballCamera.cpp
+           src/TrackballCamera.cpp \
+           src/Image.cpp
 
 FORMS += ui/MainWindow.ui
 

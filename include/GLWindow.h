@@ -36,8 +36,8 @@ public :
     std::vector< std::vector< std::vector<float> > > chroma(std::vector<std::vector<float> > &_intensity );
 
 public slots:
-    void saveImage3f(std::vector< std::vector< std::vector<float> > >  & _image, std::string _destination );
-    void saveImage1f(std::vector< std::vector<float > >  & _image, std::string _destination );
+//    void saveImage3f(std::vector< std::vector< std::vector<float> > >  & _image, std::string _destination );
+//    void saveImage1f(std::vector< std::vector<float > >  & _image, std::string _destination );
 
 protected:
 
@@ -52,12 +52,10 @@ protected:
     /// @brief this is the main gl drawing routine which is called whenever the window needs to
     // be re-drawn
     void paintGL();
-    void addTexture(std::string _image);
+    void addTexture( std::string _image );
     void renderTexture();
     void renderScene();
-    void threshold();
-    void separation(std::vector<std::vector<float>> intensity, std::vector<std::vector<std::vector<float>>> chroma);
-    void exportCSV(std::string _file );
+    void exportCSV( std::string _file );
 private :
     //----------------------------------------------------------------------------------------------------------------------
     void init();
@@ -84,9 +82,6 @@ private :
     //----------------------------------------------------------------------------------------------------------------------
     std::vector<std::vector<std::vector<float>>> m_totDiffF0;
     //----------------------------------------------------------------------------------------------------------------------
-     int m_iterations = 20; // separation iterations
-     //----------------------------------------------------------------------------------------------------------------------
-
 };
 
 #endif
