@@ -121,6 +121,7 @@ void GLWindow::init()
   image.chroma();
   image.separation();
   image.save( Image::map::ALBEDO, "images/albedo.jpg" );
+	image.save( Image::map::INTENSITY, "images/grey.jpg" );
 
   glUniform1i( m_colourTextureAddress, 0 );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );

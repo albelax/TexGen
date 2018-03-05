@@ -260,17 +260,19 @@ void Image::separation()
             int ourChromaRegion = whichPixelWhichRegion[x][y][i][j];
             float noPixelsChroma = float(numberOfPixelsInChromaRegions[x][y][ourChromaRegion]);
 
-            float y = albedoIntensityMap[indexX][indexY];
+						float T = albedoIntensityMap[indexX][indexY];
             float C = m_intensity[indexX][indexY]/( m_res * m_res );
             float ourB = (1.0f/(m_res*m_res))*(B[x][y] - ( m_intensity[indexX][indexY]/albedoIntensityMap[indexX][indexY]));
             float ourA = A[x][y][ourChromaRegion] * (1.0f/noPixelsChroma);
-            float DiffF0 = (y - ourA/(ourB+C/y)*(1.0f - (ourA/((ourB+C/y)*(ourB+C/y)))*(C/(y*y))));
+						float DiffF0 = (T - ourA/(ourB+C/T)*(1.0f - (ourA/((ourB+C/T)*(ourB+C/T)))*(C/(T*T))));
 
             //            m_totDiffF0[r][indexX][indexY] = DiffF0;
 
             //  Change albedo based on DiffF0
-            if( DiffF0 > 0.1f ) { albedoIntensityMap[indexX][indexY] -= 0.01f; count++; }
-            else if( DiffF0 < -0.1f ) { albedoIntensityMap[indexX][indexY]+= 0.01f; count++; }
+						if( DiffF0 > 0.1f ) { albedoIntensityMap[indexX][indexY] -= 0.01f; count++; }
+						else if( DiffF0 < -0.1f ) { albedoIntensityMap[indexX][indexY]+= 0.01f; count++; }
+//						albedoIntensityMap[indexX][indexY] = (float(y))/25.0f;
+
 
             prevDiffF0[indexX][indexY] = DiffF0;
 
