@@ -3,6 +3,7 @@
 
 #include <QImage>
 #include <vector>
+#include <glm.hpp>
 
 class Image
 {
@@ -24,7 +25,7 @@ private:
   int regionWidth;   /// \brief regionWidth, the amount of regions in the x
   int regionHeight; /// \brief regionHeight, the amount of regions in the y
 	int m_iterations = 20;  /// \brief m_iterations, number of iteration for the separation
-  int m_res = 20;  /// \brief m_res, resolution of each region
+  int m_res = 16;  /// \brief m_res, resolution of each region
 
   QImage m_image;
   std::vector<std::vector<float>> albedoIntensityMap;
@@ -46,6 +47,7 @@ private:
   /// Third vector is the chroma region index
   /// Fourth vector is the r g b
   std::vector<std::vector<std::vector<std::vector<float>>>> regions;
+
 
   void findChromaRegions();
   void updateSums();

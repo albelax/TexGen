@@ -15,6 +15,7 @@
 #include <QEvent>
 #include <memory>
 #include <QImage>
+#include <QPainter>
 
 
 class GLWindow : public QOpenGLWidget
@@ -35,10 +36,6 @@ public :
     std::vector<std::vector<float>> intensity();
     std::vector< std::vector< std::vector<float> > > chroma(std::vector<std::vector<float> > &_intensity );
 
-public slots:
-//    void saveImage3f(std::vector< std::vector< std::vector<float> > >  & _image, std::string _destination );
-//    void saveImage1f(std::vector< std::vector<float > >  & _image, std::string _destination );
-
 protected:
 
     /// @brief  The following methods must be implimented in the sub class
@@ -56,6 +53,7 @@ protected:
     void renderTexture();
     void renderScene();
     void exportCSV( std::string _file );
+
 private :
     //----------------------------------------------------------------------------------------------------------------------
     void init();
@@ -82,6 +80,12 @@ private :
     //----------------------------------------------------------------------------------------------------------------------
     std::vector<std::vector<std::vector<float>>> m_totDiffF0;
     //----------------------------------------------------------------------------------------------------------------------
+//    std::unique_ptr<QPainter> p {new QPainter(this)};
+    //----------------------------------------------------------------------------------------------------------------------
+    std::vector<glm::vec2> m_stroke;
+    //----------------------------------------------------------------------------------------------------------------------
+    bool clearStroke;
+
 };
 
 #endif
