@@ -288,6 +288,80 @@ void Image::separation()
         }
     }
 }
+//---------------------------------------------------------------------------------------------------------------------
+void Image::strokeRefinement(QImage _stroke)
+{
+
+    std::vector<glm::vec2> strokePixels;
+    for(int i = 0; i<_stroke.width(); ++i)
+    {
+        for(int j = 0; j<_stroke.height(); ++j)
+        {
+            if(qRed(_stroke.pixel(i,j)) > 0)
+            {
+                strokePixels.push_back(glm::vec2(i,j));
+            }
+        }
+    }
+
+    for( int x = 0; x < regionWidth; ++x )
+    {
+        for( int y = 0; y < regionHeight; ++y )
+        {
+            int indexY = m_res * y;
+            if( indexY > height - 1 ) break;
+
+            int indexX = m_res * x;
+            if( indexX > width - 1 ) break;
+
+            for( int i = 0; i < m_res; ++i )
+            {
+                indexY = m_res * y;
+                if(indexY > height - 1) break;
+
+                for(int j = 0; j < m_res; ++j)
+                {
+                    float T = albedoIntensityMap[indexX][indexY];
+                    float ourA = m_intensity[indexX][indexY];
+                    float ourB = ((1.0f/20.0f*20.0f)*B[x][y]);
+                    float ourC = m_intensity[indexX][indexY]/( m_res * m_res );
+                    float DiffEs = (T - ourA/(ourB+ourC/T)*(1.0f - (ourA/((ourB+ourC/T)*(ourB+ourC/T)))*(ourC/(T*T))));
+
+                    int whichPixel = 0;
+                    float distance = 100000;
+                    glm::vec2 start = glm::vec2(indexX,indexY);
+
+                    for(unsigned int d = 0; d<strokePixels.size(); ++d)
+                    {
+                        glm::vec2 end = strokePixels[d];
+                        glm::vec2 diff = start-end;
+                        float distance2= glm::length(diff);
+                        if(distance2<distance)
+                        {
+                            distance = distance2;
+                            whichPixel = d;
+                        }
+                    }
+
+                    float weight = 10.0f * glm::exp(- (distance*distance)/3.0f);
+
+                    for(unsigned int d = 0; d<strokePixels.size(); ++d)
+                    {
+
+                    }
+
+
+                    indexY++;
+                    if( indexY >= height ) break;
+                }
+                indexX++;
+                if( indexX >= width ) break;
+            }
+        }
+    }
+
+}
+
 
 //---------------------------------------------------------------------------------------------------------------------
 

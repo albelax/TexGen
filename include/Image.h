@@ -16,6 +16,8 @@ public:
   void chroma();
   void separation();
   void shading();
+  void strokeRefinement(QImage _stroke);
+
   void save( std::vector<std::vector<std::vector<float>>> & _image, std::string _destination );
   void save( std::vector<std::vector<float>> & _image, std::string _destination );
   void save( map _image, std::string _destination );

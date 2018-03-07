@@ -74,6 +74,8 @@ void GLWindow::mouseClick(QMouseEvent * _event)
         QPainter newP(&strokedImage);
         drawStroke( newP );
 
+        m_editedImage.strokeRefinement(strokedImage);
+
         strokedImage.save("images/testy.png",0,-1);
         m_stroke.clear();
     }
@@ -133,14 +135,14 @@ void GLWindow::init()
     addTexture( "images/bricks.jpeg" );
 
 
-    Image image( m_image );
-    image.intensity();
-    image.chroma();
-    image.separation();
-    image.shading();
-    image.save( Image::map::ALBEDO, "images/albedo.jpg" );
-    image.save( Image::map::INTENSITY, "images/grey.jpg" );
-    image.save( Image::map::SHADING, "images/shading.jpg" );
+    m_editedImage = Image( m_image );
+    m_editedImage.intensity();
+    m_editedImage.chroma();
+    m_editedImage.separation();
+    m_editedImage.shading();
+    m_editedImage.save( Image::map::ALBEDO, "images/albedo.jpg" );
+    m_editedImage.save( Image::map::INTENSITY, "images/grey.jpg" );
+    m_editedImage.save( Image::map::SHADING, "images/shading.jpg" );
 
 
     glUniform1i( m_colourTextureAddress, 0 );

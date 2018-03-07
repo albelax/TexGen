@@ -16,6 +16,7 @@
 #include <memory>
 #include <QImage>
 #include <QPainter>
+#include "Image.h"
 
 
 class GLWindow : public QOpenGLWidget
@@ -79,6 +80,8 @@ private :
     std::vector<glm::vec2> m_stroke;
     //----------------------------------------------------------------------------------------------------------------------
     bool clearStroke;
+
+    Image m_editedImage;
 
 };
 
