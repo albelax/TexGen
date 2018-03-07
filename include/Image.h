@@ -8,17 +8,17 @@
 class Image
 {
 public:
-  enum map { INTENSITY, CHROMA, ALBEDO };
+  enum map { INTENSITY, CHROMA, ALBEDO, SHADING };
   Image() = default;
   Image( QImage & _image );
   void threshold();
   void intensity();
   void chroma();
   void separation();
+  void shading();
   void save( std::vector<std::vector<std::vector<float>>> & _image, std::string _destination );
   void save( std::vector<std::vector<float>> & _image, std::string _destination );
   void save( map _image, std::string _destination );
-
 private:
   int width;   // aliasing avoids loading m_image in the cache every time we need the width
   int height;
@@ -28,8 +28,10 @@ private:
   int m_res = 16;  /// \brief m_res, resolution of each region
 
   QImage m_image;
-  std::vector<std::vector<float>> albedoIntensityMap;
   std::vector<std::vector<float>> m_intensity;
+  std::vector<std::vector<float>> albedoIntensityMap;
+  std::vector<std::vector<float>> m_shadingMap;
+
   std::vector<std::vector<float>> B;
   std::vector<std::vector<std::vector<float>>> A;
   std::vector<std::vector<std::vector<float>>> m_chroma;

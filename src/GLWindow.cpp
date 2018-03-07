@@ -129,14 +129,19 @@ void GLWindow::init()
     glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float), 0, GL_STATIC_DRAW) ;
     glBufferSubData( GL_ARRAY_BUFFER, m_plane.getBufferIndex()/3*2 * sizeof( float ), m_plane.getAmountVertexData() * sizeof(float), &m_plane.getUVsData() );
 
-    addTexture( "images/sky_xneg.png" );
+//    addTexture( "images/sky_xneg.png" );
+    addTexture( "images/bricks.jpeg" );
+
 
     Image image( m_image );
     image.intensity();
     image.chroma();
     image.separation();
+    image.shading();
     image.save( Image::map::ALBEDO, "images/albedo.jpg" );
     image.save( Image::map::INTENSITY, "images/grey.jpg" );
+    image.save( Image::map::SHADING, "images/shading.jpg" );
+
 
     glUniform1i( m_colourTextureAddress, 0 );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
