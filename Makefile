@@ -1042,6 +1042,10 @@ moc/moc_MainWindow.cpp: /opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets/QMainWindow \
 		glm/gtx/scalar_multiplication.hpp \
 		glm/gtx/range.hpp \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/QImage \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/QPainter \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qpainter.h \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qtextoption.h \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qpen.h \
 		include/MainWindow.h \
 		moc/moc_predefs.h \
 		/opt/Qt5.9.0/5.9/gcc_64/bin/moc
@@ -1386,6 +1390,10 @@ moc/moc_GLWindow.cpp: include/Shader.h \
 		glm/gtx/scalar_multiplication.hpp \
 		glm/gtx/range.hpp \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/QImage \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/QPainter \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qpainter.h \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qtextoption.h \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qpen.h \
 		include/GLWindow.h \
 		moc/moc_predefs.h \
 		/opt/Qt5.9.0/5.9/gcc_64/bin/moc
@@ -1761,7 +1769,11 @@ obj/main.o: src/main.cpp /opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets/QApplication 
 		glm/gtx/wrap.inl \
 		glm/gtx/scalar_multiplication.hpp \
 		glm/gtx/range.hpp \
-		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/QImage
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/QImage \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/QPainter \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qpainter.h \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qtextoption.h \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qpen.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/main.o src/main.cpp
 
 obj/MainWindow.o: src/MainWindow.cpp include/MainWindow.h \
@@ -2109,6 +2121,10 @@ obj/MainWindow.o: src/MainWindow.cpp include/MainWindow.h \
 		glm/gtx/scalar_multiplication.hpp \
 		glm/gtx/range.hpp \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/QImage \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/QPainter \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qpainter.h \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qtextoption.h \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qpen.h \
 		ui/ui_MainWindow.h \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtCore/QVariant \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets/QAction \
@@ -2501,15 +2517,16 @@ obj/GLWindow.o: src/GLWindow.cpp include/GLWindow.h \
 		glm/gtx/scalar_multiplication.hpp \
 		glm/gtx/range.hpp \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/QImage \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/QPainter \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qpainter.h \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qtextoption.h \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qpen.h \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets/QColorDialog \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets/qcolordialog.h \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets/qdialog.h \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtOpenGL/QGLWidget \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtOpenGL/qgl.h \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qpaintengine.h \
-		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qpainter.h \
-		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qtextoption.h \
-		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qpen.h \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtOpenGL/qglcolormap.h \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtOpenGL/qtopenglglobal.h \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/QColor \
@@ -3018,7 +3035,99 @@ obj/Image.o: src/Image.cpp include/Image.h \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtCore/qcontainerfwd.h \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtCore/qobject_impl.h \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtCore/qline.h \
-		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qpainterpath.h
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qpainterpath.h \
+		glm/glm.hpp \
+		glm/detail/_fixes.hpp \
+		glm/fwd.hpp \
+		glm/detail/type_int.hpp \
+		glm/detail/setup.hpp \
+		glm/simd/platform.h \
+		glm/detail/type_float.hpp \
+		glm/detail/type_vec.hpp \
+		glm/detail/precision.hpp \
+		glm/detail/type_mat.hpp \
+		glm/vec2.hpp \
+		glm/detail/type_vec2.hpp \
+		glm/detail/_swizzle.hpp \
+		glm/detail/_swizzle_func.hpp \
+		glm/detail/type_vec2.inl \
+		glm/vec3.hpp \
+		glm/detail/type_vec3.hpp \
+		glm/detail/type_vec3.inl \
+		glm/vec4.hpp \
+		glm/detail/type_vec4.hpp \
+		glm/detail/type_vec4.inl \
+		glm/detail/type_vec4_simd.inl \
+		glm/mat2x2.hpp \
+		glm/detail/type_mat2x2.hpp \
+		glm/detail/type_mat2x2.inl \
+		glm/detail/func_matrix.hpp \
+		glm/mat2x3.hpp \
+		glm/detail/type_mat2x3.hpp \
+		glm/detail/type_mat2x3.inl \
+		glm/mat2x4.hpp \
+		glm/detail/type_mat2x4.hpp \
+		glm/detail/type_mat2x4.inl \
+		glm/mat3x2.hpp \
+		glm/detail/type_mat3x2.hpp \
+		glm/detail/type_mat3x2.inl \
+		glm/mat3x3.hpp \
+		glm/detail/type_mat3x3.hpp \
+		glm/detail/type_mat3x3.inl \
+		glm/mat3x4.hpp \
+		glm/detail/type_mat3x4.hpp \
+		glm/detail/type_mat3x4.inl \
+		glm/mat4x2.hpp \
+		glm/detail/type_mat4x2.hpp \
+		glm/detail/type_mat4x2.inl \
+		glm/mat4x3.hpp \
+		glm/detail/type_mat4x3.hpp \
+		glm/detail/type_mat4x3.inl \
+		glm/mat4x4.hpp \
+		glm/detail/type_mat4x4.hpp \
+		glm/detail/type_mat4x4.inl \
+		glm/detail/type_mat4x4_simd.inl \
+		glm/detail/func_matrix.inl \
+		glm/geometric.hpp \
+		glm/detail/func_geometric.hpp \
+		glm/detail/func_geometric.inl \
+		glm/detail/func_exponential.hpp \
+		glm/detail/type_vec1.hpp \
+		glm/detail/type_vec1.inl \
+		glm/detail/func_exponential.inl \
+		glm/detail/func_vector_relational.hpp \
+		glm/detail/func_vector_relational.inl \
+		glm/detail/func_vector_relational_simd.inl \
+		glm/detail/_vectorize.hpp \
+		glm/detail/func_exponential_simd.inl \
+		glm/simd/exponential.h \
+		glm/detail/func_common.hpp \
+		glm/detail/func_common.inl \
+		glm/detail/func_common_simd.inl \
+		glm/simd/common.h \
+		glm/detail/func_geometric_simd.inl \
+		glm/simd/geometric.h \
+		glm/detail/func_matrix_simd.inl \
+		glm/simd/matrix.h \
+		glm/trigonometric.hpp \
+		glm/detail/func_trigonometric.hpp \
+		glm/detail/func_trigonometric.inl \
+		glm/detail/func_trigonometric_simd.inl \
+		glm/exponential.hpp \
+		glm/common.hpp \
+		glm/packing.hpp \
+		glm/detail/func_packing.hpp \
+		glm/detail/func_packing.inl \
+		glm/detail/type_half.hpp \
+		glm/detail/type_half.inl \
+		glm/detail/func_packing_simd.inl \
+		glm/matrix.hpp \
+		glm/vector_relational.hpp \
+		glm/integer.hpp \
+		glm/detail/func_integer.hpp \
+		glm/detail/func_integer.inl \
+		glm/detail/func_integer_simd.inl \
+		glm/simd/integer.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/Image.o src/Image.cpp
 
 obj/moc_MainWindow.o: moc/moc_MainWindow.cpp 

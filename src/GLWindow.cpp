@@ -41,13 +41,6 @@ void GLWindow::initializeGL()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void GLWindow::resizeGL( int _w, int _h )
-{
-
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 GLWindow::~GLWindow()
 {
 
@@ -85,7 +78,7 @@ void GLWindow::mouseClick(QMouseEvent * _event)
         m_stroke.clear();
     }
 
-    m_camera.handleMouseClick( _event->pos().x(), _event->pos().y(), _event->type(), _event, 0 );
+    m_camera.handleMouseClick( _event->pos().x(), _event->pos().y(), _event );
     update();
 }
 
@@ -163,7 +156,6 @@ void GLWindow::paintGL()
     glClearColor( 1, 1, 1, 1.0f );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-
     renderTexture();
 
     drawStroke( p );
@@ -211,11 +203,11 @@ void GLWindow::exportCSV( std::string _file )
     std::ofstream out;
     out.open( _file );
     out.clear();
-    for(int j =0; j< m_totDiffF0[0].size(); ++j)
+    for( unsigned int j = 0; j < m_totDiffF0[0].size(); ++j )
     {
-        for ( int k = 0; k <  m_totDiffF0[0][0].size(); ++k )
+        for ( unsigned int k = 0; k <  m_totDiffF0[0][0].size(); ++k )
         {
-            for(int i = 0; i< 20; ++i)
+            for( int i = 0; i< 20; ++i )
             {
                 out << m_totDiffF0[i][j][k] << ",";
             }
@@ -235,7 +227,7 @@ void GLWindow::drawStroke( QPainter & _p )
 
     _p.setPen(pen);
     if ( m_stroke.size() > 0 )
-    for(unsigned int i = 0; i<m_stroke.size()-1; ++i)
+    for( unsigned int i = 0; i< m_stroke.size() - 1; ++i )
     {
         prevPoint.setX(m_stroke[i].x);
         prevPoint.setY(m_stroke[i].y);

@@ -42,10 +42,6 @@ protected:
     /// this is called when the window is created
     void initializeGL();
 
-    /// @brief this is called whenever the window is re-sized
-    /// @param[in] _w the width of the resized window
-    /// @param[in] _h the height of the resized window
-    void resizeGL(int _w , int _h);
     /// @brief this is the main gl drawing routine which is called whenever the window needs to
     // be re-drawn
     void paintGL();
