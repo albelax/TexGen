@@ -24,7 +24,7 @@ private:
   int height;
   int regionWidth;   /// \brief regionWidth, the amount of regions in the x
   int regionHeight; /// \brief regionHeight, the amount of regions in the y
-	int m_iterations = 20;  /// \brief m_iterations, number of iteration for the separation
+  int m_iterations = 20;  /// \brief m_iterations, number of iteration for the separation
   int m_res = 16;  /// \brief m_res, resolution of each region
 
   QImage m_image;

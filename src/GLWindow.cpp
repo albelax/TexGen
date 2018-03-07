@@ -61,11 +61,8 @@ void GLWindow::mouseMove(QMouseEvent * _event)
 
     if ( _event->buttons() == Qt::LeftButton )
     {
-        //        clearStroke = false;
         std::cout << "x " << _event->pos().x() << " y: " <<  _event->pos().y() << '\n';
-
         glm::vec2 tmp( _event->pos().x(), _event->pos().y() );
-
         m_stroke.push_back( tmp );
     }
 
@@ -78,23 +75,12 @@ void GLWindow::mouseClick(QMouseEvent * _event)
 {
     if (_event->type() ==  QMouseEvent::MouseButtonRelease)
     {
-
         QImage strokedImage = m_image;
-        strokedImage.fill(qRgb(255, 255, 255));
+        strokedImage.fill( Qt::white );
+
         QPainter newP(&strokedImage);
-        QPoint prevPoint;
-        QPoint lastPoint;
-        if (m_stroke.size() > 0)
-        for(unsigned int i = 0; i<m_stroke.size()-1; ++i)
-        {
-            prevPoint.setX(m_stroke[i].x);
-            prevPoint.setY(m_stroke[i].y);
+        drawStroke( newP );
 
-            lastPoint.setX(m_stroke[i+1].x);
-            lastPoint.setY(m_stroke[i+1].y);
-
-            newP.drawLine(prevPoint, lastPoint);
-        }
         strokedImage.save("images/testy.png",0,-1);
         m_stroke.clear();
     }
@@ -176,23 +162,11 @@ void GLWindow::paintGL()
 
     glClearColor( 1, 1, 1, 1.0f );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    QPoint prevPoint;
-    QPoint lastPoint;
+
 
     renderTexture();
 
-    if (m_stroke.size() > 0)
-    for(unsigned int i = 0; i<m_stroke.size()-1; ++i)
-    {
-        prevPoint.setX(m_stroke[i].x);
-        prevPoint.setY(m_stroke[i].y);
-
-        lastPoint.setX(m_stroke[i+1].x);
-        lastPoint.setY(m_stroke[i+1].y);
-
-        p.drawLine(prevPoint, lastPoint);
-    }
-
+    drawStroke( p );
     update();
 }
 
@@ -247,6 +221,29 @@ void GLWindow::exportCSV( std::string _file )
             }
             out << "\n";
         }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+
+void GLWindow::drawStroke( QPainter & _p )
+{
+    QPoint prevPoint;
+    QPoint lastPoint;
+    QPen pen( Qt::red );
+    pen.setWidth( 5 );
+
+    _p.setPen(pen);
+    if ( m_stroke.size() > 0 )
+    for(unsigned int i = 0; i<m_stroke.size()-1; ++i)
+    {
+        prevPoint.setX(m_stroke[i].x);
+        prevPoint.setY(m_stroke[i].y);
+
+        lastPoint.setX(m_stroke[i+1].x);
+        lastPoint.setY(m_stroke[i+1].y);
+
+        _p.drawLine(prevPoint, lastPoint);
     }
 }
 

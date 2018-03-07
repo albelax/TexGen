@@ -53,7 +53,7 @@ protected:
     void renderTexture();
     void renderScene();
     void exportCSV( std::string _file );
-
+    void drawStroke( QPainter & _p );
 private :
     //----------------------------------------------------------------------------------------------------------------------
     void init();
