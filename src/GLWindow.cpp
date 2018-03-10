@@ -74,9 +74,9 @@ void GLWindow::mouseClick(QMouseEvent * _event)
         QPainter newP(&strokedImage);
         drawStroke( newP );
 
-        m_editedImage.strokeRefinement(strokedImage);
+//        m_editedImage.strokeRefinement(strokedImage);
 
-        strokedImage.save("images/testy.png",0,-1);
+				strokedImage.save("images/testy.png",0,-1);
         m_stroke.clear();
     }
 
@@ -131,8 +131,8 @@ void GLWindow::init()
     glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float), 0, GL_STATIC_DRAW) ;
     glBufferSubData( GL_ARRAY_BUFFER, m_plane.getBufferIndex()/3*2 * sizeof( float ), m_plane.getAmountVertexData() * sizeof(float), &m_plane.getUVsData() );
 
-//    addTexture( "images/sky_xneg.png" );
-    addTexture( "images/bricks.jpeg" );
+//		addTexture( "images/sky_xneg.png" );
+		addTexture( "images/bricksSmall.jpeg" );
 
 
     m_editedImage = Image( m_image );
