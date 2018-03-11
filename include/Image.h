@@ -8,7 +8,7 @@
 class Image
 {
 public:
-  enum map { INTENSITY, CHROMA, ALBEDO, SHADING };
+  enum map { ORIGINAL, INTENSITY, CHROMA, ALBEDO, SHADING };
   Image() = default;
   Image( QImage & _image );
   void threshold();

@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
 	m_ui -> setupUi(this);
 	m_gl = new GLWindow(this);
 	m_ui -> s_mainWindowGridLayout -> addWidget(m_gl,0,0,3,5);
+    connect(m_ui->m_selectImage,SIGNAL(currentIndexChanged(int)),m_gl,SLOT(selectImage(int)));
 }
 
 MainWindow::~MainWindow()

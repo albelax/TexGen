@@ -16,6 +16,7 @@
 #include <memory>
 #include <QImage>
 #include <QPainter>
+#include <string>
 #include "Image.h"
 
 
@@ -37,52 +38,42 @@ public :
     std::vector<std::vector<float>> intensity();
     std::vector< std::vector< std::vector<float> > > chroma(std::vector<std::vector<float> > &_intensity );
 
+public slots:
+    void selectImage( int _i );
 protected:
-
     /// @brief  The following methods must be implimented in the sub class
     /// this is called when the window is created
     void initializeGL();
 
     /// @brief this is the main gl drawing routine which is called whenever the window needs to
-    // be re-drawn
     void paintGL();
     void addTexture( std::string _image );
     void renderTexture();
     void renderScene();
     void exportCSV( std::string _file );
     void drawStroke( QPainter & _p );
+    void showOriginalImage();
+    void showAlbedoMap();
+    void showGrayscale();
+    void showShadingMap();
 private :
-    //----------------------------------------------------------------------------------------------------------------------
     void init();
-    //----------------------------------------------------------------------------------------------------------------------
-    Mesh m_plane;
-    //----------------------------------------------------------------------------------------------------------------------
-    Shader m_renderShader;
-    //----------------------------------------------------------------------------------------------------------------------
-    GLuint m_vao;
-    //----------------------------------------------------------------------------------------------------------------------
-    GLuint m_vbo;
-    //----------------------------------------------------------------------------------------------------------------------
-    GLuint m_tbo;
-    //----------------------------------------------------------------------------------------------------------------------
-    GLuint m_colourTextureAddress;
-    //----------------------------------------------------------------------------------------------------------------------
-    std::vector<GLuint> m_textures;
-    //----------------------------------------------------------------------------------------------------------------------
-    TrackballCamera m_camera;
-    //----------------------------------------------------------------------------------------------------------------------
+    Mesh m_plane;   
+    Shader m_renderShader;   
+    GLuint m_vao;   
+    GLuint m_vbo; 
+    GLuint m_tbo; 
+    GLuint m_colourTextureAddress; 
+    std::vector<GLuint> m_textures; 
+    TrackballCamera m_camera; 
     QImage m_image;
-    //----------------------------------------------------------------------------------------------------------------------
     QImage m_glImage;
-    //----------------------------------------------------------------------------------------------------------------------
     std::vector<std::vector<std::vector<float>>> m_totDiffF0;
-    //----------------------------------------------------------------------------------------------------------------------
     std::vector<glm::vec2> m_stroke;
-    //----------------------------------------------------------------------------------------------------------------------
     bool clearStroke;
-
     Image m_editedImage;
-
+    char * m_originalImage;
+    unsigned int m_activeTexture = 0;
 };
 
 #endif
