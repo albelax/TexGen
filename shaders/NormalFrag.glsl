@@ -40,7 +40,7 @@ vec3 rotateVector( vec3 src, vec3 tgt, vec3 vec )
 
 float texture_lum(sampler2D _texture, vec2 _uv)
 {
-  vec3 rgb = texture( _texture, _uv ).rgb;
+	vec3 rgb = texture( _texture, _uv ).rgb;
   return 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
 }
 
@@ -61,14 +61,14 @@ vec3 toNormal()
 
 void main()
 {
-  vec3 n = normalize( FragmentNormal ); // normal
+//  vec3 n = normalize( FragmentNormal ); // normal
 
-  vec3 v = normalize( -vec3( FragmentPosition ) ); // eye
+//  vec3 v = normalize( -vec3( FragmentPosition ) ); // eye
 
-  vec3 tgt = normalize( toNormal() * 2.0 - 1.0 );
+//  vec3 tgt = normalize( toNormal() * 2.0 - 1.0 );
 
-  vec3 src = vec3( 0.0, 0.0, 1.0 );
-  n = rotateVector( src, tgt, n);
+//  vec3 src = vec3( 0.0, 0.0, 1.0 );
+//  n = rotateVector( src, tgt, n);
 
-  FragColor = vec4( n, 1);
+	FragColor = vec4( toNormal() , 1);
 }
