@@ -22,7 +22,7 @@
 
 class GLWindow : public QOpenGLWidget
 {
-    Q_OBJECT        // must include this if you use Qt signals/slots
+    Q_OBJECT // must include this if you use Qt signals/slots
 public :
     /// @brief Constructor for GLWindow
     //----------------------------------------------------------------------------------------------------------------------
@@ -40,6 +40,7 @@ public :
 
 public slots:
     void selectImage( int _i );
+    void toNormal();
 protected:
     /// @brief  The following methods must be implimented in the sub class
     /// this is called when the window is created

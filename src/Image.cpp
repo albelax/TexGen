@@ -5,6 +5,7 @@
 Image::Image( QImage & _image )
 {
   m_image = _image;
+
   width = m_image.width();
   height = m_image.height();
   std::cout << "image w: " << width << " image h: " << height << '\n';
@@ -292,6 +293,8 @@ void Image::strokeRefinement(QImage _stroke)
 {
 
   std::vector<glm::vec2> strokePixels;
+  strokePixels.reserve( _stroke.width() * _stroke.height());
+
   for(int i = 0; i<_stroke.width(); ++i)
   {
     for(int j = 0; j<_stroke.height(); ++j)

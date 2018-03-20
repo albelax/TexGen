@@ -17,7 +17,7 @@ GLWindow::GLWindow( QWidget *_parent ) : QOpenGLWidget( _parent )
   m_camera.setInitialMousePos(0,0);
   m_camera.setTarget(0.0f, 0.0f, -2.0f);
   m_camera.setEye(0.0f, 0.0f, 0.0f);
-  m_originalImage = "images/sky_xneg.png"; // "images/bricksSmall.jpeg";
+  m_originalImage = "images/sky_xneg.png"; //"images/bricksSmall.jpeg";
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -117,7 +117,7 @@ void GLWindow::init()
   glGenBuffers( 1, &m_vbo );
   glGenBuffers( 1, &m_tbo );
 
-  int amountVertexData = m_plane.getAmountVertexData() ;
+  int amountVertexData = m_plane.getAmountVertexData();
 
   m_plane.setBufferIndex( 0 );
   // load vertices
@@ -136,12 +136,13 @@ void GLWindow::init()
 
   m_editedImage = Image( m_image );
   m_editedImage.intensity();
-  m_editedImage.chroma();
-  m_editedImage.separation();
-  m_editedImage.shading();
-  m_editedImage.save( Image::map::ALBEDO, "images/albedo.jpg" );
+//  m_editedImage.chroma();
+//  m_editedImage.separation();
+//  m_editedImage.shading();
+//  m_editedImage.save( Image::map::ALBEDO, "images/albedo.jpg" );
+
   m_editedImage.save( Image::map::INTENSITY, "images/grey.jpg" );
-  m_editedImage.save( Image::map::SHADING, "images/shading.jpg" );
+//  m_editedImage.save( Image::map::SHADING, "images/shading.jpg" );
 
 
   glUniform1i( m_colourTextureAddress, 0 );
@@ -151,6 +152,7 @@ void GLWindow::init()
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
   glGenerateMipmap( GL_TEXTURE_2D );
   glActiveTexture( GL_TEXTURE0 );
+
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -299,6 +301,8 @@ void GLWindow::showGrayscale()
     glBindTexture( GL_TEXTURE_2D, index );
     glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
   }
+  toNormal();
+
   m_activeTexture = index;
 }
 
@@ -342,6 +346,24 @@ void GLWindow::selectImage(int _i)
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
   glGenerateMipmap( GL_TEXTURE_2D );
   glActiveTexture( GL_TEXTURE0 );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+
+void GLWindow::toNormal()
+{
+  float * pix = (float * ) calloc(512 * 512 *3 , sizeof( float ) );
+  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, pix );
+  QImage im = m_image;
+  for ( int i = 0; i < 512*512*3; i += 3 )
+  {
+    int x = i%(512*3);
+    int y = floor(i/(512.0f*3.0f));
+    im.setPixel( x, y, qRgb( pix[i],  pix[i+1],  pix[i+2]) );
+  }
+  im.save("test.jpg",0, -1);
+  free( pix );
+
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
