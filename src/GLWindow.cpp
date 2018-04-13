@@ -55,7 +55,7 @@ void GLWindow::mouseMove( QMouseEvent * _event )
 
   if ( _event->buttons() == Qt::LeftButton )
   {
-//    std::cout << "x " << _event->pos().x() << " y: " <<  _event->pos().y() << '\n';
+    //    std::cout << "x " << _event->pos().x() << " y: " <<  _event->pos().y() << '\n';
     glm::vec2 tmp( _event->pos().x(), _event->pos().y() );
     m_stroke.push_back( tmp );
   }
@@ -147,9 +147,9 @@ void GLWindow::init()
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
   glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_normalTexture, 0 );
-//   end calculation of normals
+  //   end calculation of normals
 
-//   second framebuffer
+  //   second framebuffer
   glGenFramebuffers( 1, &m_framebuffer );
   glBindFramebuffer( GL_FRAMEBUFFER, m_framebuffer );
 
@@ -161,7 +161,7 @@ void GLWindow::init()
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
   glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_renderedTexture, 0);
-//   end second framebuffer
+  //   end second framebuffer
 
   addTexture( m_originalImage );
 
@@ -183,7 +183,15 @@ void GLWindow::init()
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
   glGenerateMipmap( GL_TEXTURE_2D );
   glActiveTexture( GL_TEXTURE0 );
+  int error;
 
+  auto img = cl::ImageGL( m_editedImage.m_CLContext, CL_MEM_READ_WRITE, GL_TEXTURE_2D, 0, m_textures[m_activeTexture], &error );
+
+  if ( CL_INVALID_CONTEXT == error )
+  std::cout << error << " <- error\n";
+
+  if ( CL_SUCCESS == error )
+  std::cout << error << " <- success\n";
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -197,17 +205,16 @@ void GLWindow::paintGL()
 
   glBindTexture( GL_TEXTURE_2D, m_textures[m_activeTexture]);
 
-  glBindFramebuffer( GL_FRAMEBUFFER,  m_framebuffer );
-  renderNormals();
-  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
+  //  glBindFramebuffer( GL_FRAMEBUFFER,  m_framebuffer );
+  //  renderNormals();
+  //  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
 
-  glBindFramebuffer( GL_FRAMEBUFFER,  3 );
+  //  glBindFramebuffer( GL_FRAMEBUFFER,  3 );
 
   renderTexture();
+  //  drawStroke( p );
 
-//  drawStroke( p );
-
-//  update();
+  //  update();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -220,14 +227,14 @@ void GLWindow::renderNormals()
 
   glUseProgram( m_normalShader.getShaderProgram() );
 
-//  glActiveTexture( GL_TEXTURE1 );
-//  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
+  //  glActiveTexture( GL_TEXTURE1 );
+  //  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
 
-//  glTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR );
-//  glTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR );
-//  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-//  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-//  glGenerateMipmap( GL_TEXTURE_2D );
+  //  glTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+  //  glTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+  //  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  //  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+  //  glGenerateMipmap( GL_TEXTURE_2D );
 
   glBindVertexArray( m_vao );
   glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
@@ -248,7 +255,7 @@ void GLWindow::renderTexture()
   glClearColor( 1, 1, 1, 1.0f );
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-//  glBindTexture( GL_TEXTURE_2D, m_textures[m_activeTexture]);
+  //  glBindTexture( GL_TEXTURE_2D, m_textures[m_activeTexture]);
 
   glUseProgram( m_renderShader.getShaderProgram() );
 

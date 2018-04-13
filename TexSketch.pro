@@ -10,6 +10,7 @@ CONFIG += console \
 CONFIG -= app_bundle
 
 INCLUDEPATH += include \
+               $$PWD/cl/include \
                ui \
                glm \
                shaders \
@@ -23,7 +24,6 @@ HEADERS += include/MainWindow.h \
            include/TrackballCamera.h \
            include/Image.h
 
-
 SOURCES += src/main.cpp \
            src/MainWindow.cpp \
            src/GLWindow.cpp \
@@ -36,7 +36,9 @@ SOURCES += src/main.cpp \
 FORMS += ui/MainWindow.ui
 
 OTHER_FILES += shaders/* \
-               images/*
+               images/* \
+               cl/include/* \
+               cl/src/*
 
 UI_HEADERS_DIR = ui
 OBJECTS_DIR = obj
@@ -45,3 +47,7 @@ UI_DIR = ui
 
 linux:LIBS +=  -lGLEW
 
+# CL
+macx: LIBS += -framework OpenCL
+linux: LIBS += -L/usr/lib64/nvidia -lOpenCL
+INCLUDEPATH += /usr/include/CL cl/include/

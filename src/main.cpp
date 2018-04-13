@@ -7,13 +7,11 @@
 
 #include <QApplication>
 #include "MainWindow.h"
-
 #include <random>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 #include <glm/ext.hpp>
-
 
 int main(int argc, char **argv)
 {

@@ -1,9 +1,11 @@
 #include "Image.h"
 #include <math.h>
 #include <iostream>
+#include <fstream>
 
 Image::Image( QImage & _image )
 {
+  initCL();
   m_image = _image;
 
   width = m_image.width();
@@ -38,6 +40,78 @@ Image::Image( QImage & _image )
     whichPixelWhichRegion[i].resize( int(regionHeight) );
     numberOfPixelsInChromaRegions[i].resize( int(regionHeight) );
   }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+void Image::initCL()
+{
+	std::vector<cl::Platform> all_platforms;
+	cl::Platform::get(&all_platforms);
+	if( all_platforms.size() == 0 )
+	{
+		std::cout<<" No platforms found. Check OpenCL installation!\n";
+		exit(1);
+	}
+	cl::Platform m_CLPlatform = all_platforms[0];
+
+	std::vector<cl::Device> all_devices;
+	m_CLPlatform.getDevices( CL_DEVICE_TYPE_ALL, &all_devices );
+	if( all_devices.size() == 0 )
+	{
+		std::cout<<" No devices found. Check OpenCL installation!\n";
+		exit(1);
+	}
+	cl::Device m_device = all_devices[0];
+
+	m_CLContext = cl::Context( m_device );
+
+	//-----------------------------------------------> set up kernel, to be removed later
+
+	std::ifstream clFile("cl/src/toNormal.cl");
+	std::string programSrc((std::istreambuf_iterator<char>(clFile)), std::istreambuf_iterator<char>());
+
+	m_program = cl::Program( m_CLContext, programSrc.c_str() );
+	if(m_program.build( {m_device} ) != CL_SUCCESS)
+	{
+		std::cout << " Error building: " << m_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(m_device) << "\n";
+		exit(1);
+	}
+
+	//-----------------------------------------------> launch kernel, to be removed later
+
+	// create buffers on the device
+	cl::Buffer buffer_A(m_CLContext,CL_MEM_READ_WRITE,sizeof(int)*10);
+	cl::Buffer buffer_B(m_CLContext,CL_MEM_READ_WRITE,sizeof(int)*10);
+	cl::Buffer buffer_C(m_CLContext,CL_MEM_READ_WRITE,sizeof(int)*10);
+
+	int A[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+	int B[] = {0, 1, 2, 0, 1, 2, 0, 1, 2, 0};
+
+	//create queue to which we will push commands for the device.
+	cl::CommandQueue queue( m_CLContext, m_device );
+
+	//write arrays A and B to the device
+	queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(int)*10, A);
+	queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(int)*10, B);
+
+	cl::Kernel kernel_add = cl::Kernel( m_program, "simple_add" );
+	kernel_add.setArg(0,buffer_A);
+	kernel_add.setArg(1,buffer_B);
+	kernel_add.setArg(2,buffer_C);
+	queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(10), cl::NullRange);
+	queue.finish();
+
+	int C[10];
+	//read result C from the device to array C
+	queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(int)*10, C);
+
+	std::cout<<" result: \n";
+	for( int i = 0; i < 10; ++i )
+	{
+			std::cout<<C[i]<<" ";
+	}
+	std::cout << '\n';
 }
 
 //---------------------------------------------------------------------------------------------------------------------

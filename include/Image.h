@@ -4,6 +4,7 @@
 #include <QImage>
 #include <vector>
 #include <glm.hpp>
+#include <CL/cl.hpp>
 
 class Image
 {
@@ -16,11 +17,20 @@ public:
   void chroma();
   void separation();
   void shading();
-  void strokeRefinement(QImage _stroke);
+  void strokeRefinement( QImage _stroke );
 
   void save( std::vector<std::vector<std::vector<float>>> & _image, std::string _destination );
   void save( std::vector<std::vector<float>> & _image, std::string _destination );
   void save( map _image, std::string _destination );
+
+  // CL, for now public
+  cl::Platform m_CLPlatform;
+  cl::Device m_device;
+  cl::Context m_CLContext;
+  cl::Program::Sources m_sources;
+  cl::Program m_program;
+  // CL end
+
 private:
   int width;   // aliasing avoids loading m_image in the cache every time we need the width
   int height;
@@ -28,8 +38,10 @@ private:
   int regionHeight; /// \brief regionHeight, the amount of regions in the y
   int m_iterations = 20;  /// \brief m_iterations, number of iteration for the separation
   int m_res = 16;  /// \brief m_res, resolution of each region
+  void initCL();
 
   QImage m_image;
+
   std::vector<std::vector<float>> m_intensity;
   std::vector<std::vector<float>> albedoIntensityMap;
   std::vector<std::vector<float>> m_shadingMap;
