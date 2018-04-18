@@ -53,7 +53,7 @@ float texture_lum(sampler2D _texture, vec2 _uv)
 
 vec3 toNormal()
 {
-	float r = 1;// 0.00078125f; // 1 / width of the texture
+	float r = 1; // 0.00078125f; // 1 / width of the texture
 
 	float x0 = texture_lum( ColourTexture, vec2( texCoord.x + r, texCoord.y ) );
 	float x1 = texture_lum( ColourTexture, vec2( texCoord.x - r, texCoord.y ) );

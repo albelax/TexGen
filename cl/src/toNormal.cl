@@ -33,16 +33,18 @@ void kernel calculateMap( global float * _r, global float * _g, global float * _
 
   int _width = 2196;
 
-  float r = 1.0f;// / _width;
+  float r = 1.0f / _width;
   //  float3   rgb = (float3)( _r[ uv.y * _width + uv.x ], _g[ uv.y * _width + uv.x ], _b[ uv.y * _width + uv.x ]);
 
   float3 rgb = (float3)( _r[ uv.y * _width + (int)(uv.x + r) ], _g[ uv.y * _width + (int)(uv.x + r) ], _b[ uv.y * _width + (int)(uv.x + r) ]);
-  float x0 = 0.2126 * rgb.x + 0.7152 * rgb.y + 0.0722 * rgb.z;
+  float x0 = (0.2126 * rgb.x) + (0.7152 * rgb.y) + (0.0722 * rgb.z);
+
   rgb = (float3)( _r[ uv.y * _width + (int)(uv.x - r) ], _g[ uv.y * _width + (int)(uv.x - r) ], _b[ uv.y * _width + (int)(uv.x - r) ]);
-  float x1 = 0.2126 * rgb.x + 0.7152 * rgb.y + 0.0722 * rgb.z;
+  float x1 = (0.2126 * rgb.x) + (0.7152 * rgb.y) + (0.0722 * rgb.z);
 
   rgb = (float3)( _r[ (int)(uv.y + r ) * _width + uv.x ], _g[ (int)(uv.y + r ) * _width + uv.x ], _b[ (int)(uv.y + r ) * _width + uv.x ]);
   float y0 = 0.2126 * rgb.x + 0.7152 * rgb.y + 0.0722 * rgb.z;
+
   rgb = (float3)( _r[ (int)(uv.y - r ) * _width + uv.x ], _g[ (int)(uv.y - r ) * _width + uv.x ], _b[ (int)(uv.y - r ) * _width + uv.x ]);
   float y1 = 0.2126 * rgb.x + 0.7152 * rgb.y + 0.0722 * rgb.z;
 

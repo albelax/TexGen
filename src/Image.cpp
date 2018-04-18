@@ -174,8 +174,8 @@ void Image::imageTest( QImage & image )
 
 
   queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(width, height), cl::NullRange);
-  queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, width * height * sizeof( float ), r);
-  queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, width * height * sizeof( float ), g);
+  queue.enqueueReadBuffer(buffer_A, CL_TRUE, 0, width * height * sizeof( float ), r);
+  queue.enqueueReadBuffer(buffer_B, CL_TRUE, 0, width * height * sizeof( float ), g);
   queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, width * height * sizeof( float ), b);
 
 

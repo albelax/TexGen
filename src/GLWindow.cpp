@@ -176,7 +176,7 @@ void GLWindow::init()
   QImage out;
 
   out.load("images/grey.jpg");
-  m_editedImage.imageTest(out);
+  m_editedImage.imageTest(m_image);
   //  m_editedImage.save( Image::map::SHADING, "images/shading.jpg" );
 
 
