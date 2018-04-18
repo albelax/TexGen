@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.9.0
+** Created by: Qt User Interface Compiler version 5.6.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -122,15 +122,15 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "TexSketch", Q_NULLPTR));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "TexSketch", 0));
         s_transformGB->setTitle(QString());
-        label_2->setText(QApplication::translate("MainWindow", "Image", Q_NULLPTR));
+        label_2->setText(QApplication::translate("MainWindow", "Image", 0));
         m_selectImage->clear();
         m_selectImage->insertItems(0, QStringList()
-         << QApplication::translate("MainWindow", "Original", Q_NULLPTR)
-         << QApplication::translate("MainWindow", "Albedo", Q_NULLPTR)
-         << QApplication::translate("MainWindow", "Shading", Q_NULLPTR)
-         << QApplication::translate("MainWindow", "Grayscale", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "Original", 0)
+         << QApplication::translate("MainWindow", "Albedo", 0)
+         << QApplication::translate("MainWindow", "Shading", 0)
+         << QApplication::translate("MainWindow", "Grayscale", 0)
         );
         s_drawGB->setTitle(QString());
     } // retranslateUi

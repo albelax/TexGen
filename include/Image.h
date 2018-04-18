@@ -30,6 +30,8 @@ public:
   cl::Program::Sources m_sources;
   cl::Program m_program;
   // CL end
+  void vectorAdd();
+  void imageTest( QImage & image );
 
 private:
   int width;   // aliasing avoids loading m_image in the cache every time we need the width

@@ -172,7 +172,11 @@ void GLWindow::init()
   //  m_editedImage.shading();
   //  m_editedImage.save( Image::map::ALBEDO, "images/albedo.jpg" );
 
-  m_editedImage.save( Image::map::INTENSITY, "images/grey.jpg" );
+//  m_editedImage.save( Image::map::INTENSITY, "images/grey.jpg" );
+  QImage out;
+
+  out.load("images/grey.jpg");
+  m_editedImage.imageTest(out);
   //  m_editedImage.save( Image::map::SHADING, "images/shading.jpg" );
 
 
@@ -183,15 +187,6 @@ void GLWindow::init()
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
   glGenerateMipmap( GL_TEXTURE_2D );
   glActiveTexture( GL_TEXTURE0 );
-  int error;
-
-  auto img = cl::ImageGL( m_editedImage.m_CLContext, CL_MEM_READ_WRITE, GL_TEXTURE_2D, 0, m_textures[m_activeTexture], &error );
-
-  if ( CL_INVALID_CONTEXT == error )
-  std::cout << error << " <- error\n";
-
-  if ( CL_SUCCESS == error )
-  std::cout << error << " <- success\n";
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -205,11 +200,11 @@ void GLWindow::paintGL()
 
   glBindTexture( GL_TEXTURE_2D, m_textures[m_activeTexture]);
 
-  //  glBindFramebuffer( GL_FRAMEBUFFER,  m_framebuffer );
-  //  renderNormals();
-  //  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
+    glBindFramebuffer( GL_FRAMEBUFFER,  m_framebuffer );
+    renderNormals();
+    glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
 
-  //  glBindFramebuffer( GL_FRAMEBUFFER,  3 );
+    glBindFramebuffer( GL_FRAMEBUFFER,  3 );
 
   renderTexture();
   //  drawStroke( p );

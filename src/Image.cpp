@@ -10,11 +10,11 @@ Image::Image( QImage & _image )
 
   width = m_image.width();
   height = m_image.height();
-  std::cout << "image w: " << width << " image h: " << height << '\n';
+//  std::cout << "image w: " << width << " image h: " << height << '\n';
 
   regionWidth = ceil(float(width)/float(m_res));
   regionHeight = ceil(float(height)/float(m_res));
-  std::cout << "region w: " << regionWidth << " region h: " << regionHeight << '\n';
+//  std::cout << "region w: " << regionWidth << " region h: " << regionHeight << '\n';
   m_intensity.resize( width );
   m_chroma.resize( width );
   m_shadingMap.resize( width );
@@ -46,72 +46,155 @@ Image::Image( QImage & _image )
 
 void Image::initCL()
 {
-	std::vector<cl::Platform> all_platforms;
-	cl::Platform::get(&all_platforms);
-	if( all_platforms.size() == 0 )
-	{
-		std::cout<<" No platforms found. Check OpenCL installation!\n";
-		exit(1);
-	}
-	cl::Platform m_CLPlatform = all_platforms[0];
+  std::vector<cl::Platform> all_platforms;
+  cl::Platform::get(&all_platforms);
+  if( all_platforms.size() == 0 )
+  {
+    std::cout<<" No platforms found. Check OpenCL installation!\n";
+    exit(1);
+  }
+  cl::Platform m_CLPlatform = all_platforms[0];
 
-	std::vector<cl::Device> all_devices;
-	m_CLPlatform.getDevices( CL_DEVICE_TYPE_ALL, &all_devices );
-	if( all_devices.size() == 0 )
-	{
-		std::cout<<" No devices found. Check OpenCL installation!\n";
-		exit(1);
-	}
-	cl::Device m_device = all_devices[0];
+  std::vector<cl::Device> all_devices;
+  m_CLPlatform.getDevices( CL_DEVICE_TYPE_ALL, &all_devices );
+  if( all_devices.size() == 0 )
+  {
+    std::cout<<" No devices found. Check OpenCL installation!\n";
+    exit(1);
+  }
+  m_device = all_devices[0];
 
-	m_CLContext = cl::Context( m_device );
+  m_CLContext = cl::Context( m_device );
 
-	//-----------------------------------------------> set up kernel, to be removed later
+  vectorAdd();
 
-	std::ifstream clFile("cl/src/toNormal.cl");
-	std::string programSrc((std::istreambuf_iterator<char>(clFile)), std::istreambuf_iterator<char>());
+}
 
-	m_program = cl::Program( m_CLContext, programSrc.c_str() );
-	if(m_program.build( {m_device} ) != CL_SUCCESS)
-	{
-		std::cout << " Error building: " << m_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(m_device) << "\n";
-		exit(1);
-	}
 
-	//-----------------------------------------------> launch kernel, to be removed later
+void Image::vectorAdd()
+{
+  //-----------------------------------------------> set up kernel, to be removed later
 
-	// create buffers on the device
-	cl::Buffer buffer_A(m_CLContext,CL_MEM_READ_WRITE,sizeof(int)*10);
-	cl::Buffer buffer_B(m_CLContext,CL_MEM_READ_WRITE,sizeof(int)*10);
-	cl::Buffer buffer_C(m_CLContext,CL_MEM_READ_WRITE,sizeof(int)*10);
+  std::ifstream clFile("cl/src/toNormal.cl");
+  std::string programSrc((std::istreambuf_iterator<char>(clFile)), std::istreambuf_iterator<char>());
 
-	int A[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-	int B[] = {0, 1, 2, 0, 1, 2, 0, 1, 2, 0};
+  m_program = cl::Program( m_CLContext, programSrc.c_str() );
+  if(m_program.build( {m_device} ) != CL_SUCCESS)
+  {
+    std::cout << " Error building: " << m_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(m_device) << "\n";
+    exit(1);
+  }
 
-	//create queue to which we will push commands for the device.
-	cl::CommandQueue queue( m_CLContext, m_device );
+  //-----------------------------------------------> launch kernel, to be removed later
 
-	//write arrays A and B to the device
-	queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(int)*10, A);
-	queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(int)*10, B);
+  // create buffers on the device
+  cl::Buffer buffer_A(m_CLContext,CL_MEM_READ_WRITE,sizeof(int)*10);
+  cl::Buffer buffer_B(m_CLContext,CL_MEM_READ_WRITE,sizeof(int)*10);
+  cl::Buffer buffer_C(m_CLContext,CL_MEM_READ_WRITE,sizeof(int)*10);
 
-	cl::Kernel kernel_add = cl::Kernel( m_program, "simple_add" );
-	kernel_add.setArg(0,buffer_A);
-	kernel_add.setArg(1,buffer_B);
-	kernel_add.setArg(2,buffer_C);
-	queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(10), cl::NullRange);
-	queue.finish();
+  int A[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  int B[] = {0, 1, 2, 0, 1, 2, 0, 1, 2, 0};
 
-	int C[10];
-	//read result C from the device to array C
-	queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(int)*10, C);
+  //create queue to which we will push commands for the device.
+  cl::CommandQueue queue( m_CLContext, m_device );
 
-	std::cout<<" result: \n";
-	for( int i = 0; i < 10; ++i )
-	{
-			std::cout<<C[i]<<" ";
-	}
-	std::cout << '\n';
+  //write arrays A and B to the device
+  queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(int)*10, A);
+  queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(int)*10, B);
+
+  cl::Kernel kernel_add = cl::Kernel( m_program, "simple_add" );
+  kernel_add.setArg(0,buffer_A);
+  kernel_add.setArg(1,buffer_B);
+  kernel_add.setArg(2,buffer_C);
+  queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(10), cl::NullRange);
+  queue.finish();
+
+  int C[10];
+  //read result C from the device to array C
+  queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(int)*10, C);
+
+  //  std::cout<<" result: \n";
+  //  for( int i = 0; i < 10; ++i )
+  //  {
+  //    std::cout<<C[i]<<" ";
+  //  }
+  //  std::cout << '\n';
+
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+void Image::imageTest( QImage & image )
+{
+  //  cl::ImageFormat f;
+  //  cl::Image2D img(m_CLContext, CL_MEM_READ_ONLY, f, width, height,0, &image );
+
+  float * r = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
+  float * g = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
+  float * b = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
+
+  for ( int i = 0; i < width; ++i )
+  {
+    for ( int j = 0; j < height; ++j )
+    {
+      QColor myPixel = QColor( image.pixel(i,j) );
+      r[j * width + i] = myPixel.redF();
+      g[j * width + i] = myPixel.greenF();
+      b[j * width + i] = myPixel.blueF();
+    }
+  }
+
+  std::ifstream clFile( "cl/src/toNormal.cl" );
+  std::string programSrc((std::istreambuf_iterator<char>(clFile)), std::istreambuf_iterator<char>());
+
+  m_program = cl::Program( m_CLContext, programSrc.c_str() );
+  if(m_program.build( {m_device} ) != CL_SUCCESS)
+  {
+    std::cout << " Error building: " << m_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(m_device) << "\n";
+    exit(1);
+  }
+
+  cl::Buffer buffer_A(m_CLContext, CL_MEM_READ_WRITE, width * height * sizeof( float ));
+  cl::Buffer buffer_B(m_CLContext, CL_MEM_READ_WRITE, width * height * sizeof( float ));
+  cl::Buffer buffer_C(m_CLContext, CL_MEM_READ_WRITE, width * height * sizeof( float ));
+
+  //create queue to which we will push commands for the device.
+  cl::CommandQueue queue( m_CLContext, m_device );
+
+  //write arrays A and B to the device
+  queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, width * height * sizeof( float ), r);
+  queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, width * height * sizeof( float ), g);
+  queue.enqueueWriteBuffer(buffer_C, CL_TRUE, 0, width * height * sizeof( float ), b);
+
+
+  cl::Kernel kernel_add = cl::Kernel( m_program, "calculateMap" );
+  kernel_add.setArg(0,buffer_A);
+  kernel_add.setArg(1,buffer_B);
+  kernel_add.setArg(2,buffer_C);
+
+
+  queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(width, height), cl::NullRange);
+  queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, width * height * sizeof( float ), r);
+  queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, width * height * sizeof( float ), g);
+  queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, width * height * sizeof( float ), b);
+
+
+
+  queue.finish();
+
+
+  QImage out;
+  out = image.copy();
+
+  for ( int i = 0; i < width; ++i )
+  {
+    for ( int j = 0; j < height; ++j )
+    {
+      out.setPixel(i,j,qRgb( r[j * width + i]*255, g[j * width + i]*255, b[j * width + i]*255 ));
+    }
+  }
+
+  out.save( "images/normal.jpg", 0, -1 );
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -363,6 +446,7 @@ void Image::separation()
   }
 }
 //---------------------------------------------------------------------------------------------------------------------
+
 void Image::strokeRefinement(QImage _stroke)
 {
 
