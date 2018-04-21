@@ -389,6 +389,7 @@ void GLWindow::selectImage(int _i)
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
   glGenerateMipmap( GL_TEXTURE_2D );
   glActiveTexture( GL_TEXTURE0 );
+  update();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -436,6 +437,8 @@ void GLWindow::loadImage()
   glGenerateMipmap( GL_TEXTURE_2D );
   glActiveTexture( GL_TEXTURE0 );
   m_textureLoaded = true;
+  update();
+
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
