@@ -9,7 +9,7 @@
 class Image
 {
 public:
-  enum map { ORIGINAL, INTENSITY, CHROMA, ALBEDO, SHADING };
+  enum map { ORIGINAL, INTENSITY, CHROMA, ALBEDO, SHADING, SPECULAR };
   Image() = default;
   Image( QImage & _image );
   void threshold();
@@ -18,6 +18,11 @@ public:
   void separation();
   void shading();
   void strokeRefinement( QImage _stroke );
+  void specular();
+  void specular2();
+  void setSpecInvert(bool b);
+  void setSpecWidth(int n);
+  void setSpecDropoff(int n);
 
   void save( std::vector<std::vector<std::vector<float>>> & _image, std::string _destination );
   void save( std::vector<std::vector<float>> & _image, std::string _destination );
@@ -32,10 +37,15 @@ private:
   int regionHeight; /// \brief regionHeight, the amount of regions in the y
   int m_iterations = 20;  /// \brief m_iterations, number of iteration for the separation
   int m_res = 16;  /// \brief m_res, resolution of each region
+  int m_specWidth=50;
+  int m_specDropoff=50;
+  float m_specAmount = 1.0f;
+  bool m_specInvert = false;
+
   void initCL();
   void rgbToHsv();
 
-  // CL
+  // CL4
   cl::Platform m_CLPlatform;
   cl::Device m_device;
   cl::Context m_CLContext;
@@ -47,7 +57,7 @@ private:
   std::vector<std::vector<float>> m_intensity;
   std::vector<std::vector<float>> albedoIntensityMap;
   std::vector<std::vector<float>> m_shadingMap;
-
+  std::vector<std::vector<float>> m_specular;
   std::vector<std::vector<float>> B;
   std::vector<std::vector<std::vector<float>>> A;
   std::vector<std::vector<std::vector<float>>> m_chroma;

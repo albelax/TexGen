@@ -10,20 +10,23 @@ Image::Image( QImage & _image )
 
   width = m_image.width();
   height = m_image.height();
-//  std::cout << "image w: " << width << " image h: " << height << '\n';
+  //  std::cout << "image w: " << width << " image h: " << height << '\n';
 
   regionWidth = ceil(float(width)/float(m_res));
   regionHeight = ceil(float(height)/float(m_res));
-//  std::cout << "region w: " << regionWidth << " region h: " << regionHeight << '\n';
+  //  std::cout << "region w: " << regionWidth << " region h: " << regionHeight << '\n';
+
   m_intensity.resize( width );
   m_chroma.resize( width );
   m_shadingMap.resize( width );
+  m_specular.resize( width );
 
   for( int i = 0; i < width; ++i )
   {
     m_intensity[i].resize( height );
     m_shadingMap[i].resize( height );
     m_chroma[i].resize( height );
+    m_specular[i].resize( height );
   }
 
   B.resize( int(regionWidth) );
@@ -433,6 +436,7 @@ void Image::separation()
 
   }
 }
+
 //---------------------------------------------------------------------------------------------------------------------
 
 void Image::strokeRefinement(QImage _stroke)
@@ -573,7 +577,7 @@ void Image::save( map _image, std::string _destination )
     case map::CHROMA: this->save( m_chroma, _destination ); break;
     case map::ALBEDO: this->save( albedoIntensityMap, _destination ); break;
     case map::SHADING: this->save( m_shadingMap, _destination ); break;
-
+    case map::SPECULAR: this->save( m_specular, _destination ); break;
     default: break;
   }
 }
@@ -585,4 +589,120 @@ void Image::rgbToHsv()
 
 }
 
+//---------------------------------------------------------------------------------------------------------------------
+void Image::setSpecWidth(int n)
+{
+  m_specWidth=n;
+}
+
+void Image::setSpecDropoff(int n)
+{
+  m_specDropoff=n;
+}
+
+void Image::setSpecInvert(bool b)
+{
+  m_specInvert = b;
+}
+
+void Image::specular2()
+{
+  for( int i = 0; i < width; ++i )
+  {
+    for( int j = 0 ; j < height; ++j )
+    {
+      QColor myColor = m_image.pixelColor( i, j );
+
+      float spec = (std::min(myColor.redF(), std::min(myColor.greenF(), myColor.blueF())) + std::max(myColor.redF(),std:: max(myColor.greenF(), myColor.blueF()))) * 0.5f;
+
+      m_specular[i][j] =(spec * m_specAmount);
+      if(m_specInvert) m_specular[i][j] =1.0f-(spec * m_specAmount);
+    }
+  }
+
+
+  int k = 16;
+
+  for (int i = 1; i < width-1; i++)
+  {
+    for (int j = 1; j < height-1; j++)
+    {
+      double sum = m_specular[i][j] * k;
+
+      double weight = k;
+
+      int l[3] = { -1, 0, 1 };
+      for (int m = 0; m < 3; m++){
+        for (int n = 0; n < 3; n++) {
+          if (l[m] + i != i && l[n] + j != j) {
+            sum = sum + m_specular[l[m] + i][ l[n] + j] * (-k / 8);
+
+            weight = weight + (-k / 8);
+          }
+        }
+      }
+      sum = sum / weight;
+      m_specular[i][j] = sum;
+    }
+  }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+void Image::specular()
+{
+  for( int i = 0; i < width; ++i )
+  {
+    for( int j = 0 ; j < height; ++j )
+    {
+      QColor myColor = m_image.pixelColor( i, j );
+
+      QColor theColor(128,128,128);
+      float spec = 0.0f;
+
+      bool redBool = myColor.red() > (theColor.red() - m_specWidth) && myColor.red() < (theColor.red() + m_specWidth);
+      bool greenBool = myColor.green() > (theColor.green() - m_specWidth) && myColor.green() < (theColor.green() + m_specWidth);
+      bool blueBool = myColor.blue() > (theColor.blue() - m_specWidth) && myColor.blue() < (theColor.blue() + m_specWidth);
+
+      if(redBool&&greenBool&&blueBool) m_specAmount;
+      else
+      {
+        bool redBool2 = myColor.red() > (theColor.red() + m_specWidth) && myColor.red() < (theColor.red() + m_specWidth + m_specDropoff);
+        bool greenBool2 = myColor.green() > (theColor.green() + m_specWidth) && myColor.green() < (theColor.green() + m_specWidth + m_specDropoff);
+        bool blueBool2 = myColor.blue() > (theColor.blue() + m_specWidth) && myColor.blue() < (theColor.blue() + m_specWidth + m_specDropoff);
+
+        if(redBool2||greenBool2||blueBool2)
+        {
+          int valueR = myColor.red()-m_specWidth-theColor.red();
+          valueR = valueR < 0 ? 0 : (valueR > 255 ? 255 : valueR);
+          int valueG = myColor.green()-m_specWidth-theColor.green();
+          valueG = valueG < 0 ? 0 : (valueG > 255 ? 255 : valueG);
+          int valueB = myColor.blue()-m_specWidth-theColor.blue();
+          valueB = valueB < 0 ? 0 : (valueB > 255 ? 255 : valueB);
+          int valueA = (valueR + valueG + valueB)/3;
+          spec = m_specAmount - (float(valueA)/float(m_specDropoff));
+        }
+        else
+        {
+          bool redBool3 = myColor.red() > (theColor.red() - m_specWidth - m_specDropoff) && myColor.red() < (theColor.red() - m_specWidth);
+          bool greenBool3 = myColor.green() > (theColor.green() - m_specWidth - m_specDropoff) && myColor.green() < (theColor.green() - m_specWidth);
+          bool blueBool3 = myColor.blue() > (theColor.blue() - m_specWidth - m_specDropoff) && myColor.blue() < (theColor.blue() - m_specWidth);
+
+          if(redBool3||greenBool3||blueBool3)
+          {
+            int valueR = theColor.red()-m_specWidth-myColor.red();
+            valueR = valueR < 0 ? 0 : (valueR > 255 ? 255 : valueR);
+            int valueG = theColor.green()-m_specWidth-myColor.green();
+            valueG = valueG < 0 ? 0 : (valueG > 255 ? 255 : valueG);
+            int valueB = theColor.blue()-m_specWidth-myColor.blue();
+            valueB = valueB < 0 ? 0 : (valueB > 255 ? 255 : valueB);
+            int valueA = (valueR + valueG + valueB)/3;
+            spec = m_specAmount - (float(valueA)/float(m_specDropoff));
+          }
+        }
+      }
+      m_specular[i][j] = spec;
+    }
+  }
+}
 //---------------------------------------------------------------------------------------------------------------------

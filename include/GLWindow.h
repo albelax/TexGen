@@ -45,6 +45,7 @@ public slots:
   void calculateIntensity();
   void calculateNormals();
   void calculateSeparation();
+  void calculateSpecular();
 
 protected:
   /// @brief  The following methods must be implimented in the sub class
@@ -61,6 +62,8 @@ protected:
   void showAlbedoMap();
   void showGrayscale();
   void showShadingMap();
+  void showSpecular();
+
   void saveActiveTexture(const char * _name, int _width, int _height);
 
 private :

@@ -66,6 +66,11 @@
            <string>Grayscale</string>
           </property>
          </item>
+         <item>
+          <property name="text">
+           <string>Specular</string>
+          </property>
+         </item>
         </widget>
        </item>
       </layout>

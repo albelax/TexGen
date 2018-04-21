@@ -29,9 +29,6 @@ public:
 
 private slots:
 	void open();
-	void calculateIntensity();
-	void calculateSeparation();
-	void calculateNormals();
 
 private:
 	Ui::MainWindow * m_ui;
@@ -43,7 +40,7 @@ private:
   QAction * calculateIntensityAct;
   QAction * calculateSeparationAct;
   QAction * calculateNormalsAct;
-
+  QAction * calculateSpecularAct;
 
   QList<QAction *> saveAsActs;
   QAction *exitAct;

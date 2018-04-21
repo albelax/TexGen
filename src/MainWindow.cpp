@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
 	m_ui -> setupUi(this);
 	m_gl = new GLWindow(this);
 	m_ui -> s_mainWindowGridLayout -> addWidget(m_gl,0,0,3,5);
-	connect(m_ui->m_selectImage,SIGNAL(currentIndexChanged(int)),m_gl,SLOT(selectImage(int)));
+	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), m_gl, SLOT(selectImage(int)));
 
 	createActions();
 	createMenus();
@@ -64,6 +64,7 @@ void MainWindow::createMenus()
   m_ui->menuedit->addAction(calculateIntensityAct);
   m_ui->menuedit->addAction(calculateSeparationAct);
   m_ui->menuedit->addAction(calculateNormalsAct);
+  m_ui->menuedit->addAction(calculateSpecularAct);
 }
 
 //------------------------------------------------------------------------
@@ -75,13 +76,16 @@ void MainWindow::createActions()
   connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
   calculateIntensityAct = new QAction(tr("&Calculate Intensity"), this);
-  connect(calculateIntensityAct, SIGNAL(triggered()), this, SLOT(calculateIntensity()));
+  connect(calculateIntensityAct, SIGNAL(triggered()), m_gl, SLOT(calculateIntensity()));
 
   calculateSeparationAct = new QAction(tr("&Calculate Separation"), this);
-  connect(calculateSeparationAct, SIGNAL(triggered()), this, SLOT(calculateSeparation()));
+  connect(calculateSeparationAct, SIGNAL(triggered()), m_gl, SLOT(calculateSeparation()));
 
   calculateNormalsAct = new QAction(tr("&Calculate Normals"), this);
-  connect(calculateNormalsAct, SIGNAL(triggered()), this, SLOT(calculateNormals()));
+  connect(calculateNormalsAct, SIGNAL(triggered()), m_gl, SLOT(calculateNormals()));
+
+  calculateSpecularAct = new QAction(tr("&Calculate Specular"), this);
+  connect(calculateSpecularAct, SIGNAL(triggered()), m_gl, SLOT(calculateSpecular()));
 }
 
 //------------------------------------------------------------------------
@@ -96,25 +100,3 @@ void MainWindow::open()
   }
 }
 
-//------------------------------------------------------------------------
-
-void MainWindow::calculateIntensity()
-{
-  m_gl->calculateIntensity();
-}
-
-//------------------------------------------------------------------------
-
-void MainWindow::calculateSeparation()
-{
-  m_gl->calculateSeparation();
-}
-
-//------------------------------------------------------------------------
-
-void MainWindow::calculateNormals()
-{
-  m_gl->calculateNormals();
-}
-
-//------------------------------------------------------------------------

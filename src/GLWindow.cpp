@@ -349,15 +349,36 @@ void GLWindow::showShadingMap()
 
 //------------------------------------------------------------------------------------------------------------------------------
 
+void GLWindow::showSpecular()
+{
+  static int index = -1;
+  if ( index == -1 )
+  {
+    addTexture( "images/specular.jpg" );
+    index = m_textures.size() - 1;
+  }
+  else
+  {
+    glActiveTexture( GL_TEXTURE0 + index );
+    glBindTexture( GL_TEXTURE_2D, index );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
+  }
+  m_activeTexture = index;
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------
+
 void GLWindow::selectImage(int _i)
 {
-  //  std::cout << _i << "\n";
+  std::cout << _i << "\n";
   switch ( _i )
   {
     case 0: this->showOriginalImage(); break;
     case 1: this->showAlbedoMap(); break;
     case 2: this->showShadingMap(); break;
     case 3: this->showGrayscale(); break;
+    case 4: this->showSpecular(); break;
 
     default: break;
   }
@@ -445,3 +466,9 @@ void GLWindow::calculateSeparation()
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
+
+void GLWindow::calculateSpecular()
+{
+  m_editedImage.specular2();
+  m_editedImage.save(Image::SPECULAR, "images/specular.jpg");
+}
