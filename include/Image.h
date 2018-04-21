@@ -22,16 +22,8 @@ public:
   void save( std::vector<std::vector<std::vector<float>>> & _image, std::string _destination );
   void save( std::vector<std::vector<float>> & _image, std::string _destination );
   void save( map _image, std::string _destination );
-
-  // CL, for now public
-  cl::Platform m_CLPlatform;
-  cl::Device m_device;
-  cl::Context m_CLContext;
-  cl::Program::Sources m_sources;
-  cl::Program m_program;
-  // CL end
   void vectorAdd();
-  void imageTest( QImage & image );
+  void calculateNormalMap( QImage & image );
 
 private:
   int width;   // aliasing avoids loading m_image in the cache every time we need the width
@@ -41,7 +33,15 @@ private:
   int m_iterations = 20;  /// \brief m_iterations, number of iteration for the separation
   int m_res = 16;  /// \brief m_res, resolution of each region
   void initCL();
+  void rgbToHsv();
 
+  // CL
+  cl::Platform m_CLPlatform;
+  cl::Device m_device;
+  cl::Context m_CLContext;
+  cl::Program::Sources m_sources;
+  cl::Program m_program;
+  // CL end
   QImage m_image;
 
   std::vector<std::vector<float>> m_intensity;

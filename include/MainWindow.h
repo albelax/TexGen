@@ -11,6 +11,7 @@
 #endif
 
 #include <QMainWindow>
+#include <QtWidgets>
 #include "GLWindow.h"
 
 namespace Ui
@@ -26,10 +27,29 @@ public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
 
+private slots:
+	void open();
+	void calculateIntensity();
+	void calculateSeparation();
+	void calculateNormals();
+
 private:
-	Ui::MainWindow *m_ui;
-	/// @brief
+	Ui::MainWindow * m_ui;
 	GLWindow * m_gl;
+	QMenu * m_fileMenu;
+	QMenu * m_editMenu;
+
+  QAction * openAct;
+  QAction * calculateIntensityAct;
+  QAction * calculateSeparationAct;
+  QAction * calculateNormalsAct;
+
+
+  QList<QAction *> saveAsActs;
+  QAction *exitAct;
+
+	void createActions();
+	void createMenus();
 	void keyPressEvent(QKeyEvent * _event);
 	void mouseMoveEvent(QMouseEvent * _event);
 	void mousePressEvent(QMouseEvent *_event);

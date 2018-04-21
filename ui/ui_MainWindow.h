@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.6.2
+** Created by: Qt User Interface Compiler version 5.9.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -19,6 +19,7 @@
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QWidget>
@@ -32,18 +33,20 @@ public:
     QGridLayout *s_mainWindowGridLayout;
     QGroupBox *s_transformGB;
     QGridLayout *gridLayout;
+    QSpacerItem *horizontalSpacer_4;
     QLabel *label_2;
     QComboBox *m_selectImage;
-    QSpacerItem *horizontalSpacer_4;
     QSpacerItem *horizontalSpacer_5;
     QSpacerItem *horizontalSpacer_6;
     QSpacerItem *horizontalSpacer_2;
+    QSpacerItem *horizontalSpacer;
     QGroupBox *s_drawGB;
     QGridLayout *gridLayout_2;
     QSpacerItem *verticalSpacer;
     QSpacerItem *horizontalSpacer_3;
-    QSpacerItem *horizontalSpacer;
     QMenuBar *menubar;
+    QMenu *menuFiles;
+    QMenu *menuedit;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -58,6 +61,10 @@ public:
         s_transformGB->setObjectName(QStringLiteral("s_transformGB"));
         gridLayout = new QGridLayout(s_transformGB);
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
+        horizontalSpacer_4 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        gridLayout->addItem(horizontalSpacer_4, 2, 3, 1, 1);
+
         label_2 = new QLabel(s_transformGB);
         label_2->setObjectName(QStringLiteral("label_2"));
 
@@ -67,10 +74,6 @@ public:
         m_selectImage->setObjectName(QStringLiteral("m_selectImage"));
 
         gridLayout->addWidget(m_selectImage, 3, 2, 1, 1);
-
-        horizontalSpacer_4 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-        gridLayout->addItem(horizontalSpacer_4, 2, 3, 1, 1);
 
 
         s_mainWindowGridLayout->addWidget(s_transformGB, 0, 5, 1, 1);
@@ -87,6 +90,10 @@ public:
 
         s_mainWindowGridLayout->addItem(horizontalSpacer_2, 0, 2, 1, 1);
 
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        s_mainWindowGridLayout->addItem(horizontalSpacer, 0, 4, 1, 1);
+
         s_drawGB = new QGroupBox(centralwidget);
         s_drawGB->setObjectName(QStringLiteral("s_drawGB"));
         gridLayout_2 = new QGridLayout(s_drawGB);
@@ -102,15 +109,18 @@ public:
 
         s_mainWindowGridLayout->addWidget(s_drawGB, 2, 5, 1, 1);
 
-        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-        s_mainWindowGridLayout->addItem(horizontalSpacer, 0, 4, 1, 1);
-
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
-        menubar->setGeometry(QRect(0, 0, 800, 25));
+        menubar->setGeometry(QRect(0, 0, 800, 26));
+        menuFiles = new QMenu(menubar);
+        menuFiles->setObjectName(QStringLiteral("menuFiles"));
+        menuedit = new QMenu(menubar);
+        menuedit->setObjectName(QStringLiteral("menuedit"));
         MainWindow->setMenuBar(menubar);
+
+        menubar->addAction(menuFiles->menuAction());
+        menubar->addAction(menuedit->menuAction());
 
         retranslateUi(MainWindow);
 
@@ -122,17 +132,19 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "TexSketch", 0));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "TexSketch", Q_NULLPTR));
         s_transformGB->setTitle(QString());
-        label_2->setText(QApplication::translate("MainWindow", "Image", 0));
+        label_2->setText(QApplication::translate("MainWindow", "Image", Q_NULLPTR));
         m_selectImage->clear();
         m_selectImage->insertItems(0, QStringList()
-         << QApplication::translate("MainWindow", "Original", 0)
-         << QApplication::translate("MainWindow", "Albedo", 0)
-         << QApplication::translate("MainWindow", "Shading", 0)
-         << QApplication::translate("MainWindow", "Grayscale", 0)
+         << QApplication::translate("MainWindow", "Original", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "Albedo", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "Shading", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "Grayscale", Q_NULLPTR)
         );
         s_drawGB->setTitle(QString());
+        menuFiles->setTitle(QApplication::translate("MainWindow", "File", Q_NULLPTR));
+        menuedit->setTitle(QApplication::translate("MainWindow", "Edit", Q_NULLPTR));
     } // retranslateUi
 
 };

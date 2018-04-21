@@ -13,11 +13,10 @@
 GLWindow::GLWindow( QWidget *_parent ) : QOpenGLWidget( _parent )
 {
   m_plane = Mesh( "models/plane.obj", "plane" );
-  this->resize(_parent->size());
-  m_camera.setInitialMousePos(0,0);
-  m_camera.setTarget(0.0f, 0.0f, -2.0f);
-  m_camera.setEye(0.0f, 0.0f, 0.0f);
-  m_originalImage = /*"images/sky_xneg.png"; //*/ "images/bricksSmall.jpeg";
+  this->resize( _parent->size() );
+  m_camera.setInitialMousePos( 0, 0 );
+  m_camera.setTarget( 0.0f, 0.0f, -2.0f );
+  m_camera.setEye( 0.0f, 0.0f, 0.0f );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -162,31 +161,6 @@ void GLWindow::init()
 
   glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_renderedTexture, 0);
   //   end second framebuffer
-
-  addTexture( m_originalImage );
-
-  m_editedImage = Image( m_image );
-  m_editedImage.intensity();
-  //  m_editedImage.chroma();
-  //  m_editedImage.separation();
-  //  m_editedImage.shading();
-  //  m_editedImage.save( Image::map::ALBEDO, "images/albedo.jpg" );
-
-//  m_editedImage.save( Image::map::INTENSITY, "images/grey.jpg" );
-  QImage out;
-
-  out.load("images/grey.jpg");
-  m_editedImage.imageTest(m_image);
-  //  m_editedImage.save( Image::map::SHADING, "images/shading.jpg" );
-
-
-  glUniform1i( m_colourTextureAddress, 0 );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-  glGenerateMipmap( GL_TEXTURE_2D );
-  glActiveTexture( GL_TEXTURE0 );
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -198,18 +172,14 @@ void GLWindow::paintGL()
   glClearColor( 1, 1, 1, 1.0f );
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-  glBindTexture( GL_TEXTURE_2D, m_textures[m_activeTexture]);
+  if ( m_textureLoaded )
+  {
+    glBindTexture( GL_TEXTURE_2D, m_textures[m_activeTexture]);
+    renderTexture();
+  }
+  drawStroke( p );
 
-    glBindFramebuffer( GL_FRAMEBUFFER,  m_framebuffer );
-    renderNormals();
-    glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
-
-    glBindFramebuffer( GL_FRAMEBUFFER,  3 );
-
-  renderTexture();
-  //  drawStroke( p );
-
-  //  update();
+  //    update();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -313,18 +283,10 @@ void GLWindow::drawStroke( QPainter & _p )
 
 void GLWindow::showOriginalImage()
 {
-  static int index = -1;
-  if ( index == -1 )
-  {
-    addTexture( m_originalImage );
-    index = m_textures.size() - 1;
-  }
-  else
-  {
-    glActiveTexture( GL_TEXTURE0 + index );
-    glBindTexture( GL_TEXTURE_2D, index );
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
-  }
+  static int index = 0;
+  glActiveTexture( GL_TEXTURE0 + index );
+  glBindTexture( GL_TEXTURE_2D, index );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
   m_activeTexture = index;
 }
 
@@ -389,7 +351,7 @@ void GLWindow::showShadingMap()
 
 void GLWindow::selectImage(int _i)
 {
-  std::cout << _i << "\n";
+  //  std::cout << _i << "\n";
   switch ( _i )
   {
     case 0: this->showOriginalImage(); break;
@@ -410,17 +372,6 @@ void GLWindow::selectImage(int _i)
 
 //------------------------------------------------------------------------------------------------------------------------------
 
-void GLWindow::toNormal()
-{
-  // end
-  int width = 512;
-  int height = 512;
-  const char * p = "pippo.jpg";
-  saveActiveTexture( p, width, height );
-}
-
-//------------------------------------------------------------------------------------------------------------------------------
-
 void GLWindow::saveActiveTexture( const char * _name, int _width, int _height)
 {
   int tot = _width * _height;
@@ -437,6 +388,60 @@ void GLWindow::saveActiveTexture( const char * _name, int _width, int _height)
   }
   im.save( _name, 0, -1 );
   free( pix );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+
+void GLWindow::setImagePath( char *_path )
+{
+  m_originalImage = _path;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+
+void GLWindow::loadImage()
+{
+  m_activeTexture = 0;
+  m_textures.clear();
+  addTexture( m_originalImage );
+
+  m_editedImage = Image( m_image );
+
+  glUniform1i( m_colourTextureAddress, 0 );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+  glGenerateMipmap( GL_TEXTURE_2D );
+  glActiveTexture( GL_TEXTURE0 );
+  m_textureLoaded = true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+
+void GLWindow::calculateIntensity()
+{
+  m_editedImage.intensity();
+  m_editedImage.save( Image::INTENSITY, "images/grey.jpg");
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+
+void GLWindow::calculateNormals()
+{
+  m_editedImage.calculateNormalMap( m_image );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+
+void GLWindow::calculateSeparation()
+{
+  m_editedImage.intensity();
+  m_editedImage.chroma();
+  m_editedImage.separation();
+  m_editedImage.shading();
+  m_editedImage.save( Image::ALBEDO, "images/albedo.jpg");
+  m_editedImage.save( Image::SHADING, "images/shading.jpg");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------

@@ -65,10 +65,9 @@ void Image::initCL()
   m_device = all_devices[0];
 
   m_CLContext = cl::Context( m_device );
-
-  vectorAdd();
-
 }
+
+//---------------------------------------------------------------------------------------------------------------------
 
 
 void Image::vectorAdd()
@@ -112,23 +111,12 @@ void Image::vectorAdd()
   int C[10];
   //read result C from the device to array C
   queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(int)*10, C);
-
-  //  std::cout<<" result: \n";
-  //  for( int i = 0; i < 10; ++i )
-  //  {
-  //    std::cout<<C[i]<<" ";
-  //  }
-  //  std::cout << '\n';
-
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 
-void Image::imageTest( QImage & image )
+void Image::calculateNormalMap( QImage & image )
 {
-  //  cl::ImageFormat f;
-  //  cl::Image2D img(m_CLContext, CL_MEM_READ_ONLY, f, width, height,0, &image );
-
   float * r = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
   float * g = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
   float * b = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
@@ -171,17 +159,14 @@ void Image::imageTest( QImage & image )
   kernel_add.setArg(0,buffer_A);
   kernel_add.setArg(1,buffer_B);
   kernel_add.setArg(2,buffer_C);
-
+  kernel_add.setArg(3,width);
 
   queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(width, height), cl::NullRange);
   queue.enqueueReadBuffer(buffer_A, CL_TRUE, 0, width * height * sizeof( float ), r);
   queue.enqueueReadBuffer(buffer_B, CL_TRUE, 0, width * height * sizeof( float ), g);
   queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, width * height * sizeof( float ), b);
 
-
-
   queue.finish();
-
 
   QImage out;
   out = image.copy();
@@ -195,6 +180,9 @@ void Image::imageTest( QImage & image )
   }
 
   out.save( "images/normal.jpg", 0, -1 );
+  free( r );
+  free( g );
+  free( b );
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -449,7 +437,6 @@ void Image::separation()
 
 void Image::strokeRefinement(QImage _stroke)
 {
-
   std::vector<glm::vec2> strokePixels;
   strokePixels.reserve( _stroke.width() * _stroke.height());
 
@@ -589,6 +576,13 @@ void Image::save( map _image, std::string _destination )
 
     default: break;
   }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+void Image::rgbToHsv()
+{
+
 }
 
 //---------------------------------------------------------------------------------------------------------------------
