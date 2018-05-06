@@ -1,15 +1,29 @@
 #include "include/MainWindow.h"
 #include "ui_MainWindow.h"
+#include <memory>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::MainWindow)
 {
 	m_ui -> setupUi(this);
 	m_gl = new GLWindow(this);
 	m_ui -> s_mainWindowGridLayout -> addWidget(m_gl,0,0,3,5);
-	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), m_gl, SLOT(selectImage(int)));
+
 
 	createActions();
 	createMenus();
+	makeSpecularMenu();
+	m_currentMenu = &m_originalMenu;
+	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), m_gl, SLOT(selectImage(int)));
+	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLayout(int)));
+	connect((QSlider *)m_specularMenu[3], SIGNAL(sliderReleased() ), this, SLOT(changeContrast()));
+
+	//	int count = m_ui->s_drawGB->layout()->count();
+	//	m_originalLayout.reserve( count );
+	//	for ( int i = 0; i < count; ++i )
+	//	{
+	//		QLayoutItem * tmp = m_ui->s_drawGB->layout()->itemAt( i );
+	//		m_originalLayout.push_back( tmp );
+	//	}
 }
 
 //------------------------------------------------------------------------
@@ -100,3 +114,57 @@ void MainWindow::open()
   }
 }
 
+//------------------------------------------------------------------------
+
+void MainWindow::changeLayout( int _n )
+{
+  QLayout * layout = m_ui->s_drawGB->layout();
+
+  for( auto &_widget : *m_currentMenu )
+  {
+    _widget->hide();
+  }
+
+  //  if ( _n == 3 )
+  //  {
+  //    m_currentMenu.push_back( new QPushButton( "button" ) );
+  //    layout->addWidget( m_currentMenu[ m_currentMenu.size() - 1] );
+  //  }
+
+  if ( _n == Image::SPECULAR )
+  {
+    m_currentMenu = &m_specularMenu;
+
+    for ( auto &_widget : m_specularMenu)
+    {
+      layout->addWidget( _widget ); // probably should be added only once?
+      _widget->show();
+    }
+
+  }
+}
+
+//------------------------------------------------------------------------
+
+void MainWindow::makeSpecularMenu()
+{
+  QSlider * contrast = new QSlider( Qt::Horizontal, Q_NULLPTR );
+  contrast->setMinimum(0);
+  contrast->setMaximum(100);
+  contrast->value();
+
+  m_specularMenu.push_back( new QLabel( "Invert", 0, 0 ) );
+  m_specularMenu.push_back( new QCheckBox() );
+
+  m_specularMenu.push_back( new QLabel( "Contrast", 0, 0 ) );
+  m_specularMenu.push_back( contrast );
+
+  m_specularMenu.push_back( new QLabel( "Brightness", 0, 0 ) );
+  m_specularMenu.push_back( new QSlider( Qt::Horizontal, Q_NULLPTR) );}
+
+//------------------------------------------------------------------------
+
+void MainWindow::changeContrast()
+{
+  std::cout << static_cast<QSlider *>(m_specularMenu[3])->value() << " = contrast \n";
+}

@@ -58,11 +58,13 @@ protected:
   void renderNormals();
   void exportCSV( std::string _file );
   void drawStroke( QPainter & _p );
+
   void showOriginalImage();
   void showAlbedoMap();
   void showGrayscale();
   void showShadingMap();
   void showSpecular();
+  void showNormalMap();
 
   void saveActiveTexture(const char * _name, int _width, int _height);
 
