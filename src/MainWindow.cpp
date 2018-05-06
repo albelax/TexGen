@@ -123,13 +123,14 @@ void MainWindow::changeLayout( int _n )
   for( auto &_widget : *m_currentMenu )
   {
     _widget->hide();
+    std::cout << "hidden!\n";
   }
 
-  //  if ( _n == 3 )
-  //  {
-  //    m_currentMenu.push_back( new QPushButton( "button" ) );
-  //    layout->addWidget( m_currentMenu[ m_currentMenu.size() - 1] );
-  //  }
+//    if ( _n == 3 )
+//    {
+//      m_currentMenu.push_back( new QPushButton( "button" ) );
+//      layout->addWidget( m_currentMenu[ m_currentMenu.size() - 1] );
+//    }
 
   if ( _n == Image::SPECULAR )
   {
