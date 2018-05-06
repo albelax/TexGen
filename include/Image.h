@@ -18,11 +18,10 @@ public:
   void separation();
   void shading();
   void strokeRefinement( QImage _stroke );
-  void specular();
-  void specular2();
-  void setSpecInvert(bool b);
-  void setSpecWidth(int n);
-  void setSpecDropoff(int n);
+  void specular(float _brightness, float _contrast, bool _invert);
+
+  float contrast(float _amount, float _value);
+  float desaturate(float _r, float _g, float _b);
 
   void save( std::vector<std::vector<std::vector<float>>> & _image, std::string _destination );
   void save( std::vector<std::vector<float>> & _image, std::string _destination );
@@ -37,10 +36,6 @@ private:
   int regionHeight; /// \brief regionHeight, the amount of regions in the y
   int m_iterations = 20;  /// \brief m_iterations, number of iteration for the separation
   int m_res = 16;  /// \brief m_res, resolution of each region
-  int m_specWidth=50;
-  int m_specDropoff=50;
-  float m_specAmount = 1.0f;
-  bool m_specInvert = false;
 
   void initCL();
   void rgbToHsv();

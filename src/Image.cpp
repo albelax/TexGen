@@ -590,37 +590,54 @@ void Image::rgbToHsv()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void Image::setSpecWidth(int n)
+float Image::contrast(float _amount, float _value)
 {
-  m_specWidth=n;
+  int specInt =  _value * 255;
+  float contrast = 255*_amount;
+  float factor = (259.0f * (contrast + 255.0f)) / (255.0f * (259.0f - contrast));
+  float newSpec = ( factor*(specInt-128) + 128 );
+  newSpec = newSpec < 0 ? 0 : (newSpec > 255 ? 255 : newSpec);
+  return newSpec/255.0f;
 }
 
-void Image::setSpecDropoff(int n)
+float Image::desaturate(float _r, float _g, float _b)
 {
-  m_specDropoff=n;
+  return (std::min(_r, std::min(_g, _b)) + std::max(_r,std:: max(_g, _b))) * 0.5f;
 }
 
-void Image::setSpecInvert(bool b)
-{
-  m_specInvert = b;
-}
 
-void Image::specular2()
+void Image::specular(float _brightness, float _contrast, bool _invert)
 {
+  float newBrightness = _brightness;
+  float newContrast = _contrast;
+  float high = 1.0f;
+  float low = 0.0f;
+  newBrightness = newBrightness < low ? low : (newBrightness > high ? high : newBrightness);
+  newContrast = newContrast < low ? low : (newContrast > high ? high : newContrast);
+
   for( int i = 0; i < width; ++i )
   {
     for( int j = 0 ; j < height; ++j )
     {
       QColor myColor = m_image.pixelColor( i, j );
 
-      float spec = (std::min(myColor.redF(), std::min(myColor.greenF(), myColor.blueF())) + std::max(myColor.redF(),std:: max(myColor.greenF(), myColor.blueF()))) * 0.5f;
+      //---DESATURATE---------------
+      // https://stackoverflow.com/a/28873770
+      float spec = desaturate(myColor.redF(),myColor.greenF(),myColor.blueF());
 
-      m_specular[i][j] =(spec * m_specAmount);
-      if(m_specInvert) m_specular[i][j] =1.0f-(spec * m_specAmount);
+      //---BRIGHTNESS--------------
+      m_specular[i][j] =(spec * newBrightness);
+
+      //---INVERT---------------
+      if(_invert) m_specular[i][j] =1.0f-m_specular[i][j];
+
+      //---CONTRAST-------------
+      // http://www.dfstudios.co.uk/articles/programming/image-programming-algorithms/image-processing-algorithms-part-5-contrast-adjustment/
+      m_specular[i][j] = contrast(_contrast, m_specular[i][j]);
     }
   }
 
-
+  //---SHARPEN-----------
   int k = 16;
 
   for (int i = 1; i < width-1; i++)
@@ -646,63 +663,3 @@ void Image::specular2()
     }
   }
 }
-
-//---------------------------------------------------------------------------------------------------------------------
-
-void Image::specular()
-{
-  for( int i = 0; i < width; ++i )
-  {
-    for( int j = 0 ; j < height; ++j )
-    {
-      QColor myColor = m_image.pixelColor( i, j );
-
-      QColor theColor(128,128,128);
-      float spec = 0.0f;
-
-      bool redBool = myColor.red() > (theColor.red() - m_specWidth) && myColor.red() < (theColor.red() + m_specWidth);
-      bool greenBool = myColor.green() > (theColor.green() - m_specWidth) && myColor.green() < (theColor.green() + m_specWidth);
-      bool blueBool = myColor.blue() > (theColor.blue() - m_specWidth) && myColor.blue() < (theColor.blue() + m_specWidth);
-
-      if(redBool&&greenBool&&blueBool) m_specAmount;
-      else
-      {
-        bool redBool2 = myColor.red() > (theColor.red() + m_specWidth) && myColor.red() < (theColor.red() + m_specWidth + m_specDropoff);
-        bool greenBool2 = myColor.green() > (theColor.green() + m_specWidth) && myColor.green() < (theColor.green() + m_specWidth + m_specDropoff);
-        bool blueBool2 = myColor.blue() > (theColor.blue() + m_specWidth) && myColor.blue() < (theColor.blue() + m_specWidth + m_specDropoff);
-
-        if(redBool2||greenBool2||blueBool2)
-        {
-          int valueR = myColor.red()-m_specWidth-theColor.red();
-          valueR = valueR < 0 ? 0 : (valueR > 255 ? 255 : valueR);
-          int valueG = myColor.green()-m_specWidth-theColor.green();
-          valueG = valueG < 0 ? 0 : (valueG > 255 ? 255 : valueG);
-          int valueB = myColor.blue()-m_specWidth-theColor.blue();
-          valueB = valueB < 0 ? 0 : (valueB > 255 ? 255 : valueB);
-          int valueA = (valueR + valueG + valueB)/3;
-          spec = m_specAmount - (float(valueA)/float(m_specDropoff));
-        }
-        else
-        {
-          bool redBool3 = myColor.red() > (theColor.red() - m_specWidth - m_specDropoff) && myColor.red() < (theColor.red() - m_specWidth);
-          bool greenBool3 = myColor.green() > (theColor.green() - m_specWidth - m_specDropoff) && myColor.green() < (theColor.green() - m_specWidth);
-          bool blueBool3 = myColor.blue() > (theColor.blue() - m_specWidth - m_specDropoff) && myColor.blue() < (theColor.blue() - m_specWidth);
-
-          if(redBool3||greenBool3||blueBool3)
-          {
-            int valueR = theColor.red()-m_specWidth-myColor.red();
-            valueR = valueR < 0 ? 0 : (valueR > 255 ? 255 : valueR);
-            int valueG = theColor.green()-m_specWidth-myColor.green();
-            valueG = valueG < 0 ? 0 : (valueG > 255 ? 255 : valueG);
-            int valueB = theColor.blue()-m_specWidth-myColor.blue();
-            valueB = valueB < 0 ? 0 : (valueB > 255 ? 255 : valueB);
-            int valueA = (valueR + valueG + valueB)/3;
-            spec = m_specAmount - (float(valueA)/float(m_specDropoff));
-          }
-        }
-      }
-      m_specular[i][j] = spec;
-    }
-  }
-}
-//---------------------------------------------------------------------------------------------------------------------
