@@ -600,13 +600,16 @@ float Image::contrast(float _amount, float _value)
   return newSpec/255.0f;
 }
 
+//---------------------------------------------------------------------------------------------------------------------
+
 float Image::desaturate(float _r, float _g, float _b)
 {
   return (std::min(_r, std::min(_g, _b)) + std::max(_r,std:: max(_g, _b))) * 0.5f;
 }
 
+//---------------------------------------------------------------------------------------------------------------------
 
-void Image::specular(float _brightness, float _contrast, bool _invert)
+void Image::specular( float _brightness, float _contrast, bool _invert )
 {
   float newBrightness = _brightness;
   float newContrast = _contrast;

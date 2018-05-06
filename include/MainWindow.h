@@ -32,6 +32,8 @@ private slots:
 	void open();
 	void changeLayout( int _n );
 	void changeContrast( );
+	void changeBrightness( );
+	void invert(bool _clicked );
 
 
 private:

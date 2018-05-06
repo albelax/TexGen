@@ -488,8 +488,11 @@ void GLWindow::calculateSeparation()
 
 //------------------------------------------------------------------------------------------------------------------------------
 
-void GLWindow::calculateSpecular()
+void GLWindow::calculateSpecular( int _brightness, int _contrast, bool _invert )
 {
-  m_editedImage.specular2();
+  float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
+  float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
+
+  m_editedImage.specular( tmpBrightness, tmpContrast, _invert );
   m_editedImage.save(Image::SPECULAR, "images/specular.jpg");
 }
