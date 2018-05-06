@@ -43,7 +43,6 @@ public:
     QGroupBox *s_drawGB;
     QGridLayout *gridLayout_2;
     QSpacerItem *verticalSpacer;
-    QSpacerItem *horizontalSpacer_3;
     QMenuBar *menubar;
     QMenu *menuFiles;
     QMenu *menuedit;
@@ -100,11 +99,7 @@ public:
         gridLayout_2->setObjectName(QStringLiteral("gridLayout_2"));
         verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-        gridLayout_2->addItem(verticalSpacer, 1, 1, 1, 1);
-
-        horizontalSpacer_3 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-        gridLayout_2->addItem(horizontalSpacer_3, 0, 2, 1, 1);
+        gridLayout_2->addItem(verticalSpacer, 0, 1, 1, 1);
 
 
         s_mainWindowGridLayout->addWidget(s_drawGB, 2, 5, 1, 1);
@@ -138,9 +133,10 @@ public:
         m_selectImage->clear();
         m_selectImage->insertItems(0, QStringList()
          << QApplication::translate("MainWindow", "Original", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "Grayscale", Q_NULLPTR)
          << QApplication::translate("MainWindow", "Albedo", Q_NULLPTR)
          << QApplication::translate("MainWindow", "Shading", Q_NULLPTR)
-         << QApplication::translate("MainWindow", "Grayscale", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "Normal", Q_NULLPTR)
          << QApplication::translate("MainWindow", "Specular", Q_NULLPTR)
         );
         s_drawGB->setTitle(QString());

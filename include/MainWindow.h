@@ -14,6 +14,7 @@
 #include <QtWidgets>
 #include "GLWindow.h"
 
+
 namespace Ui
 {
 	class MainWindow;
@@ -29,6 +30,9 @@ public:
 
 private slots:
 	void open();
+	void changeLayout( int _n );
+	void changeContrast( );
+
 
 private:
 	Ui::MainWindow * m_ui;
@@ -44,6 +48,11 @@ private:
 
   QList<QAction *> saveAsActs;
   QAction *exitAct;
+  std::vector<QLayoutItem *> m_originalLayout;
+  std::vector<QWidget *> m_originalMenu;
+  std::vector<QWidget *> * m_currentMenu;
+  std::vector<QWidget *> NormalMenu;
+  std::vector<QWidget *> m_specularMenu;
 
 	void createActions();
 	void createMenus();
@@ -51,6 +60,7 @@ private:
 	void mouseMoveEvent(QMouseEvent * _event);
 	void mousePressEvent(QMouseEvent *_event);
 	void mouseReleaseEvent(QMouseEvent *_event);
+	void makeSpecularMenu();
 };
 
 #endif // MAINWINDOW_H

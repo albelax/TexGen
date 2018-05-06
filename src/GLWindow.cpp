@@ -366,19 +366,37 @@ void GLWindow::showSpecular()
   m_activeTexture = index;
 }
 
+//------------------------------------------------------------------------------------------------------------------------------
+
+void GLWindow::showNormalMap()
+{
+  static int index = -1;
+  if ( index == -1 )
+  {
+    addTexture( "images/normal.jpg" );
+    index = m_textures.size() - 1;
+  }
+  else
+  {
+    glActiveTexture( GL_TEXTURE0 + index );
+    glBindTexture( GL_TEXTURE_2D, index );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
+  }
+  m_activeTexture = index;
+}
 
 //------------------------------------------------------------------------------------------------------------------------------
 
 void GLWindow::selectImage(int _i)
 {
-  std::cout << _i << "\n";
   switch ( _i )
   {
-    case 0: this->showOriginalImage(); break;
-    case 1: this->showAlbedoMap(); break;
-    case 2: this->showShadingMap(); break;
-    case 3: this->showGrayscale(); break;
-    case 4: this->showSpecular(); break;
+    case Image::ORIGINAL: this->showOriginalImage(); break;
+    case Image::INTENSITY: this->showGrayscale(); break;
+    case Image::NORMAL: this->showNormalMap(); break;
+    case Image::ALBEDO: this->showAlbedoMap(); break;
+    case Image::SHADING: this->showShadingMap(); break;
+    case Image::SPECULAR: this->showSpecular(); break;
 
     default: break;
   }
@@ -446,7 +464,7 @@ void GLWindow::loadImage()
 void GLWindow::calculateIntensity()
 {
   m_editedImage.intensity();
-  m_editedImage.save( Image::INTENSITY, "images/grey.jpg");
+  m_editedImage.save( Image::INTENSITY, "images/grey.jpg" );
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
