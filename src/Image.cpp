@@ -621,36 +621,49 @@ float Image::clampI(int value, int high, int low)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-
 void Image::specular( float _brightness, float _contrast, bool _invert, int _sharpness)
 {
-  //---SHARPEN-----------
-  int k = 16;
 
-  for(int n = 0; n<_sharpness; ++n)
+  for( int i = 0; i < width; ++i )
   {
-    for (int i = 1; i < width-1; i++)
+    for( int j = 0 ; j < height; ++j )
     {
-      for (int j = 1; j < height-1; j++)
-      {
-        double sum = m_specular[i][j] * k;
+      QColor myColor = m_image.pixelColor( i, j );
 
-        double weight = k;
-
-        int l[3] = { -1, 0, 1 };
-        for (int m = 0; m < 3; m++){
-          for (int n = 0; n < 3; n++) {
-            if (l[m] + i != i && l[n] + j != j) {
-              sum = sum + m_specular[l[m] + i][ l[n] + j] * (-k / 8);
-              weight = weight + (-k / 8);
-            }
-          }
-        }
-        sum = sum / weight;
-        m_specular[i][j] = sum;
-      }
+      //---DESATURATE---------------
+      // https://stackoverflow.com/a/28873770
+      m_specular[i][j] = desaturate(myColor.redF(),myColor.greenF(),myColor.blueF());
     }
   }
+  //---SHARPEN-----------
+    int k = 16;
+
+    for(int n = 0; n<_sharpness; ++n)
+    {
+      std::vector<std::vector<float>> m_specular2 = m_specular;
+      for (int i = 1; i < width-1; i++)
+      {
+        for (int j = 1; j < height-1; j++)
+        {
+          double sum = m_specular[i][j] * k;
+
+          double weight = k;
+
+          int l[3] = { -1, 0, 1 };
+          for (int m = 0; m < 3; m++){
+            for (int n = 0; n < 3; n++) {
+              if (l[m] + i != i && l[n] + j != j) {
+                sum = sum + m_specular2[l[m] + i][ l[n] + j] * (-k / 8);
+                weight = weight + (-k / 8);
+              }
+            }
+          }
+          sum = sum / weight;
+          m_specular[i][j] = sum;
+        }
+      }
+    }
+
 
   float newContrast = clampF(_contrast,1.0f,0.0f);
   newContrast*=5;
@@ -663,15 +676,9 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
   {
     for( int j = 0 ; j < height; ++j )
     {
-      QColor myColor = m_image.pixelColor( i, j );
-
-      //---DESATURATE---------------
-      // https://stackoverflow.com/a/28873770
-      float spec = desaturate(myColor.redF(),myColor.greenF(),myColor.blueF());
-
       //---BRIGHTNESS & CONTRAST--------------
       // https://math.stackexchange.com/a/906280
-      m_specular[i][j] = newContrast*(spec - 0.5f) + 0.5f + newBrightness;
+      m_specular[i][j] = newContrast*(m_specular[i][j] - 0.5f) + 0.5f + newBrightness;
       m_specular[i][j] = clampF(m_specular[i][j],1.0f,0.0f);
 
       //---INVERT---------------
@@ -679,7 +686,6 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
     }
   }
 }
-
 //---------------------------------------------------------------------------------------------------------------------
 
 QImage Image::getSpecular()
