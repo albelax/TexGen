@@ -32,6 +32,7 @@ public :
   GLWindow(QWidget *_parent );
   void loadImage();
   void setImagePath( char * _path );
+  void save(const char * _name);
 
   /// @brief dtor
   ~GLWindow();
@@ -66,7 +67,6 @@ protected:
   void showSpecular();
   void showNormalMap();
 
-  void saveActiveTexture(const char * _name, int _width, int _height);
 
 private :
   void init();

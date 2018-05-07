@@ -684,3 +684,22 @@ QImage Image::getSpecular()
   }
   return out;
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+
+QImage Image::getIntensity()
+{
+  QImage out;
+  out = m_image.copy();
+  for ( int i = 0; i < width; ++i )
+  {
+    for ( int j = 0; j < height; ++j )
+    {
+      float pixel = m_intensity[i][j] * 255;
+      out.setPixel(i,j,qRgb( pixel, pixel, pixel));
+    }
+  }
+  return out;
+}
+
+//---------------------------------------------------------------------------------------------------------------------

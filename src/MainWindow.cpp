@@ -70,6 +70,8 @@ void MainWindow::createMenus()
   m_editMenu = new QMenu(tr("&Edit"), this);
 
   m_ui->menuFiles->addAction(openAct);
+  m_ui->menuFiles->addAction(saveAct);
+
   m_ui->menuedit->addAction(calculateIntensityAct);
   m_ui->menuedit->addAction(calculateSeparationAct);
   m_ui->menuedit->addAction(calculateNormalsAct);
@@ -82,6 +84,10 @@ void MainWindow::createActions()
   openAct = new QAction(tr("&Open..."), this);
   openAct->setShortcuts(QKeySequence::Open);
   connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+
+  saveAct = new QAction(tr("&Save..."), this);
+  saveAct->setShortcuts(QKeySequence::Save);
+  connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
 
   calculateIntensityAct = new QAction(tr("&Calculate Intensity"), this);
   connect(calculateIntensityAct, SIGNAL(triggered()), m_gl, SLOT(calculateIntensity()));
@@ -105,6 +111,21 @@ void MainWindow::open()
   }
 }
 
+//------------------------------------------------------------------------
+
+void MainWindow::save()
+{
+  QString fileFormat = "jpg";
+  QString initialPath = QDir::currentPath() + "/untitled." + fileFormat;
+
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save As"),
+                                                  initialPath,tr("%1 Files (*.%2);;All Files (*)"));
+  if (!fileName.isEmpty())
+  {
+    m_gl->save( fileName.toLatin1().data() );
+    std::cout << fileName.toLatin1().data() << "\n";
+  }
+}
 //------------------------------------------------------------------------
 
 void MainWindow::changeLayout( int _n )
@@ -131,7 +152,6 @@ void MainWindow::changeLayout( int _n )
       layout->addWidget( _widget ); // probably should be added only once?
       _widget->show();
     }
-
   }
 }
 
@@ -144,10 +164,12 @@ void MainWindow::makeSpecularMenu()
   contrast->setMaximum(100);
 //  contrast->value();
 
+
   QSlider * brightness = new QSlider( Qt::Horizontal, Q_NULLPTR );
   brightness->setMinimum(0);
   brightness->setMaximum(100);
 //  brightness->value();
+  brightness->setValue( 100 );
 
   m_specularMenu.push_back( new QLabel( "Invert", 0, 0 ) );
   m_specularMenu.push_back( new QCheckBox() );
