@@ -45,7 +45,7 @@ public slots:
   void calculateIntensity();
   void calculateNormals();
   void calculateSeparation();
-  void calculateSpecular( int _brightness, int _contrast, bool _invert );
+  void calculateSpecular( int _brightness, int _contrast, bool _invert, int _sharpness );
 
 protected:
   /// @brief  The following methods must be implimented in the sub class

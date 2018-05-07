@@ -18,10 +18,13 @@ public:
   void separation();
   void shading();
   void strokeRefinement( QImage _stroke );
-  void specular(float _brightness, float _contrast, bool _invert);
+  void specular(float _brightness, float _contrast, bool _invert, int _sharpness);
 
   float contrast(float _amount, float _value);
   float desaturate(float _r, float _g, float _b);
+
+  float clampF(float value, float high, float low);
+  float clampI(int value, int high, int low);
 
   void save( std::vector<std::vector<std::vector<float>>> & _image, std::string _destination );
   void save( std::vector<std::vector<float>> & _image, std::string _destination );

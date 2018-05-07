@@ -182,7 +182,7 @@ QImage Image::calculateNormalMap( QImage & image )
     }
   }
 
-//  out.save( "images/normal.jpg", 0, -1 );
+  //  out.save( "images/normal.jpg", 0, -1 );
   free( r );
   free( g );
   free( b );
@@ -608,16 +608,56 @@ float Image::desaturate(float _r, float _g, float _b)
   return (std::min(_r, std::min(_g, _b)) + std::max(_r,std:: max(_g, _b))) * 0.5f;
 }
 
+float Image::clampF(float value, float high, float low)
+{
+  float newValue = value < low ? low : (value > high ? high : value);
+  return newValue;
+}
+
+float Image::clampI(int value, int high, int low)
+{
+  int newValue = value < low ? low : (value > high ? high : value);
+  return newValue;
+}
+
 //---------------------------------------------------------------------------------------------------------------------
 
-void Image::specular( float _brightness, float _contrast, bool _invert )
+void Image::specular( float _brightness, float _contrast, bool _invert, int _sharpness)
 {
-  float newBrightness = _brightness;
-  float newContrast = _contrast;
-  float high = 1.0f;
-  float low = 0.0f;
-  newBrightness = newBrightness < low ? low : (newBrightness > high ? high : newBrightness);
-  newContrast = newContrast < low ? low : (newContrast > high ? high : newContrast);
+  //---SHARPEN-----------
+  int k = 16;
+
+  for(int n = 0; n<_sharpness; ++n)
+  {
+    for (int i = 1; i < width-1; i++)
+    {
+      for (int j = 1; j < height-1; j++)
+      {
+        double sum = m_specular[i][j] * k;
+
+        double weight = k;
+
+        int l[3] = { -1, 0, 1 };
+        for (int m = 0; m < 3; m++){
+          for (int n = 0; n < 3; n++) {
+            if (l[m] + i != i && l[n] + j != j) {
+              sum = sum + m_specular[l[m] + i][ l[n] + j] * (-k / 8);
+              weight = weight + (-k / 8);
+            }
+          }
+        }
+        sum = sum / weight;
+        m_specular[i][j] = sum;
+      }
+    }
+  }
+
+  float newContrast = clampF(_contrast,1.0f,0.0f);
+  newContrast*=5;
+  float newBrightness = clampF(_brightness,1.0f,0.0f);
+  newBrightness = (newBrightness*2) - 1;
+
+  std::cout<<"Contrast: "<<newContrast<<" Brightness: "<<newBrightness<<std::endl;
 
   for( int i = 0; i < width; ++i )
   {
@@ -629,41 +669,13 @@ void Image::specular( float _brightness, float _contrast, bool _invert )
       // https://stackoverflow.com/a/28873770
       float spec = desaturate(myColor.redF(),myColor.greenF(),myColor.blueF());
 
-      //---BRIGHTNESS--------------
-      m_specular[i][j] =(spec * newBrightness);
+      //---BRIGHTNESS & CONTRAST--------------
+      // https://math.stackexchange.com/a/906280
+      m_specular[i][j] = newContrast*(spec - 0.5f) + 0.5f + newBrightness;
+      m_specular[i][j] = clampF(m_specular[i][j],1.0f,0.0f);
 
       //---INVERT---------------
       if(_invert) m_specular[i][j] =1.0f-m_specular[i][j];
-
-      //---CONTRAST-------------
-      // http://www.dfstudios.co.uk/articles/programming/image-programming-algorithms/image-processing-algorithms-part-5-contrast-adjustment/
-      m_specular[i][j] = contrast(_contrast, m_specular[i][j]);
-    }
-  }
-
-  //---SHARPEN-----------
-  int k = 16;
-
-  for (int i = 1; i < width-1; i++)
-  {
-    for (int j = 1; j < height-1; j++)
-    {
-      double sum = m_specular[i][j] * k;
-
-      double weight = k;
-
-      int l[3] = { -1, 0, 1 };
-      for (int m = 0; m < 3; m++){
-        for (int n = 0; n < 3; n++) {
-          if (l[m] + i != i && l[n] + j != j) {
-            sum = sum + m_specular[l[m] + i][ l[n] + j] * (-k / 8);
-
-            weight = weight + (-k / 8);
-          }
-        }
-      }
-      sum = sum / weight;
-      m_specular[i][j] = sum;
     }
   }
 }

@@ -31,9 +31,9 @@ public:
 private slots:
 	void open();
 	void changeLayout( int _n );
-	void changeContrast( );
-	void changeBrightness( );
-	void invert();
+
+	void updateSpecular( );
+	void resetSpecularSettings();
 
 
 private:

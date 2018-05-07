@@ -474,12 +474,12 @@ void GLWindow::calculateSeparation()
 
 //------------------------------------------------------------------------------------------------------------------------------
 
-void GLWindow::calculateSpecular( int _brightness, int _contrast, bool _invert )
+void GLWindow::calculateSpecular( int _brightness, int _contrast, bool _invert, int _sharpness)
 {
   float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
   float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
 
-  m_editedImage.specular( tmpBrightness, tmpContrast, _invert );
+  m_editedImage.specular( tmpBrightness, tmpContrast, _invert, _sharpness );
   m_preview = m_editedImage.getSpecular();
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
   if(m_glImage.isNull())
