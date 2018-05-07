@@ -83,7 +83,7 @@ void Image::vectorAdd()
   m_program = cl::Program( m_CLContext, programSrc.c_str() );
   if(m_program.build( {m_device} ) != CL_SUCCESS)
   {
-    std::cout << " Error building: " << m_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(m_device) << "\n";
+    std::cout << " Error building: " << m_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>( m_device ) << "\n";
     exit(1);
   }
 
@@ -118,7 +118,7 @@ void Image::vectorAdd()
 
 //---------------------------------------------------------------------------------------------------------------------
 
-void Image::calculateNormalMap( QImage & image )
+QImage Image::calculateNormalMap( QImage & image )
 {
   float * r = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
   float * g = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
@@ -182,10 +182,11 @@ void Image::calculateNormalMap( QImage & image )
     }
   }
 
-  out.save( "images/normal.jpg", 0, -1 );
+//  out.save( "images/normal.jpg", 0, -1 );
   free( r );
   free( g );
   free( b );
+  return out;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -665,4 +666,21 @@ void Image::specular( float _brightness, float _contrast, bool _invert )
       m_specular[i][j] = sum;
     }
   }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+QImage Image::getSpecular()
+{
+  QImage out;
+  out = m_image.copy();
+  for ( int i = 0; i < width; ++i )
+  {
+    for ( int j = 0; j < height; ++j )
+    {
+      float pixel = m_specular[i][j] * 255;
+      out.setPixel(i,j,qRgb( pixel, pixel, pixel));
+    }
+  }
+  return out;
 }

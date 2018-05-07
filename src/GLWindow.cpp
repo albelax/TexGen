@@ -134,33 +134,9 @@ void GLWindow::init()
   glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float), 0, GL_STATIC_DRAW) ;
   glBufferSubData( GL_ARRAY_BUFFER, m_plane.getBufferIndex()/3*2 * sizeof( float ), m_plane.getAmountVertexData() * sizeof(float), &m_plane.getUVsData() );
 
-  // FRAMEBUFFER FOR THE CALCULATION OF THE NORMALS
-  glGenFramebuffers( 1, &m_normalFramebuffer );
-  glBindFramebuffer( GL_FRAMEBUFFER, m_normalFramebuffer );
+  glActiveTexture( GL_TEXTURE0 );
+  glGenTextures( 1, &m_renderedTexture );
 
-  glGenTextures( 1, &m_normalTexture);
-  glBindTexture( GL_TEXTURE_2D, m_normalTexture );
-  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width(), height(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL );
-
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
-  glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_normalTexture, 0 );
-  //   end calculation of normals
-
-  //   second framebuffer
-  glGenFramebuffers( 1, &m_framebuffer );
-  glBindFramebuffer( GL_FRAMEBUFFER, m_framebuffer );
-
-  glGenTextures( 1, &m_renderedTexture);
-  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
-  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width(), height(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL );
-
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
-  glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_renderedTexture, 0);
-  //   end second framebuffer
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -174,7 +150,7 @@ void GLWindow::paintGL()
 
   if ( m_textureLoaded )
   {
-    glBindTexture( GL_TEXTURE_2D, m_textures[m_activeTexture]);
+    glBindTexture( GL_TEXTURE_2D, m_renderedTexture);
     renderTexture();
   }
   drawStroke( p );
@@ -294,19 +270,19 @@ void GLWindow::showOriginalImage()
 
 void GLWindow::showAlbedoMap()
 {
-  static int index = -1;
-  if ( index == -1 )
-  {
-    addTexture( "images/albedo.jpg" );
-    index = m_textures.size() - 1;
-  }
-  else
-  {
-    glActiveTexture( GL_TEXTURE0 + index );
-    glBindTexture( GL_TEXTURE_2D, index );
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
-  }
-  m_activeTexture = index;
+//  static int index = -1;
+//  if ( index == -1 )
+//  {
+//    addTexture( "images/albedo.jpg" );
+//    index = m_textures.size() - 1;
+//  }
+//  else
+//  {
+//    glActiveTexture( GL_TEXTURE0 + index );
+//    glBindTexture( GL_TEXTURE_2D, index );
+//    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
+//  }
+//  m_activeTexture = index;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -351,38 +327,43 @@ void GLWindow::showShadingMap()
 
 void GLWindow::showSpecular()
 {
-  static int index = -1;
-  if ( index == -1 )
-  {
-    addTexture( "images/specular.jpg" );
-    index = m_textures.size() - 1;
-  }
-  else
-  {
-    glActiveTexture( GL_TEXTURE0 + index );
-    glBindTexture( GL_TEXTURE_2D, index );
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
-  }
-  m_activeTexture = index;
+
+  glActiveTexture( GL_TEXTURE0 );
+  m_preview = m_editedImage.getSpecular();
+  m_glImage = QGLWidget::convertToGLFormat( m_preview );
+  if(m_glImage.isNull())
+    qWarning("IMAGE IS NULL");
+  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
+
+  glUniform1i( m_colourTextureAddress, 0 );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+  glActiveTexture( GL_TEXTURE0 );
+  m_textureLoaded = true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
 
 void GLWindow::showNormalMap()
 {
-  static int index = -1;
-  if ( index == -1 )
-  {
-    addTexture( "images/normal.jpg" );
-    index = m_textures.size() - 1;
-  }
-  else
-  {
-    glActiveTexture( GL_TEXTURE0 + index );
-    glBindTexture( GL_TEXTURE_2D, index );
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
-  }
-  m_activeTexture = index;
+  glActiveTexture( GL_TEXTURE0 );
+  m_preview = m_editedImage.calculateNormalMap( m_image );
+  m_glImage = QGLWidget::convertToGLFormat( m_preview );
+  if(m_glImage.isNull())
+    qWarning("IMAGE IS NULL");
+  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
+
+  glUniform1i( m_colourTextureAddress, 0 );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+  glActiveTexture( GL_TEXTURE0 );
+  m_textureLoaded = true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -405,7 +386,7 @@ void GLWindow::selectImage(int _i)
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-  glGenerateMipmap( GL_TEXTURE_2D );
+//  glGenerateMipmap( GL_TEXTURE_2D );
   glActiveTexture( GL_TEXTURE0 );
   update();
 }
@@ -441,18 +422,23 @@ void GLWindow::setImagePath( char *_path )
 
 void GLWindow::loadImage()
 {
-  m_activeTexture = 0;
-  m_textures.clear();
-  addTexture( m_originalImage );
-
+  glActiveTexture( GL_TEXTURE0 );
+  m_image.load( m_originalImage );
+  m_preview = m_image.copy();
   m_editedImage = Image( m_image );
+
+  m_glImage = QGLWidget::convertToGLFormat( m_preview );
+  if(m_glImage.isNull())
+    qWarning("IMAGE IS NULL");
+  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
 
   glUniform1i( m_colourTextureAddress, 0 );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-  glGenerateMipmap( GL_TEXTURE_2D );
+//  glGenerateMipmap( GL_TEXTURE_2D );
   glActiveTexture( GL_TEXTURE0 );
   m_textureLoaded = true;
   update();
@@ -494,5 +480,18 @@ void GLWindow::calculateSpecular( int _brightness, int _contrast, bool _invert )
   float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
 
   m_editedImage.specular( tmpBrightness, tmpContrast, _invert );
-  m_editedImage.save(Image::SPECULAR, "images/specular.jpg");
+  m_preview = m_editedImage.getSpecular();
+  m_glImage = QGLWidget::convertToGLFormat( m_preview );
+  if(m_glImage.isNull())
+    qWarning("IMAGE IS NULL");
+  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
+
+  glUniform1i( m_colourTextureAddress, 0 );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+
+  update();
 }

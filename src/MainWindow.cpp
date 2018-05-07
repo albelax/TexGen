@@ -17,16 +17,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
 	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLayout(int)));
 	connect((QSlider *)m_specularMenu[3], SIGNAL(sliderReleased() ), this, SLOT(changeContrast()));
 	connect((QSlider *)m_specularMenu[5], SIGNAL(sliderReleased() ), this, SLOT(changeBrightness()));
-	connect((QSlider *)m_specularMenu[1], SIGNAL(clicked(bool)), this, SLOT(invert(bool)));
+	connect((QCheckBox *)m_specularMenu[1], SIGNAL(clicked(bool)), this, SLOT(invert()));
 
-
-	//	int count = m_ui->s_drawGB->layout()->count();
-	//	m_originalLayout.reserve( count );
-	//	for ( int i = 0; i < count; ++i )
-	//	{
-	//		QLayoutItem * tmp = m_ui->s_drawGB->layout()->itemAt( i );
-	//		m_originalLayout.push_back( tmp );
-	//	}
 }
 
 //------------------------------------------------------------------------
@@ -81,7 +73,6 @@ void MainWindow::createMenus()
   m_ui->menuedit->addAction(calculateIntensityAct);
   m_ui->menuedit->addAction(calculateSeparationAct);
   m_ui->menuedit->addAction(calculateNormalsAct);
-//  m_ui->menuedit->addAction(calculateSpecularAct);
 }
 
 //------------------------------------------------------------------------
@@ -100,12 +91,6 @@ void MainWindow::createActions()
 
   calculateNormalsAct = new QAction(tr("&Calculate Normals"), this);
   connect(calculateNormalsAct, SIGNAL(triggered()), m_gl, SLOT(calculateNormals()));
-
-
-//  calculateSpecularAct = new QAction(tr("&Calculate Specular"), this);
-//  connect(calculateSpecularAct, SIGNAL(triggered()), m_gl,
-//          SLOT(calculateSpecular(float, float, bool)));
-//  static_cast<QSlider *>(m_specularMenu[5])->value(),static_cast<QSlider *>(m_specularMenu[3])->value(),static_cast<QSlider *>(m_specularMenu[1])->value()))
 }
 
 //------------------------------------------------------------------------
@@ -129,7 +114,6 @@ void MainWindow::changeLayout( int _n )
   for( auto &_widget : *m_currentMenu )
   {
     _widget->hide();
-    std::cout << "hidden!\n";
   }
 
 //    if ( _n == 3 )
@@ -158,12 +142,12 @@ void MainWindow::makeSpecularMenu()
   QSlider * contrast = new QSlider( Qt::Horizontal, Q_NULLPTR );
   contrast->setMinimum(0);
   contrast->setMaximum(100);
-  contrast->value();
+//  contrast->value();
 
   QSlider * brightness = new QSlider( Qt::Horizontal, Q_NULLPTR );
   brightness->setMinimum(0);
   brightness->setMaximum(100);
-  brightness->value();
+//  brightness->value();
 
   m_specularMenu.push_back( new QLabel( "Invert", 0, 0 ) );
   m_specularMenu.push_back( new QCheckBox() );
@@ -173,25 +157,28 @@ void MainWindow::makeSpecularMenu()
 
   m_specularMenu.push_back( new QLabel( "Brightness", 0, 0 ) );
   m_specularMenu.push_back( brightness );
+
+//  m_specularMenu.push_back( new QPushButton( "Calculate"));
 }
 
 //------------------------------------------------------------------------
 
 void MainWindow::changeContrast()
 {
-  m_gl->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),static_cast<QSlider *>(m_specularMenu[3])->value(),static_cast<QSlider *>(m_specularMenu[1])->value());
+  m_gl->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),static_cast<QSlider *>(m_specularMenu[3])->value(),static_cast<QCheckBox *>(m_specularMenu[1])->isChecked());
+
 }
 
 //------------------------------------------------------------------------
 
 void MainWindow::changeBrightness()
 {
-  m_gl->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),static_cast<QSlider *>(m_specularMenu[3])->value(),static_cast<QSlider *>(m_specularMenu[1])->value());
+  m_gl->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),static_cast<QSlider *>(m_specularMenu[3])->value(),static_cast<QCheckBox *>(m_specularMenu[1])->isChecked());
 }
 
 //------------------------------------------------------------------------
 
-void MainWindow::invert( bool _clicked )
+void MainWindow::invert( )
 {
-  m_gl->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),static_cast<QSlider *>(m_specularMenu[3])->value(),static_cast<QSlider *>(m_specularMenu[1])->value());
+  m_gl->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),static_cast<QSlider *>(m_specularMenu[3])->value(),static_cast<QCheckBox *>(m_specularMenu[1])->isChecked());
 }

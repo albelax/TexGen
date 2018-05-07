@@ -22,7 +22,7 @@ void kernel calculateMap( global float * _r, global float * _g, global float * _
 
 //  int _width = 2196;
 
-  float r = 1.0f / _width;
+  float r = 1.0 / _width;
 
   float depth = 1;
 

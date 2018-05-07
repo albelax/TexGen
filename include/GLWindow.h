@@ -84,6 +84,7 @@ private :
   std::vector<GLuint> m_textures;
   TrackballCamera m_camera;
   QImage m_image;
+  QImage m_preview;
   QImage m_glImage;
   std::vector<std::vector<std::vector<float>>> m_totDiffF0;
   std::vector<glm::vec2> m_stroke;
