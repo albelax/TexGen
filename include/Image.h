@@ -31,8 +31,9 @@ public:
   void save( map _image, std::string _destination );
   void vectorAdd();
   QImage calculateNormalMap( QImage & image );
-//  QImage getNormalMap() const { return m_normalMap; }
   QImage getSpecular();
+  QImage getIntensity();
+
 private:
   int width;   // aliasing avoids loading m_image in the cache every time we need the width
   int height;
@@ -52,7 +53,6 @@ private:
   cl::Program m_program;
   // CL end
   QImage m_image;
-//  QImage m_normalMap;
 
   std::vector<std::vector<float>> m_intensity;
   std::vector<std::vector<float>> albedoIntensityMap;

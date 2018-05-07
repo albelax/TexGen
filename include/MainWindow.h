@@ -30,6 +30,7 @@ public:
 
 private slots:
 	void open();
+	void save();
 	void changeLayout( int _n );
 
 	void updateSpecular( );
@@ -43,6 +44,7 @@ private:
 	QMenu * m_editMenu;
 
   QAction * openAct;
+  QAction * saveAct;
   QAction * calculateIntensityAct;
   QAction * calculateSeparationAct;
   QAction * calculateNormalsAct;
