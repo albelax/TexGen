@@ -2,6 +2,7 @@
 #include <math.h>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 Image::Image( QImage & _image )
 {
@@ -643,8 +644,67 @@ float Image::clampI(int value, int high, int low)
   return newValue;
 }
 
+void Image::equalizeHistogram(map _map)
+{
+  int max_val = 255;
+  int total = width*height;
+  int n_bins = max_val + 1;
+
+  // Compute histogram
+  std::vector<int> hist(n_bins, 0);
+  for (int i = 0; i < width; ++i)
+  {
+    for(int j = 0 ; j< height ; ++j)
+    {
+      hist[int(m_specular[i][j]*255)]++;
+    }
+  }
+
+  // Build LUT from cumulative histrogram
+
+  // Find first non-zero bin
+  int p = 0;
+  while (!hist[p]) ++p;
+
+  if (hist[p] == total)
+  {
+    for (int i = 0; i < width; ++i)
+    {
+      for(int j = 0 ; j< height ; ++j)
+      {
+        m_specular[i][j] = float(p)/255.0f;
+      }
+    }
+    return;
+  }
+
+  // Compute scale
+  float scale = (n_bins - 1.f) / (total - hist[p]);
+
+  // Initialize lut
+  std::vector<int> lut(n_bins, 0);
+  p++;
+
+  int sum = 0;
+  for (; p < hist.size(); ++p) {
+    sum += hist[p];
+    // the value is saturated in range [0, max_val]
+    lut[p] = std::max(0, std::min(int(round(sum * scale)), max_val));
+  }
+
+  // Apply equalization
+  for (int i = 0; i < width; ++i)
+  {
+    for(int j = 0 ; j< height ; ++j)
+    {
+      m_specular[i][j] = float(lut[int(m_specular[i][j]*255)])/255.0f;
+    }
+  }
+}
+
+
 //---------------------------------------------------------------------------------------------------------------------
-void Image::specular( float _brightness, float _contrast, bool _invert, int _sharpness)
+void Image::specular( float _brightness, float _contrast, bool _invert, int _sharpness, bool _equalize)
 {
 
   for( int i = 0; i < width; ++i )
@@ -693,7 +753,7 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
   float newBrightness = clampF(_brightness,1.0f,0.0f);
   newBrightness = (newBrightness*2) - 1;
 
-  std::cout<<"Contrast: "<<newContrast<<" Brightness: "<<newBrightness<<std::endl;
+  //std::cout<<"Contrast: "<<newContrast<<" Brightness: "<<newBrightness<<std::endl;
 
   for( int i = 0; i < width; ++i )
   {
@@ -707,6 +767,11 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
       //---INVERT---------------
       if(_invert) m_specular[i][j] =1.0f-m_specular[i][j];
     }
+  }
+
+  if(_equalize)
+  {
+    equalizeHistogram(map::SPECULAR);
   }
 }
 //---------------------------------------------------------------------------------------------------------------------
