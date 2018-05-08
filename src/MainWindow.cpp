@@ -19,7 +19,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
 	connect((QSlider *)m_specularMenu[5], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
 	connect((QSlider *)m_specularMenu[7], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
 	connect((QCheckBox *)m_specularMenu[1], SIGNAL(clicked(bool)), this, SLOT(updateSpecular()));
-	connect((QPushButton *)m_specularMenu[8], SIGNAL(released()), this, SLOT(resetSpecularSettings()));
+	connect((QCheckBox *)m_specularMenu[9], SIGNAL(clicked(bool)), this, SLOT(updateSpecular()));
+	connect((QPushButton *)m_specularMenu[10], SIGNAL(released()), this, SLOT(resetSpecularSettings()));
 }
 
 //------------------------------------------------------------------------
@@ -190,7 +191,10 @@ void MainWindow::makeSpecularMenu()
   m_specularMenu.push_back( new QLabel( "Sharpness", 0, 0 ) );
   m_specularMenu.push_back( sharpness );
 
-  // 8
+  m_specularMenu.push_back( new QLabel( "Histogram equalization", 0, 0 ) );
+  m_specularMenu.push_back( new QCheckBox() );
+
+  // 10
   m_specularMenu.push_back( new QPushButton("Reset",nullptr));
 
 
@@ -204,7 +208,8 @@ void MainWindow::updateSpecular()
   m_gl->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),
       static_cast<QSlider *>(m_specularMenu[3])->value(),
       static_cast<QCheckBox *>(m_specularMenu[1])->isChecked(),
-      static_cast<QSlider *>(m_specularMenu[7])->value());
+      static_cast<QSlider *>(m_specularMenu[7])->value(),
+      static_cast<QCheckBox *>(m_specularMenu[9])->isChecked());
 }
 
 //------------------------------------------------------------------------
@@ -214,8 +219,10 @@ void MainWindow::resetSpecularSettings()
   static_cast<QSlider *>(m_specularMenu[3])->setValue(20);
   static_cast<QSlider *>(m_specularMenu[5])->setValue(50);
   static_cast<QCheckBox *>(m_specularMenu[1])->setTristate(false);
+  static_cast<QCheckBox *>(m_specularMenu[9])->setTristate(false);
   m_gl->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),
       static_cast<QSlider *>(m_specularMenu[3])->value(),
       static_cast<QCheckBox *>(m_specularMenu[1])->isChecked(),
-      static_cast<QSlider *>(m_specularMenu[7])->value());
+      static_cast<QSlider *>(m_specularMenu[7])->value(),
+      static_cast<QCheckBox *>(m_specularMenu[9])->isChecked());
 }

@@ -22,7 +22,8 @@ HEADERS += include/MainWindow.h \
            include/Shader.h \
            include/Camera.h \
            include/TrackballCamera.h \
-           include/Image.h
+           include/Image.h \
+    include/PBRViewport.h
 
 SOURCES += src/main.cpp \
            src/MainWindow.cpp \
@@ -31,7 +32,8 @@ SOURCES += src/main.cpp \
            src/Shader.cpp \
            src/Camera.cpp \
            src/TrackballCamera.cpp \
-           src/Image.cpp
+           src/Image.cpp \
+    src/PBRViewport.cpp
 
 FORMS += ui/MainWindow.ui
 

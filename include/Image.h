@@ -18,10 +18,11 @@ public:
   void separation();
   void shading();
   void strokeRefinement( QImage _stroke );
-  void specular(float _brightness, float _contrast, bool _invert, int _sharpness);
+  void specular(float _brightness, float _contrast, bool _invert, int _sharpness, bool _equalize);
 
   float contrast(float _amount, float _value);
   float desaturate(float _r, float _g, float _b);
+  void equalizeHistogram(map _map);
 
   float clampF(float value, float high, float low);
   float clampI(int value, int high, int low);
