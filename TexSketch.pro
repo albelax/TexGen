@@ -22,7 +22,8 @@ HEADERS += include/MainWindow.h \
            include/Shader.h \
            include/Camera.h \
            include/TrackballCamera.h \
-           include/Image.h
+           include/Image.h \
+    include/Tuple.h
 
 SOURCES += src/main.cpp \
            src/MainWindow.cpp \

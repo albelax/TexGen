@@ -5,6 +5,8 @@
 #include <vector>
 #include <glm.hpp>
 #include <CL/cl.hpp>
+#include "Tuple.h"
+
 
 class Image
 {
@@ -30,7 +32,7 @@ public:
   void save( std::vector<std::vector<float>> & _image, std::string _destination );
   void save( map _image, std::string _destination );
   void vectorAdd();
-  QImage calculateNormalMap( QImage & image );
+  QImage calculateNormalMap( QImage & image, int _depth );
   QImage getSpecular();
   QImage getIntensity();
 

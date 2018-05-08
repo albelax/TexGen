@@ -33,7 +33,8 @@ private slots:
 	void save();
 	void changeLayout( int _n );
 
-	void updateSpecular( );
+	void updateSpecular();
+	void updateNormal();
 	void resetSpecularSettings();
 
 
@@ -55,7 +56,7 @@ private:
   std::vector<QLayoutItem *> m_originalLayout;
   std::vector<QWidget *> m_originalMenu;
   std::vector<QWidget *> * m_currentMenu;
-  std::vector<QWidget *> NormalMenu;
+  std::vector<QWidget *> m_normalMenu;
   std::vector<QWidget *> m_specularMenu;
 
 	void createActions();
@@ -65,6 +66,8 @@ private:
 	void mousePressEvent(QMouseEvent *_event);
 	void mouseReleaseEvent(QMouseEvent *_event);
 	void makeSpecularMenu();
+	void makeNormalMenu();
+
 };
 
 #endif // MAINWINDOW_H

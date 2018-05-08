@@ -118,11 +118,15 @@ void Image::vectorAdd()
 
 //---------------------------------------------------------------------------------------------------------------------
 
-QImage Image::calculateNormalMap( QImage & image )
+QImage Image::calculateNormalMap( QImage & image, int _depth )
 {
   float * r = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
   float * g = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
   float * b = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
+
+  float * o_r = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
+  float * o_g = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
+  float * o_b = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
 
   for ( int i = 0; i < width; ++i )
   {
@@ -149,6 +153,10 @@ QImage Image::calculateNormalMap( QImage & image )
   cl::Buffer buffer_B(m_CLContext, CL_MEM_READ_WRITE, width * height * sizeof( float ));
   cl::Buffer buffer_C(m_CLContext, CL_MEM_READ_WRITE, width * height * sizeof( float ));
 
+  cl::Buffer bufferOutR(m_CLContext, CL_MEM_READ_WRITE, width * height * sizeof( float ));
+  cl::Buffer bufferOutG(m_CLContext, CL_MEM_READ_WRITE, width * height * sizeof( float ));
+  cl::Buffer bufferOutB(m_CLContext, CL_MEM_READ_WRITE, width * height * sizeof( float ));
+
   //create queue to which we will push commands for the device.
   cl::CommandQueue queue( m_CLContext, m_device );
 
@@ -157,17 +165,30 @@ QImage Image::calculateNormalMap( QImage & image )
   queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, width * height * sizeof( float ), g);
   queue.enqueueWriteBuffer(buffer_C, CL_TRUE, 0, width * height * sizeof( float ), b);
 
+  queue.enqueueWriteBuffer(bufferOutR, CL_TRUE, 0, width * height * sizeof( float ), o_r);
+  queue.enqueueWriteBuffer(bufferOutG, CL_TRUE, 0, width * height * sizeof( float ), o_g);
+  queue.enqueueWriteBuffer(bufferOutB, CL_TRUE, 0, width * height * sizeof( float ), o_b);
+
 
   cl::Kernel kernel_add = cl::Kernel( m_program, "calculateMap" );
   kernel_add.setArg(0,buffer_A);
   kernel_add.setArg(1,buffer_B);
   kernel_add.setArg(2,buffer_C);
-  kernel_add.setArg(3,width);
+
+  kernel_add.setArg(3,bufferOutR);
+  kernel_add.setArg(4,bufferOutG);
+  kernel_add.setArg(5,bufferOutB);
+
+  kernel_add.setArg(6, width);
+  kernel_add.setArg(7,_depth);
+
 
   queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(width, height), cl::NullRange);
-  queue.enqueueReadBuffer(buffer_A, CL_TRUE, 0, width * height * sizeof( float ), r);
-  queue.enqueueReadBuffer(buffer_B, CL_TRUE, 0, width * height * sizeof( float ), g);
-  queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, width * height * sizeof( float ), b);
+
+
+  queue.enqueueReadBuffer(bufferOutR, CL_TRUE, 0, width * height * sizeof( float ), r);
+  queue.enqueueReadBuffer(bufferOutG, CL_TRUE, 0, width * height * sizeof( float ), g);
+  queue.enqueueReadBuffer(bufferOutB, CL_TRUE, 0, width * height * sizeof( float ), b);
 
   queue.finish();
 
@@ -182,10 +203,12 @@ QImage Image::calculateNormalMap( QImage & image )
     }
   }
 
-  //  out.save( "images/normal.jpg", 0, -1 );
   free( r );
   free( g );
   free( b );
+  free( o_r );
+  free( o_g );
+  free( o_b );
   return out;
 }
 
@@ -636,33 +659,33 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
     }
   }
   //---SHARPEN-----------
-    int k = 16;
+  int k = 16;
 
-    for(int n = 0; n<_sharpness; ++n)
+  for(int n = 0; n<_sharpness; ++n)
+  {
+    std::vector<std::vector<float>> m_specular2 = m_specular;
+    for (int i = 1; i < width-1; i++)
     {
-      std::vector<std::vector<float>> m_specular2 = m_specular;
-      for (int i = 1; i < width-1; i++)
+      for (int j = 1; j < height-1; j++)
       {
-        for (int j = 1; j < height-1; j++)
-        {
-          double sum = m_specular[i][j] * k;
+        double sum = m_specular[i][j] * k;
 
-          double weight = k;
+        double weight = k;
 
-          int l[3] = { -1, 0, 1 };
-          for (int m = 0; m < 3; m++){
-            for (int n = 0; n < 3; n++) {
-              if (l[m] + i != i && l[n] + j != j) {
-                sum = sum + m_specular2[l[m] + i][ l[n] + j] * (-k / 8);
-                weight = weight + (-k / 8);
-              }
+        int l[3] = { -1, 0, 1 };
+        for (int m = 0; m < 3; m++){
+          for (int n = 0; n < 3; n++) {
+            if (l[m] + i != i && l[n] + j != j) {
+              sum = sum + m_specular2[l[m] + i][ l[n] + j] * (-k / 8);
+              weight = weight + (-k / 8);
             }
           }
-          sum = sum / weight;
-          m_specular[i][j] = sum;
         }
+        sum = sum / weight;
+        m_specular[i][j] = sum;
       }
     }
+  }
 
 
   float newContrast = clampF(_contrast,1.0f,0.0f);

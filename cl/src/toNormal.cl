@@ -16,15 +16,14 @@ void kernel toOne(global const int* A, global const int* B, global int* C)
 
 //-----------------------------------------------------------------------------------
 
-void kernel calculateMap( global float * _r, global float * _g, global float * _b, const int _width )
+void kernel calculateMap( global float * _r, global float * _g, global float * _b,
+                          global float * o_r, global float * o_g, global float * o_b, const int _width, const int _depth )
 {
   int2 uv = (int2)(get_global_id(0), get_global_id(1));
 
-//  int _width = 2196;
-
   float r = 1.0 / _width;
 
-  float depth = 1;
+  float depth = _depth;
 
   float3 rgb = (float3)( _r[ uv.y * _width + (int)(uv.x + r) ], _g[ uv.y * _width + (int)(uv.x + r) ], _b[ uv.y * _width + (int)(uv.x + r) ]);
   float x0 = (0.2126 * rgb.x + 0.7152 * rgb.y + 0.0722 * rgb.z) * depth;
@@ -40,7 +39,7 @@ void kernel calculateMap( global float * _r, global float * _g, global float * _
 
   float3 n = normalize( (float3)( x1 - x0, y1 - y0, 1.0f ));
 
-  _r[ uv.y * _width + uv.x ] = ( n.x * 0.5 ) + 0.5;
-  _g[ uv.y * _width + uv.x ] = ( n.y * 0.5 ) + 0.5;
-  _b[ uv.y * _width + uv.x ] = ( n.z * 0.5 ) + 0.5;
+  o_r[ uv.y * _width + uv.x ] = ( n.x * 0.5 ) + 0.5;
+  o_g[ uv.y * _width + uv.x ] = ( n.y * 0.5 ) + 0.5;
+  o_b[ uv.y * _width + uv.x ] = ( n.z * 0.5 ) + 0.5;
 }

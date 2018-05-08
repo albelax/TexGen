@@ -259,11 +259,21 @@ void GLWindow::drawStroke( QPainter & _p )
 
 void GLWindow::showOriginalImage()
 {
-  static int index = 0;
-  glActiveTexture( GL_TEXTURE0 + index );
-  glBindTexture( GL_TEXTURE_2D, index );
+  glActiveTexture( GL_TEXTURE0 );
+  m_preview = m_image.copy();
+  m_glImage = QGLWidget::convertToGLFormat( m_preview );
+  if(m_glImage.isNull())
+    qWarning("IMAGE IS NULL");
+  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
-  m_activeTexture = index;
+
+  glUniform1i( m_colourTextureAddress, 0 );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+  glActiveTexture( GL_TEXTURE0 );
+  m_textureLoaded = true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -327,7 +337,7 @@ void GLWindow::showSpecular()
 void GLWindow::showNormalMap()
 {
   glActiveTexture( GL_TEXTURE0 );
-  m_preview = m_editedImage.calculateNormalMap( m_image );
+  m_preview = m_editedImage.calculateNormalMap( m_image, 1 );
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
   if(m_glImage.isNull())
     qWarning("IMAGE IS NULL");
@@ -341,6 +351,13 @@ void GLWindow::showNormalMap()
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
   glActiveTexture( GL_TEXTURE0 );
   m_textureLoaded = true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+
+int GLWindow::getNormalDepth()
+{
+
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -416,9 +433,26 @@ void GLWindow::calculateIntensity()
 
 //------------------------------------------------------------------------------------------------------------------------------
 
-void GLWindow::calculateNormals()
+void GLWindow::calculateNormals( int _depth )
 {
-  m_editedImage.calculateNormalMap( m_image );
+  m_editedImage.calculateNormalMap( m_image, _depth );
+
+  m_preview =   m_editedImage.calculateNormalMap( m_image, _depth );
+
+  m_glImage = QGLWidget::convertToGLFormat( m_preview );
+
+  if(m_glImage.isNull())
+    qWarning("IMAGE IS NULL");
+  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
+
+  glUniform1i( m_colourTextureAddress, 0 );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+
+  update();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -454,3 +488,5 @@ void GLWindow::calculateSpecular( int _brightness, int _contrast, bool _invert, 
 
   update();
 }
+
+//------------------------------------------------------------------------------------------------------------------------------

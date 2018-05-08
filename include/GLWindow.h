@@ -44,9 +44,10 @@ public :
 public slots:
   void selectImage( int _i );
   void calculateIntensity();
-  void calculateNormals();
+  void calculateNormals(int _depth);
   void calculateSeparation();
   void calculateSpecular( int _brightness, int _contrast, bool _invert, int _sharpness );
+  int getNormalDepth();
 
 protected:
   /// @brief  The following methods must be implimented in the sub class
@@ -66,7 +67,6 @@ protected:
   void showShadingMap();
   void showSpecular();
   void showNormalMap();
-
 
 private :
   void init();

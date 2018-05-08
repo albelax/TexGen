@@ -12,7 +12,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
 	createActions();
 	createMenus();
 	makeSpecularMenu();
+	makeNormalMenu();
 	m_currentMenu = &m_originalMenu;
+	// specular
 	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), m_gl, SLOT(selectImage(int)));
 	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLayout(int)));
 	connect((QSlider *)m_specularMenu[3], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
@@ -20,6 +22,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
 	connect((QSlider *)m_specularMenu[7], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
 	connect((QCheckBox *)m_specularMenu[1], SIGNAL(clicked(bool)), this, SLOT(updateSpecular()));
 	connect((QPushButton *)m_specularMenu[8], SIGNAL(released()), this, SLOT(resetSpecularSettings()));
+
+	// normal
+	connect((QSlider *)m_normalMenu[1], SIGNAL(sliderReleased() ), this, SLOT(updateNormal()));
+
 }
 
 //------------------------------------------------------------------------
@@ -155,6 +161,18 @@ void MainWindow::changeLayout( int _n )
     }
     updateSpecular();
   }
+
+  if ( _n == Image::NORMAL )
+  {
+    m_currentMenu = &m_normalMenu;
+
+    for ( auto &_widget : m_normalMenu )
+    {
+      layout->addWidget( _widget ); // probably should be added only once?
+      _widget->show();
+    }
+//    updateSpecular();
+  }
 }
 
 //------------------------------------------------------------------------
@@ -199,12 +217,33 @@ void MainWindow::makeSpecularMenu()
 
 //------------------------------------------------------------------------
 
+void MainWindow::makeNormalMenu()
+{
+  QSlider * depth = new QSlider( Qt::Horizontal, Q_NULLPTR );
+  depth->setMinimum(1);
+  depth->setMaximum(20);
+  depth->setValue(1);
+
+  m_normalMenu.push_back( new QLabel( "Depth", 0, 0 ) );
+  m_normalMenu.push_back( depth );
+}
+
+//------------------------------------------------------------------------
+
 void MainWindow::updateSpecular()
 {
   m_gl->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),
       static_cast<QSlider *>(m_specularMenu[3])->value(),
       static_cast<QCheckBox *>(m_specularMenu[1])->isChecked(),
       static_cast<QSlider *>(m_specularMenu[7])->value());
+}
+
+//------------------------------------------------------------------------
+
+void MainWindow::updateNormal()
+{
+  std::cout << "normal slider " << static_cast<QSlider *>(m_normalMenu[1])->value() << "\n";
+  m_gl->calculateNormals( static_cast<QSlider *>(m_normalMenu[1])->value() );
 }
 
 //------------------------------------------------------------------------
@@ -219,3 +258,5 @@ void MainWindow::resetSpecularSettings()
       static_cast<QCheckBox *>(m_specularMenu[1])->isChecked(),
       static_cast<QSlider *>(m_specularMenu[7])->value());
 }
+
+//------------------------------------------------------------------------
