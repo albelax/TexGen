@@ -2,6 +2,7 @@
 #define PBRVIEWPORT_H_
 
 #include "Shader.h"
+#include "Scene.h"
 #include "TrackballCamera.h"
 #include "Mesh.h"
 #include <glm.hpp>
@@ -9,14 +10,15 @@
 #include <QOpenGLWidget>
 #include <QGLWidget>
 
-class PBRViewport : public QOpenGLWidget
+class PBRViewport : public Scene
 {
+  Q_OBJECT
 public:
   PBRViewport(QWidget *_parent);
   ~PBRViewport();
 
-  void mouseMove(QMouseEvent * _event);
-  void mouseClick( QMouseEvent * _event );
+  void mouseMove(QMouseEvent * _event) override;
+  void mouseClick(QMouseEvent * _event) override;
 
 protected:
   /// @brief  The following methods must be implimented in the sub class
@@ -34,22 +36,22 @@ protected:
 private :
   void init();
   Mesh m_tile;
-  Shader m_shader;
+//  Shader m_shader; //
 
-  GLuint m_vao;
-  GLuint m_vbo;
-  GLuint m_nbo;
-  GLuint m_tbo;
+//  GLuint m_vao; //
+//  GLuint m_vbo; //
+//  GLuint m_nbo; //
+//  GLuint m_tbo; //
 
-  glm::mat4 m_MV;
-  glm::mat4 m_MVP;
+//  glm::mat4 m_MV; //
+//  glm::mat4 m_MVP; //
   glm::mat4 m_tableMV;
 
-  std::vector<GLuint> m_textures;
+//  std::vector<GLuint> m_textures; //
 
-  GLint m_MVAddress;
-  GLint m_MVPAddress;
-  GLint m_NAddress;
+//  GLint m_MVAddress; //
+//  GLint m_MVPAddress; //
+//  GLint m_NAddress; //
   GLint m_colorAddress;
   GLint m_specularTextureAddress;
   GLint m_normalTextureAddress;
@@ -57,7 +59,7 @@ private :
 
   GLuint m_depthTexture;
 
-  TrackballCamera m_camera;
+//  TrackballCamera m_camera; //
 
 };
 

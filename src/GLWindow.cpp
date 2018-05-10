@@ -10,7 +10,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-GLWindow::GLWindow( QWidget *_parent ) : QOpenGLWidget( _parent )
+GLWindow::GLWindow( QWidget *_parent ) : Scene( _parent )
 {
   m_plane = Mesh( "models/plane.obj", "plane" );
   this->resize( _parent->size() );
@@ -54,7 +54,12 @@ void GLWindow::mouseMove( QMouseEvent * _event )
 
   if ( _event->buttons() == Qt::LeftButton )
   {
-    //    std::cout << "x " << _event->pos().x() << " y: " <<  _event->pos().y() << '\n';
+        std::cout << "x " << _event->pos().x() << " y: " <<  _event->pos().y()<< '\n';
+    //    std::cout << m_image.width() << " " << m_image.height() << "\n";
+    m_ratio[0] = m_image.width() / width();
+    m_ratio[1] = m_image.height() / height();
+
+//    std::cout << width() << " " << height() << "\n";
     glm::vec2 tmp( _event->pos().x(), _event->pos().y() );
     m_stroke.push_back( tmp );
   }
@@ -68,19 +73,23 @@ void GLWindow::mouseClick(QMouseEvent * _event)
 {
   if (_event->type() ==  QMouseEvent::MouseButtonRelease)
   {
+    m_ratio[0] = m_image.width() / width();
+    m_ratio[1] = m_image.height() / height();
+
     QImage strokedImage = m_image;
     strokedImage.fill( Qt::white );
 
     QPainter newP( &strokedImage );
-    drawStroke( newP );
+    drawStroke( newP, m_ratio );
 
     //    m_editedImage.strokeRefinement(strokedImage);
+
 
     strokedImage.save( "images/testy.png", 0, -1 );
     m_stroke.clear();
   }
 
-  m_camera.handleMouseClick( _event->pos().x(), _event->pos().y(), _event );
+  m_camera.handleMouseClick(_event->pos().x(), _event->pos().y(), _event );
   update();
 }
 
@@ -109,11 +118,9 @@ void GLWindow::init()
 {
   //	std::cerr << "OpenGL Version :" << glGetString(GL_VERSION) << std::endl;
   std::string shadersAddress = "shaders/";
-  m_renderShader = Shader( "m_toScreen", shadersAddress + "renderedVert.glsl", shadersAddress + "renderedFrag.glsl" );
-  m_normalShader = Shader( "m_toScreen", shadersAddress + "NormalVert.glsl", shadersAddress + "NormalFrag.glsl" );
+  m_shader = Shader( "m_toScreen", shadersAddress + "renderedVert.glsl", shadersAddress + "renderedFrag.glsl" );
 
-  glLinkProgram( m_renderShader.getShaderProgram() );
-  glLinkProgram( m_normalShader.getShaderProgram() );
+  glLinkProgram( m_shader.getShaderProgram() );
 
   glGenVertexArrays( 1, &m_vao );
   glBindVertexArray( m_vao );
@@ -153,40 +160,10 @@ void GLWindow::paintGL()
     glBindTexture( GL_TEXTURE_2D, m_renderedTexture);
     renderTexture();
   }
-  drawStroke( p );
+  std::array<float, 2> ratio = {1,1};
+  drawStroke( p, ratio );
 
   //    update();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------
-
-void GLWindow::renderNormals()
-{
-  glClearColor( 1, 1, 1, 1.0f );
-  glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-
-  glUseProgram( m_normalShader.getShaderProgram() );
-
-  //  glActiveTexture( GL_TEXTURE1 );
-  //  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
-
-  //  glTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR );
-  //  glTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR );
-  //  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-  //  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-  //  glGenerateMipmap( GL_TEXTURE_2D );
-
-  glBindVertexArray( m_vao );
-  glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
-  glEnableVertexAttribArray( glGetAttribLocation( m_normalShader.getShaderProgram(), "VertexPosition" ) );
-  glVertexAttribPointer( glGetAttribLocation( m_normalShader.getShaderProgram(), "VertexPosition" ), 3, GL_FLOAT, GL_FALSE, 0, 0 );
-
-  glBindBuffer( GL_ARRAY_BUFFER, m_tbo );
-  glEnableVertexAttribArray( glGetAttribLocation( m_normalShader.getShaderProgram(), "TexCoord" ) );
-  glVertexAttribPointer( glGetAttribLocation( m_normalShader.getShaderProgram(), "TexCoord" ), 2, GL_FLOAT, GL_FALSE, 0, (void*) 0 );
-
-  glDrawArrays( GL_TRIANGLES, m_plane.getBufferIndex() / 3, ( m_plane.getAmountVertexData() / 3 ) );
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -198,16 +175,16 @@ void GLWindow::renderTexture()
 
   //  glBindTexture( GL_TEXTURE_2D, m_textures[m_activeTexture]);
 
-  glUseProgram( m_renderShader.getShaderProgram() );
+  glUseProgram( m_shader.getShaderProgram() );
 
   glBindVertexArray( m_vao );
   glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
-  glEnableVertexAttribArray( glGetAttribLocation( m_renderShader.getShaderProgram(), "VertexPosition" ) );
-  glVertexAttribPointer( glGetAttribLocation( m_renderShader.getShaderProgram(), "VertexPosition" ), 3, GL_FLOAT, GL_FALSE, 0, 0 );
+  glEnableVertexAttribArray( glGetAttribLocation( m_shader.getShaderProgram(), "VertexPosition" ) );
+  glVertexAttribPointer( glGetAttribLocation( m_shader.getShaderProgram(), "VertexPosition" ), 3, GL_FLOAT, GL_FALSE, 0, 0 );
 
   glBindBuffer( GL_ARRAY_BUFFER, m_tbo );
-  glEnableVertexAttribArray( glGetAttribLocation( m_renderShader.getShaderProgram(), "TexCoord" ) );
-  glVertexAttribPointer( glGetAttribLocation( m_renderShader.getShaderProgram(), "TexCoord" ), 2, GL_FLOAT, GL_FALSE, 0, (void*) 0 );
+  glEnableVertexAttribArray( glGetAttribLocation( m_shader.getShaderProgram(), "TexCoord" ) );
+  glVertexAttribPointer( glGetAttribLocation( m_shader.getShaderProgram(), "TexCoord" ), 2, GL_FLOAT, GL_FALSE, 0, (void*) 0 );
 
   glDrawArrays( GL_TRIANGLES, m_plane.getBufferIndex() / 3, ( m_plane.getAmountVertexData() / 3 ) );
 }
@@ -234,7 +211,7 @@ void GLWindow::exportCSV( std::string _file )
 
 //------------------------------------------------------------------------------------------------------------------------------
 
-void GLWindow::drawStroke( QPainter & _p )
+void GLWindow::drawStroke( QPainter & _p, std::array<float, 2> & _ratio )
 {
   QPoint prevPoint;
   QPoint lastPoint;
@@ -245,11 +222,11 @@ void GLWindow::drawStroke( QPainter & _p )
   if ( m_stroke.size() > 0 )
     for( unsigned int i = 0; i< m_stroke.size() - 1; ++i )
     {
-      prevPoint.setX(m_stroke[i].x);
-      prevPoint.setY(m_stroke[i].y);
+      prevPoint.setX(m_stroke[i].x * _ratio[0]);
+      prevPoint.setY(m_stroke[i].y * _ratio[1]);
 
-      lastPoint.setX(m_stroke[i+1].x);
-      lastPoint.setY(m_stroke[i+1].y);
+      lastPoint.setX(m_stroke[i+1].x * _ratio[0]);
+      lastPoint.setY(m_stroke[i+1].y * _ratio[1]);
 
       _p.drawLine(prevPoint, lastPoint);
     }

@@ -18,9 +18,9 @@
 #include <QPainter>
 #include <string>
 #include "Image.h"
+#include "Scene.h"
 
-
-class GLWindow : public QOpenGLWidget
+class GLWindow : public Scene
 {
   Q_OBJECT // must include this if you use Qt signals/slots
 public :
@@ -29,15 +29,15 @@ public :
   /// @brief Constructor for GLWindow
   /// @param [in] _parent the parent window to create the GL context in
   //----------------------------------------------------------------------------------------------------------------------
-  GLWindow(QWidget *_parent );
+  GLWindow(QWidget * _parent );
   void loadImage();
   void setImagePath( char * _path );
   void save(const char * _name);
 
   /// @brief dtor
   ~GLWindow();
-  void mouseMove(QMouseEvent * _event);
-  void mouseClick(QMouseEvent * _event);
+  void mouseMove(QMouseEvent * _event) override;
+  void mouseClick(QMouseEvent * _event) override;
   std::vector<std::vector<float>> intensity();
   std::vector< std::vector< std::vector<float> > > chroma(std::vector<std::vector<float> > &_intensity );
 
@@ -61,7 +61,7 @@ protected:
   void renderTexture();
   void renderNormals();
   void exportCSV( std::string _file );
-  void drawStroke( QPainter & _p );
+  void drawStroke(QPainter & _p , std::array<float, 2> & _ratio);
 
   void showOriginalImage();
   void showAlbedoMap();
@@ -72,29 +72,26 @@ protected:
 
 private :
   void init();
-  Mesh m_plane;
-  Shader m_renderShader;
-  Shader m_normalShader;
-  GLuint m_vao;
-  GLuint m_vbo;
-  GLuint m_tbo;
+  bool clearStroke;
+  bool m_textureLoaded = false;
+
+//  Mesh m_plane; //
+//  Shader m_shader; //
+//  GLuint m_vao;   //
+//  GLuint m_vbo;   //
+//  GLuint m_tbo;   //
   GLuint m_colourTextureAddress;
-  GLuint m_normalFramebuffer;
-  GLuint m_framebuffer;
-  GLuint m_normalTexture;
   GLuint m_renderedTexture;
-  std::vector<GLuint> m_textures;
-  TrackballCamera m_camera;
+//  std::vector<GLuint> m_textures; //
+//  TrackballCamera m_camera; //
   QImage m_image;
   QImage m_preview;
   QImage m_glImage;
   std::vector<std::vector<std::vector<float>>> m_totDiffF0;
   std::vector<glm::vec2> m_stroke;
-  bool clearStroke;
   Image m_editedImage;
   char * m_originalImage;
-  unsigned int m_activeTexture = 0;
-  bool m_textureLoaded = false;
+  std::array<float, 2> m_ratio;
 };
 
 #endif

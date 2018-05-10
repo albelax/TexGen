@@ -1,8 +1,8 @@
 #include "PBRViewport.h"
 
-PBRViewport::PBRViewport(QWidget *_parent) : QOpenGLWidget( _parent )
+PBRViewport::PBRViewport(QWidget *_parent) : Scene( _parent )
 {
-  // m_tile = Mesh("models/tile.obj","tile" );
+  m_tile = Mesh("models/plane.obj","tile" );
   this->resize(_parent->size());
   m_camera.setInitialMousePos(0,0);
   m_camera.setTarget(0.0f, 0.0f, -2.0f);
@@ -26,9 +26,9 @@ void PBRViewport::initializeGL()
 	glViewport( 0, 0, devicePixelRatio(), devicePixelRatio() );
 	init();
 	m_MV = glm::translate( m_MV, glm::vec3(0.0f, 0.0f, -2.0f) );
-	m_tableMV = glm::translate( m_tableMV, glm::vec3( 0.0f, -0.43f, -2.0f ) );
-	m_tableMV = glm::rotate( m_tableMV, glm::radians( -90.0f ), glm::vec3( 1.0f, 0.0f, 0.0f ) );
-	m_tableMV = glm::scale( m_tableMV, glm::vec3( 3, 3, 3 ) );
+//	m_tableMV = glm::translate( m_tableMV, glm::vec3( 0.0f, -0.43f, -2.0f ) );
+//	m_tableMV = glm::rotate( m_tableMV, glm::radians( -90.0f ), glm::vec3( 1.0f, 0.0f, 0.0f ) );
+//	m_tableMV = glm::scale( m_tableMV, glm::vec3( 3, 3, 3 ) );
 }
 
 
@@ -130,7 +130,7 @@ void PBRViewport::init()
 	m_specularTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "SpecularTexture" );
 
 	// load color texture
-	addTexture( "images/Hackberry_pxr128.tif" ); // TODO
+	addTexture( "images/bricksSmall.jpeg" ); // TODO
 	glUniform1i( m_colourTextureAddress, 0 );
 
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
@@ -140,7 +140,7 @@ void PBRViewport::init()
 	glGenerateMipmap( GL_TEXTURE_2D );
 
 	// load normal texture
-	addTexture( "images/skin_normal.png" ); // TODO
+	addTexture( "images/normal.jpg" ); // TODO
 	glUniform1i( m_normalTextureAddress, 1 );
 
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
@@ -150,7 +150,7 @@ void PBRViewport::init()
 	glGenerateMipmap( GL_TEXTURE_2D);
 
 	// load specular texture
-	addTexture( "images/skin_normal.png" ); // TODO
+	addTexture( "images/specular.jpg" ); // TODO
 	glUniform1i( m_specularTextureAddress, 1 );
 
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
@@ -167,7 +167,7 @@ void PBRViewport::paintGL()
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 	renderScene();
-
+//	std::cout << "rendering \n";
 	update();
 }
 
@@ -178,15 +178,26 @@ void PBRViewport::renderScene()
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 	glUseProgram( m_shader.getShaderProgram() );
+	m_camera.update();
+	m_projection = glm::perspective( glm::radians( 60.0f ),
+																		static_cast<float>( width() ) / static_cast<float>( height() ), 0.1f, 100.0f );
+	m_view = glm::lookAt( glm::vec3( 0.0f, 0.0f, 5.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 1.0f, 0.0f ) );
+	m_MVP = m_projection * m_camera.viewMatrix() * m_MV;
+	glm::mat3 N = glm::mat3( glm::inverse( glm::transpose( m_MV ) ) );
 
-	glBindVertexArray( m_vao );
-	glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
-	glEnableVertexAttribArray( glGetAttribLocation( m_shader.getShaderProgram(), "VertexPosition" ) );
-	glVertexAttribPointer( glGetAttribLocation( m_shader.getShaderProgram(), "VertexPosition" ), 3, GL_FLOAT, GL_FALSE, 0, 0 );
+  glUniformMatrix4fv( m_MVPAddress, 1, GL_FALSE, glm::value_ptr( m_MVP ) );
+  glUniformMatrix4fv( m_MVAddress, 1, GL_FALSE, glm::value_ptr( m_MV ) );
 
-	glBindBuffer( GL_ARRAY_BUFFER, m_tbo );
-	glEnableVertexAttribArray( glGetAttribLocation( m_shader.getShaderProgram(), "TexCoord" ) );
-	glVertexAttribPointer( glGetAttribLocation( m_shader.getShaderProgram(), "TexCoord" ), 2, GL_FLOAT, GL_FALSE, 0, (void*) 0 );
+  glUniformMatrix3fv( m_NAddress, 1, GL_FALSE, glm::value_ptr( N ) );
 
-	glDrawArrays( GL_TRIANGLES, m_tile.getBufferIndex() / 3, ( m_tile.getAmountVertexData() / 3 ) );
+//	glBindVertexArray( m_vao );
+//	glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
+//	glEnableVertexAttribArray( glGetAttribLocation( m_shader.getShaderProgram(), "VertexPosition" ) );
+//	glVertexAttribPointer( glGetAttribLocation( m_shader.getShaderProgram(), "VertexPosition" ), 3, GL_FLOAT, GL_FALSE, 0, 0 );
+
+//	glBindBuffer( GL_ARRAY_BUFFER, m_tbo );
+//	glEnableVertexAttribArray( glGetAttribLocation( m_shader.getShaderProgram(), "TexCoord" ) );
+//	glVertexAttribPointer( glGetAttribLocation( m_shader.getShaderProgram(), "TexCoord" ), 2, GL_FLOAT, GL_FALSE, 0, (void*) 0 );
+
+  glDrawArrays( GL_TRIANGLES, m_tile.getBufferIndex() / 3, ( m_tile.getAmountVertexData() / 3 ) );
 }

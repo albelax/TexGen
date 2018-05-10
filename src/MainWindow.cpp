@@ -4,18 +4,31 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::MainWindow)
 {
-	m_ui -> setupUi(this);
-	m_gl = new GLWindow(this);
-	m_ui -> s_mainWindowGridLayout -> addWidget(m_gl,0,0,3,5);
+	bool pbr = false;
 
+	m_ui -> setupUi(this);
+
+	if ( pbr )
+	{
+//		m_pbrViewport = new PBRViewport( this );
+		m_activeScene = new PBRViewport( this ); //m_pbrViewport;
+	}
+	else
+	{
+//		m_gl = new GLWindow(this);
+		m_activeScene = new GLWindow( this ); //m_gl;
+	}
+
+	m_ui -> s_mainWindowGridLayout -> addWidget(m_activeScene, 0, 0, 3, 5);
 
 	createActions();
 	createMenus();
 	makeSpecularMenu();
 	makeNormalMenu();
 	m_currentMenu = &m_originalMenu;
+
 	// specular
-	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), m_gl, SLOT(selectImage(int)));
+//	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), m_gl, SLOT(selectImage(int)));
 	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLayout(int)));
 	connect((QSlider *)m_specularMenu[3], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
 	connect((QSlider *)m_specularMenu[5], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
@@ -25,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
 	connect((QSlider *)m_normalMenu[1], SIGNAL(sliderReleased() ), this, SLOT(updateNormal()));
 	connect((QCheckBox *)m_specularMenu[9], SIGNAL(clicked(bool)), this, SLOT(updateSpecular()));
 	connect((QPushButton *)m_specularMenu[10], SIGNAL(released()), this, SLOT(resetSpecularSettings()));
+	connect(m_ui->viewport, SIGNAL(currentIndexChanged(int)), this, SLOT(swapView(int)));
 }
 
 //------------------------------------------------------------------------
@@ -51,21 +65,21 @@ void MainWindow::keyPressEvent(QKeyEvent *_event)
 
 void MainWindow::mouseMoveEvent(QMouseEvent * _event)
 {
-  m_gl->mouseMove(_event);
+  m_activeScene->mouseMove(_event);
 }
 
 //------------------------------------------------------------------------
 
 void MainWindow::mousePressEvent(QMouseEvent * _event)
 {
-  m_gl->mouseClick(_event);
+  m_activeScene->mouseClick(_event);
 }
 
 //------------------------------------------------------------------------
 
 void MainWindow::mouseReleaseEvent(QMouseEvent * _event)
 {
-  m_gl->mouseClick(_event);
+  m_activeScene->mouseClick(_event);
 }
 
 //------------------------------------------------------------------------
@@ -78,9 +92,8 @@ void MainWindow::createMenus()
   m_ui->menuFiles->addAction(openAct);
   m_ui->menuFiles->addAction(saveAct);
 
-  m_ui->menuedit->addAction(calculateIntensityAct);
-  m_ui->menuedit->addAction(calculateSeparationAct);
-  m_ui->menuedit->addAction(calculateNormalsAct);
+//  m_ui->menuedit->addAction(calculateIntensityAct);
+//  m_ui->menuedit->addAction(calculateSeparationAct);
 }
 
 //------------------------------------------------------------------------
@@ -95,14 +108,11 @@ void MainWindow::createActions()
   saveAct->setShortcuts(QKeySequence::Save);
   connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
 
-  calculateIntensityAct = new QAction(tr("&Calculate Intensity"), this);
-  connect(calculateIntensityAct, SIGNAL(triggered()), m_gl, SLOT(calculateIntensity()));
+//  calculateIntensityAct = new QAction(tr("&Calculate Intensity"), this);
+//  connect(calculateIntensityAct, SIGNAL(triggered()), m_gl, SLOT(calculateIntensity()));
 
-  calculateSeparationAct = new QAction(tr("&Calculate Separation"), this);
-  connect(calculateSeparationAct, SIGNAL(triggered()), m_gl, SLOT(calculateSeparation()));
-
-  calculateNormalsAct = new QAction(tr("&Calculate Normals"), this);
-  connect(calculateNormalsAct, SIGNAL(triggered()), m_gl, SLOT(calculateNormals()));
+//  calculateSeparationAct = new QAction(tr("&Calculate Separation"), this);
+//  connect(calculateSeparationAct, SIGNAL(triggered()), m_gl, SLOT(calculateSeparation()));
 }
 
 //------------------------------------------------------------------------
@@ -170,8 +180,29 @@ void MainWindow::changeLayout( int _n )
       layout->addWidget( _widget ); // probably should be added only once?
       _widget->show();
     }
-//    updateSpecular();
+    //    updateSpecular();
   }
+}
+
+//------------------------------------------------------------------------
+
+void MainWindow::swapView( int _n )
+{
+  std::cout << _n << "\n";
+
+  if ( _n == 0 && dynamic_cast<GLWindow *>(m_activeScene) == false )
+  {
+
+    m_activeScene = new GLWindow(this);
+  }
+
+  else if ( _n == 1 && dynamic_cast<PBRViewport *>(m_activeScene) == false )
+  {
+
+    m_activeScene = new PBRViewport(this);
+  }
+  m_ui -> s_mainWindowGridLayout -> addWidget(m_activeScene, 0, 0, 3, 5);
+
 }
 
 //------------------------------------------------------------------------

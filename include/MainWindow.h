@@ -13,6 +13,8 @@
 #include <QMainWindow>
 #include <QtWidgets>
 #include "GLWindow.h"
+#include "PBRViewport.h"
+#include "Scene.h"
 
 
 namespace Ui
@@ -36,11 +38,14 @@ private slots:
 	void updateSpecular();
 	void updateNormal();
 	void resetSpecularSettings();
-
+	void swapView( int _n );
 
 private:
 	Ui::MainWindow * m_ui;
 	GLWindow * m_gl;
+	PBRViewport * m_pbrViewport;
+	Scene * m_activeScene;
+
 	QMenu * m_fileMenu;
 	QMenu * m_editMenu;
 

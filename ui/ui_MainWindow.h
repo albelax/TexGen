@@ -33,8 +33,10 @@ public:
     QGridLayout *s_mainWindowGridLayout;
     QGroupBox *s_transformGB;
     QGridLayout *gridLayout;
+    QLabel *label;
+    QComboBox *viewport;
+    QLabel *Image;
     QSpacerItem *horizontalSpacer_4;
-    QLabel *label_2;
     QComboBox *m_selectImage;
     QSpacerItem *horizontalSpacer_5;
     QSpacerItem *horizontalSpacer_6;
@@ -60,19 +62,29 @@ public:
         s_transformGB->setObjectName(QStringLiteral("s_transformGB"));
         gridLayout = new QGridLayout(s_transformGB);
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
+        label = new QLabel(s_transformGB);
+        label->setObjectName(QStringLiteral("label"));
+
+        gridLayout->addWidget(label, 2, 0, 1, 1);
+
+        viewport = new QComboBox(s_transformGB);
+        viewport->setObjectName(QStringLiteral("viewport"));
+
+        gridLayout->addWidget(viewport, 3, 0, 1, 1);
+
+        Image = new QLabel(s_transformGB);
+        Image->setObjectName(QStringLiteral("Image"));
+
+        gridLayout->addWidget(Image, 4, 0, 1, 1);
+
         horizontalSpacer_4 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
         gridLayout->addItem(horizontalSpacer_4, 2, 3, 1, 1);
 
-        label_2 = new QLabel(s_transformGB);
-        label_2->setObjectName(QStringLiteral("label_2"));
-
-        gridLayout->addWidget(label_2, 2, 2, 1, 1);
-
         m_selectImage = new QComboBox(s_transformGB);
         m_selectImage->setObjectName(QStringLiteral("m_selectImage"));
 
-        gridLayout->addWidget(m_selectImage, 3, 2, 1, 1);
+        gridLayout->addWidget(m_selectImage, 5, 0, 1, 1);
 
 
         s_mainWindowGridLayout->addWidget(s_transformGB, 0, 5, 1, 1);
@@ -129,7 +141,13 @@ public:
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "TexSketch", Q_NULLPTR));
         s_transformGB->setTitle(QString());
-        label_2->setText(QApplication::translate("MainWindow", "Image", Q_NULLPTR));
+        label->setText(QApplication::translate("MainWindow", "Viewport Mode", Q_NULLPTR));
+        viewport->clear();
+        viewport->insertItems(0, QStringList()
+         << QApplication::translate("MainWindow", "2D", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "3D", Q_NULLPTR)
+        );
+        Image->setText(QApplication::translate("MainWindow", "Image", Q_NULLPTR));
         m_selectImage->clear();
         m_selectImage->insertItems(0, QStringList()
          << QApplication::translate("MainWindow", "Original", Q_NULLPTR)
