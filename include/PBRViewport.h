@@ -14,11 +14,13 @@ class PBRViewport : public Scene
 {
   Q_OBJECT
 public:
-  PBRViewport(QWidget *_parent);
+  PBRViewport( QWidget *_parent );
+  PBRViewport( QWidget *_parent, Image * _image );
   ~PBRViewport();
-
-  void mouseMove(QMouseEvent * _event) override;
-  void mouseClick(QMouseEvent * _event) override;
+  void mouseMove( QMouseEvent * _event ) override;
+  void mouseClick( QMouseEvent * _event ) override;
+  void calculateNormals( int _depth ) override {}
+  void calculateSpecular( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override {}
 
 protected:
   /// @brief  The following methods must be implimented in the sub class
@@ -26,41 +28,17 @@ protected:
   void initializeGL();
   /// @brief this is the main gl drawing routine which is called whenever the window needs to
   void paintGL();
-
-  void resizeGL(int _w , int _h);
-
+  void resizeGL( int _w , int _h );
   void renderScene();
-
-  void addTexture(std::string _image);
+  void addTexture( QImage _image );
 
 private :
   void init();
-  Mesh m_tile;
-//  Shader m_shader; //
-
-//  GLuint m_vao; //
-//  GLuint m_vbo; //
-//  GLuint m_nbo; //
-//  GLuint m_tbo; //
-
-//  glm::mat4 m_MV; //
-//  glm::mat4 m_MVP; //
-  glm::mat4 m_tableMV;
-
-//  std::vector<GLuint> m_textures; //
-
-//  GLint m_MVAddress; //
-//  GLint m_MVPAddress; //
-//  GLint m_NAddress; //
   GLint m_colorAddress;
   GLint m_specularTextureAddress;
   GLint m_normalTextureAddress;
   GLint m_colourTextureAddress;
-
   GLuint m_depthTexture;
-
-//  TrackballCamera m_camera; //
-
 };
 
 #endif

@@ -4,6 +4,13 @@
 #include <fstream>
 #include <algorithm>
 
+Image::Image()
+{
+  initCL();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
 Image::Image( QImage & _image )
 {
   initCL();
@@ -54,7 +61,7 @@ void Image::initCL()
   cl::Platform::get(&all_platforms);
   if( all_platforms.size() == 0 )
   {
-    std::cout<<" No platforms found. Check OpenCL installation!\n";
+    std::cout<< " No platforms found. Check OpenCL installation!\n";
     exit(1);
   }
   cl::Platform m_CLPlatform = all_platforms[0];
@@ -73,6 +80,15 @@ void Image::initCL()
 
 //---------------------------------------------------------------------------------------------------------------------
 
+void Image::loadImage( QImage _image )
+{
+  m_image = _image;
+
+  width = m_image.width();
+  height = m_image.height();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 
 void Image::vectorAdd()
 {
@@ -121,6 +137,7 @@ void Image::vectorAdd()
 
 QImage Image::calculateNormalMap( QImage & image, int _depth )
 {
+  std::cout << width << " normal width\n";
   float * r = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
   float * g = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
   float * b = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
@@ -686,7 +703,8 @@ void Image::equalizeHistogram(map _map)
   p++;
 
   int sum = 0;
-  for (; p < hist.size(); ++p) {
+  for (; p < hist.size(); ++p)
+  {
     sum += hist[p];
     // the value is saturated in range [0, max_val]
     lut[p] = std::max(0, std::min(int(round(sum * scale)), max_val));
@@ -706,7 +724,6 @@ void Image::equalizeHistogram(map _map)
 //---------------------------------------------------------------------------------------------------------------------
 void Image::specular( float _brightness, float _contrast, bool _invert, int _sharpness, bool _equalize)
 {
-
   for( int i = 0; i < width; ++i )
   {
     for( int j = 0 ; j < height; ++j )
@@ -733,9 +750,12 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
         double weight = k;
 
         int l[3] = { -1, 0, 1 };
-        for (int m = 0; m < 3; m++){
-          for (int n = 0; n < 3; n++) {
-            if (l[m] + i != i && l[n] + j != j) {
+        for (int m = 0; m < 3; m++)
+        {
+          for (int n = 0; n < 3; n++)
+          {
+            if (l[m] + i != i && l[n] + j != j)
+            {
               sum = sum + m_specular2[l[m] + i][ l[n] + j] * (-k / 8);
               weight = weight + (-k / 8);
             }
@@ -774,6 +794,7 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
     equalizeHistogram(map::SPECULAR);
   }
 }
+
 //---------------------------------------------------------------------------------------------------------------------
 
 QImage Image::getSpecular()

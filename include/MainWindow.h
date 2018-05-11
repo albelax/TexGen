@@ -15,39 +15,39 @@
 #include "GLWindow.h"
 #include "PBRViewport.h"
 #include "Scene.h"
-
+#include "Image.h"
 
 namespace Ui
 {
-	class MainWindow;
+class MainWindow;
 }
 
 class MainWindow : public QMainWindow
 {
-	Q_OBJECT
+  Q_OBJECT
 
 public:
-	explicit MainWindow(QWidget *parent = 0);
-	~MainWindow();
-
+  explicit MainWindow(QWidget *parent = 0);
+  ~MainWindow();
+  Image m_imageProcessor;
 private slots:
-	void open();
-	void save();
-	void changeLayout( int _n );
+  void open();
+  void save();
+  void changeLayout( int _n );
 
-	void updateSpecular();
-	void updateNormal();
-	void resetSpecularSettings();
-	void swapView( int _n );
+  void updateSpecular();
+  void updateNormal();
+  void resetSpecularSettings();
+  void swapView( int _n );
 
 private:
-	Ui::MainWindow * m_ui;
-	GLWindow * m_gl;
-	PBRViewport * m_pbrViewport;
-	Scene * m_activeScene;
+  Ui::MainWindow * m_ui;
+  GLWindow * m_gl;
+  PBRViewport * m_pbrViewport;
+  Scene * m_activeScene;
 
-	QMenu * m_fileMenu;
-	QMenu * m_editMenu;
+  QMenu * m_fileMenu;
+  QMenu * m_editMenu;
 
   QAction * openAct;
   QAction * saveAct;
@@ -57,21 +57,21 @@ private:
   QAction * calculateSpecularAct;
 
   QList<QAction *> saveAsActs;
-  QAction *exitAct;
+  QAction * exitAct;
   std::vector<QLayoutItem *> m_originalLayout;
   std::vector<QWidget *> m_originalMenu;
   std::vector<QWidget *> * m_currentMenu;
   std::vector<QWidget *> m_normalMenu;
   std::vector<QWidget *> m_specularMenu;
 
-	void createActions();
-	void createMenus();
-	void keyPressEvent(QKeyEvent * _event);
-	void mouseMoveEvent(QMouseEvent * _event);
-	void mousePressEvent(QMouseEvent *_event);
-	void mouseReleaseEvent(QMouseEvent *_event);
-	void makeSpecularMenu();
-	void makeNormalMenu();
+  void createActions();
+  void createMenus();
+  void keyPressEvent(QKeyEvent * _event);
+  void mouseMoveEvent(QMouseEvent * _event);
+  void mousePressEvent(QMouseEvent *_event);
+  void mouseReleaseEvent(QMouseEvent *_event);
+  void makeSpecularMenu();
+  void makeNormalMenu();
 
 };
 

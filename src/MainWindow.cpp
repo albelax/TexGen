@@ -4,48 +4,51 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::MainWindow)
 {
-	bool pbr = false;
+  bool pbr = false;
 
-	m_ui -> setupUi(this);
+  m_ui -> setupUi(this);
 
-	if ( pbr )
-	{
-//		m_pbrViewport = new PBRViewport( this );
-		m_activeScene = new PBRViewport( this ); //m_pbrViewport;
-	}
-	else
-	{
-//		m_gl = new GLWindow(this);
-		m_activeScene = new GLWindow( this ); //m_gl;
-	}
+  if ( pbr )
+  {
+    m_pbrViewport = new PBRViewport( this );
+    m_activeScene = m_pbrViewport;
+  }
+  else
+  {
+    m_gl = new GLWindow(this, & m_imageProcessor);
+    m_activeScene = m_gl;
+  }
 
-	m_ui -> s_mainWindowGridLayout -> addWidget(m_activeScene, 0, 0, 3, 5);
+  m_ui -> s_mainWindowGridLayout -> addWidget(m_activeScene, 0, 0, 3, 5);
+//  m_imageProcessor = Image();/
+  createActions();
+  createMenus();
+  makeSpecularMenu();
+  makeNormalMenu();
+  m_currentMenu = &m_originalMenu;
 
-	createActions();
-	createMenus();
-	makeSpecularMenu();
-	makeNormalMenu();
-	m_currentMenu = &m_originalMenu;
+  // specular
+  //	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), m_gl, SLOT(selectImage(int)));
+  connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLayout(int)));
+  connect((QSlider *)m_specularMenu[3], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
+  connect((QSlider *)m_specularMenu[5], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
+  connect((QSlider *)m_specularMenu[7], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
+  connect((QCheckBox *)m_specularMenu[1], SIGNAL(clicked(bool)), this, SLOT(updateSpecular()));
+  // normal
+  connect((QSlider *)m_normalMenu[1], SIGNAL(sliderReleased() ), this, SLOT(updateNormal()));
+  connect((QCheckBox *)m_specularMenu[9], SIGNAL(clicked(bool)), this, SLOT(updateSpecular()));
+  connect((QPushButton *)m_specularMenu[10], SIGNAL(released()), this, SLOT(resetSpecularSettings()));
+  connect(m_ui->viewport, SIGNAL(currentIndexChanged(int)), this, SLOT(swapView(int)));
 
-	// specular
-//	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), m_gl, SLOT(selectImage(int)));
-	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLayout(int)));
-	connect((QSlider *)m_specularMenu[3], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
-	connect((QSlider *)m_specularMenu[5], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
-	connect((QSlider *)m_specularMenu[7], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
-	connect((QCheckBox *)m_specularMenu[1], SIGNAL(clicked(bool)), this, SLOT(updateSpecular()));
-	// normal
-	connect((QSlider *)m_normalMenu[1], SIGNAL(sliderReleased() ), this, SLOT(updateNormal()));
-	connect((QCheckBox *)m_specularMenu[9], SIGNAL(clicked(bool)), this, SLOT(updateSpecular()));
-	connect((QPushButton *)m_specularMenu[10], SIGNAL(released()), this, SLOT(resetSpecularSettings()));
-	connect(m_ui->viewport, SIGNAL(currentIndexChanged(int)), this, SLOT(swapView(int)));
+//  std::cout << "m_gl: " << sizeof( GLWindow ) << " pbr: " << sizeof( PBRViewport ) <<
+//               " Qimage: " << sizeof( QImage ) << " Image processor " << sizeof( Image ) << "\n";
 }
 
 //------------------------------------------------------------------------
 
 MainWindow::~MainWindow()
 {
-	delete m_ui;
+  delete m_ui;
 }
 
 //------------------------------------------------------------------------
@@ -91,9 +94,6 @@ void MainWindow::createMenus()
 
   m_ui->menuFiles->addAction(openAct);
   m_ui->menuFiles->addAction(saveAct);
-
-//  m_ui->menuedit->addAction(calculateIntensityAct);
-//  m_ui->menuedit->addAction(calculateSeparationAct);
 }
 
 //------------------------------------------------------------------------
@@ -107,23 +107,19 @@ void MainWindow::createActions()
   saveAct = new QAction(tr("&Save..."), this);
   saveAct->setShortcuts(QKeySequence::Save);
   connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
-
-//  calculateIntensityAct = new QAction(tr("&Calculate Intensity"), this);
-//  connect(calculateIntensityAct, SIGNAL(triggered()), m_gl, SLOT(calculateIntensity()));
-
-//  calculateSeparationAct = new QAction(tr("&Calculate Separation"), this);
-//  connect(calculateSeparationAct, SIGNAL(triggered()), m_gl, SLOT(calculateSeparation()));
 }
 
 //------------------------------------------------------------------------
 
 void MainWindow::open()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::currentPath() );
-  if (!fileName.isEmpty())
+  QString fileName = QFileDialog::getOpenFileName( this, tr("Open File"), QDir::currentPath() );
+
+  if( !fileName.isEmpty() && dynamic_cast<GLWindow *>( m_activeScene ) )
   {
-    m_gl->setImagePath( fileName.toLatin1().data() );
-    m_gl->loadImage();
+    // this needs to change, otherwise it won't work with the pbr scene
+//    dynamic_cast<GLWindow *>( m_activeScene )->setImagePath( fileName.toLatin1().data() );
+    dynamic_cast<GLWindow *>( m_activeScene )->loadImage( fileName.toLatin1().data() );
   }
 }
 
@@ -139,7 +135,6 @@ void MainWindow::save()
   if (!fileName.isEmpty())
   {
     m_gl->save( fileName.toLatin1().data() );
-    std::cout << fileName.toLatin1().data() << "\n";
   }
 }
 //------------------------------------------------------------------------
@@ -153,18 +148,13 @@ void MainWindow::changeLayout( int _n )
     _widget->hide();
   }
 
-  //    if ( _n == 3 )
-  //    {
-  //      m_currentMenu.push_back( new QPushButton( "button" ) );
-  //      layout->addWidget( m_currentMenu[ m_currentMenu.size() - 1] );
-  //    }
-
   if ( _n == Image::SPECULAR )
   {
     m_currentMenu = &m_specularMenu;
 
     for ( auto &_widget : m_specularMenu)
     {
+      layout->setAlignment( this, Qt::AlignTop );
       layout->addWidget( _widget ); // probably should be added only once?
       _widget->show();
     }
@@ -177,10 +167,11 @@ void MainWindow::changeLayout( int _n )
 
     for ( auto &_widget : m_normalMenu )
     {
+      layout->setAlignment( this, Qt::AlignTop );
       layout->addWidget( _widget ); // probably should be added only once?
       _widget->show();
     }
-    //    updateSpecular();
+    updateNormal();
   }
 }
 
@@ -188,18 +179,16 @@ void MainWindow::changeLayout( int _n )
 
 void MainWindow::swapView( int _n )
 {
-  std::cout << _n << "\n";
-
-  if ( _n == 0 && dynamic_cast<GLWindow *>(m_activeScene) == false )
+  if ( _n == 0 )
   {
-
-    m_activeScene = new GLWindow(this);
+    delete m_activeScene;
+    m_activeScene = new GLWindow(this, &m_imageProcessor);
   }
 
-  else if ( _n == 1 && dynamic_cast<PBRViewport *>(m_activeScene) == false )
+  else if ( _n == 1 )
   {
-
-    m_activeScene = new PBRViewport(this);
+    delete m_activeScene;
+    m_activeScene = new PBRViewport( this, &m_imageProcessor ); // TODO: change constructor
   }
   m_ui -> s_mainWindowGridLayout -> addWidget(m_activeScene, 0, 0, 3, 5);
 
@@ -214,7 +203,6 @@ void MainWindow::makeSpecularMenu()
   contrast->setMaximum(100);
   contrast->setValue(20);
 
-
   QSlider * brightness = new QSlider( Qt::Horizontal, Q_NULLPTR );
   brightness->setMinimum(0);
   brightness->setMaximum(100);
@@ -224,7 +212,6 @@ void MainWindow::makeSpecularMenu()
   sharpness->setMinimum(0);
   sharpness->setMaximum(5);
   sharpness->setValue(1);
-
 
   m_specularMenu.push_back( new QLabel( "Invert", 0, 0 ) );
   m_specularMenu.push_back( new QCheckBox() );
@@ -243,9 +230,6 @@ void MainWindow::makeSpecularMenu()
 
   // 10
   m_specularMenu.push_back( new QPushButton("Reset",nullptr));
-
-
-  //  m_specularMenu.push_back( new QPushButton( "Calculate"));
 }
 
 //------------------------------------------------------------------------
@@ -265,7 +249,7 @@ void MainWindow::makeNormalMenu()
 
 void MainWindow::updateSpecular()
 {
-  m_gl->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),
+  m_activeScene->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),
       static_cast<QSlider *>(m_specularMenu[3])->value(),
       static_cast<QCheckBox *>(m_specularMenu[1])->isChecked(),
       static_cast<QSlider *>(m_specularMenu[7])->value(),
@@ -276,8 +260,7 @@ void MainWindow::updateSpecular()
 
 void MainWindow::updateNormal()
 {
-  std::cout << "normal slider " << static_cast<QSlider *>(m_normalMenu[1])->value() << "\n";
-  m_gl->calculateNormals( static_cast<QSlider *>(m_normalMenu[1])->value() );
+  m_activeScene->calculateNormals( static_cast<QSlider *>(m_normalMenu[1])->value() );
 }
 
 //------------------------------------------------------------------------
@@ -288,6 +271,7 @@ void MainWindow::resetSpecularSettings()
   static_cast<QSlider *>(m_specularMenu[5])->setValue(50);
   static_cast<QCheckBox *>(m_specularMenu[1])->setTristate(false);
   static_cast<QCheckBox *>(m_specularMenu[9])->setTristate(false);
+
   m_gl->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),
       static_cast<QSlider *>(m_specularMenu[3])->value(),
       static_cast<QCheckBox *>(m_specularMenu[1])->isChecked(),

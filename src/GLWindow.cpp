@@ -21,6 +21,19 @@ GLWindow::GLWindow( QWidget *_parent ) : Scene( _parent )
 
 //----------------------------------------------------------------------------------------------------------------------
 
+GLWindow::GLWindow(QWidget * _parent, Image * _image ) : Scene( _parent )
+{
+  m_plane = Mesh( "models/plane.obj", "plane" );
+  this->resize( _parent->size() );
+  m_camera.setInitialMousePos( 0, 0 );
+  m_camera.setTarget( 0.0f, 0.0f, -2.0f );
+  m_camera.setEye( 0.0f, 0.0f, 0.0f );
+
+  m_editedImage = _image;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 void GLWindow::initializeGL()
 {
 #ifdef linux
@@ -54,12 +67,9 @@ void GLWindow::mouseMove( QMouseEvent * _event )
 
   if ( _event->buttons() == Qt::LeftButton )
   {
-        std::cout << "x " << _event->pos().x() << " y: " <<  _event->pos().y()<< '\n';
-    //    std::cout << m_image.width() << " " << m_image.height() << "\n";
     m_ratio[0] = m_image.width() / width();
     m_ratio[1] = m_image.height() / height();
 
-//    std::cout << width() << " " << height() << "\n";
     glm::vec2 tmp( _event->pos().x(), _event->pos().y() );
     m_stroke.push_back( tmp );
   }
@@ -82,7 +92,7 @@ void GLWindow::mouseClick(QMouseEvent * _event)
     QPainter newP( &strokedImage );
     drawStroke( newP, m_ratio );
 
-    //    m_editedImage.strokeRefinement(strokedImage);
+    //    m_editedImage->strokeRefinement(strokedImage);
 
 
     strokedImage.save( "images/testy.png", 0, -1 );
@@ -265,7 +275,7 @@ void GLWindow::showAlbedoMap()
 void GLWindow::showGrayscale()
 {
   glActiveTexture( GL_TEXTURE0 );
-  m_preview = m_editedImage.getIntensity();
+  m_preview = m_editedImage->getIntensity();
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
   if(m_glImage.isNull())
     qWarning("IMAGE IS NULL");
@@ -293,10 +303,10 @@ void GLWindow::showShadingMap()
 void GLWindow::showSpecular()
 {
   glActiveTexture( GL_TEXTURE0 );
-  m_preview = m_editedImage.getSpecular();
+  m_preview = m_editedImage->getSpecular();
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
   if(m_glImage.isNull())
-    qWarning("IMAGE IS NULL");
+    qWarning( "IMAGE IS NULL" );
   glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
 
@@ -314,7 +324,7 @@ void GLWindow::showSpecular()
 void GLWindow::showNormalMap()
 {
   glActiveTexture( GL_TEXTURE0 );
-  m_preview = m_editedImage.calculateNormalMap( m_image, 1 );
+  m_preview = m_editedImage->calculateNormalMap( m_image, 1 );
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
   if(m_glImage.isNull())
     qWarning("IMAGE IS NULL");
@@ -330,16 +340,10 @@ void GLWindow::showNormalMap()
   m_textureLoaded = true;
 }
 
-//------------------------------------------------------------------------------------------------------------------------------
-
-int GLWindow::getNormalDepth()
-{
-
-}
 
 //------------------------------------------------------------------------------------------------------------------------------
 
-void GLWindow::selectImage(int _i)
+void GLWindow::selectImage( int _i )
 {
   switch ( _i )
   {
@@ -370,19 +374,17 @@ void GLWindow::save( const char * _name )
 
 //------------------------------------------------------------------------------------------------------------------------------
 
-void GLWindow::setImagePath( char *_path )
-{
-  m_originalImage = _path;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------
-
-void GLWindow::loadImage()
+void GLWindow::loadImage( char *_path )
 {
   glActiveTexture( GL_TEXTURE0 );
-  m_image.load( m_originalImage );
+  m_image.load( _path );
   m_preview = m_image.copy();
-  m_editedImage = Image( m_image );
+
+  // free memory of the old image before reallocating the new one
+//  auto tmp = m_editedImage;
+//  m_editedImage = new Image( m_image );
+  m_editedImage->loadImage( m_image );
+//  delete tmp;
 
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
   if(m_glImage.isNull())
@@ -398,27 +400,26 @@ void GLWindow::loadImage()
   glActiveTexture( GL_TEXTURE0 );
   m_textureLoaded = true;
   update();
-
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
 
 void GLWindow::calculateIntensity()
 {
-  m_editedImage.intensity();
+  m_editedImage->intensity();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
 
 void GLWindow::calculateNormals( int _depth )
 {
-  m_editedImage.calculateNormalMap( m_image, _depth );
+  m_editedImage->calculateNormalMap( m_image, _depth );
 
-  m_preview =   m_editedImage.calculateNormalMap( m_image, _depth );
+  m_preview = m_editedImage->calculateNormalMap( m_image, _depth );
 
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
 
-  if(m_glImage.isNull())
+  if( m_glImage.isNull() )
     qWarning("IMAGE IS NULL");
   glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
@@ -436,10 +437,10 @@ void GLWindow::calculateNormals( int _depth )
 
 void GLWindow::calculateSeparation()
 {
-  m_editedImage.intensity();
-  m_editedImage.chroma();
-  m_editedImage.separation();
-  m_editedImage.shading();
+  m_editedImage->intensity();
+  m_editedImage->chroma();
+  m_editedImage->separation();
+  m_editedImage->shading();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -449,8 +450,8 @@ void GLWindow::calculateSpecular( int _brightness, int _contrast, bool _invert, 
   float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
   float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
 
-  m_editedImage.specular( tmpBrightness, tmpContrast, _invert, _sharpness, _equalize );
-  m_preview = m_editedImage.getSpecular();
+  m_editedImage->specular( tmpBrightness, tmpContrast, _invert, _sharpness, _equalize );
+  m_preview = m_editedImage->getSpecular();
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
   if(m_glImage.isNull())
     qWarning("IMAGE IS NULL");

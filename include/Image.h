@@ -6,12 +6,11 @@
 #include <glm.hpp>
 #include <CL/cl.hpp>
 
-
 class Image
 {
 public:
   enum map { ORIGINAL, INTENSITY, ALBEDO, SHADING, NORMAL, SPECULAR, CHROMA };
-  Image() = default;
+  Image();
   Image( QImage & _image );
   void threshold();
   void intensity();
@@ -23,7 +22,7 @@ public:
 
   float contrast(float _amount, float _value);
   float desaturate(float _r, float _g, float _b);
-  void equalizeHistogram(map _map);
+  void equalizeHistogram( map _map );
 
   float clampF(float value, float high, float low);
   float clampI(int value, int high, int low);
@@ -32,7 +31,9 @@ public:
   void save( std::vector<std::vector<float>> & _image, std::string _destination );
   void save( map _image, std::string _destination );
   void vectorAdd();
+  void loadImage( QImage _image );
   QImage calculateNormalMap( QImage & image, int _depth );
+  QImage getDiffuse() { return m_image; }
   QImage getSpecular();
   QImage getIntensity();
 
@@ -54,6 +55,7 @@ private:
   cl::Program::Sources m_sources;
   cl::Program m_program;
   // CL end
+
   QImage m_image;
 
   std::vector<std::vector<float>> m_intensity;

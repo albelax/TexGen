@@ -29,27 +29,26 @@ public :
   /// @brief Constructor for GLWindow
   /// @param [in] _parent the parent window to create the GL context in
   //----------------------------------------------------------------------------------------------------------------------
-  GLWindow(QWidget * _parent );
-  void loadImage();
-  void setImagePath( char * _path );
-  void save(const char * _name);
+
+  GLWindow( QWidget * _parent );
+  GLWindow( QWidget * _parent, Image * _image );
+
+  void loadImage( char * _path ); // override
+  void save( const char * _name );
 
   /// @brief dtor
   ~GLWindow();
-  void mouseMove(QMouseEvent * _event) override;
-  void mouseClick(QMouseEvent * _event) override;
+  void mouseMove( QMouseEvent * _event ) override;
+  void mouseClick( QMouseEvent * _event ) override;
   std::vector<std::vector<float>> intensity();
   std::vector< std::vector< std::vector<float> > > chroma(std::vector<std::vector<float> > &_intensity );
 
 public slots:
   void selectImage( int _i );
   void calculateIntensity();
-  void calculateNormals(int _depth);
+  void calculateNormals( int _depth ) override;
   void calculateSeparation();
-
-  int getNormalDepth();
-
-  void calculateSpecular( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize );
+  void calculateSpecular( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
 
 protected:
   /// @brief  The following methods must be implimented in the sub class
@@ -61,7 +60,7 @@ protected:
   void renderTexture();
   void renderNormals();
   void exportCSV( std::string _file );
-  void drawStroke(QPainter & _p , std::array<float, 2> & _ratio);
+  void drawStroke( QPainter & _p , std::array<float, 2> & _ratio );
 
   void showOriginalImage();
   void showAlbedoMap();
@@ -74,23 +73,13 @@ private :
   void init();
   bool clearStroke;
   bool m_textureLoaded = false;
-
-//  Mesh m_plane; //
-//  Shader m_shader; //
-//  GLuint m_vao;   //
-//  GLuint m_vbo;   //
-//  GLuint m_tbo;   //
   GLuint m_colourTextureAddress;
   GLuint m_renderedTexture;
-//  std::vector<GLuint> m_textures; //
-//  TrackballCamera m_camera; //
   QImage m_image;
   QImage m_preview;
   QImage m_glImage;
   std::vector<std::vector<std::vector<float>>> m_totDiffF0;
   std::vector<glm::vec2> m_stroke;
-  Image m_editedImage;
-  char * m_originalImage;
   std::array<float, 2> m_ratio;
 };
 

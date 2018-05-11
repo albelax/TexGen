@@ -1,10 +1,5 @@
 #include "Scene.h"
 
-//Scene::Scene()
-//{
-
-//}
-
 //-----------------------------------------------------
 
 Scene::Scene( QWidget *_parent ) : QOpenGLWidget( _parent )
