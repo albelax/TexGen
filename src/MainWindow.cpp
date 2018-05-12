@@ -146,6 +146,11 @@ void MainWindow::changeLayout( int _n )
     _widget->hide();
   }
 
+  if ( _n == Image::ORIGINAL && dynamic_cast<GLWindow *>( m_activeScene ) )
+  {
+    dynamic_cast<GLWindow *>( m_activeScene )->selectImage(_n);
+  }
+
   if ( _n == Image::SPECULAR )
   {
     m_currentMenu = &m_specularMenu;

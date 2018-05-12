@@ -30,6 +30,8 @@ GLWindow::GLWindow(QWidget * _parent, Image * _image ) : Scene( _parent )
   m_camera.setOrigin( 0.0f, 0.0f, 0.0f );
 
   m_editedImage = _image;
+  m_preview = _image->getDiffuse();
+  m_image = _image->getDiffuse();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -50,6 +52,22 @@ void GLWindow::initializeGL()
   glClearColor( 0.5f, 0.5f, 0.5f, 1.0f );
   glViewport( 0, 0, devicePixelRatio(), devicePixelRatio() );
   init();
+
+  if( m_preview.isNull() == 0 )
+  {
+    m_glImage = QGLWidget::convertToGLFormat( m_preview );
+
+    glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
+
+    glUniform1i( m_colourTextureAddress, 0 );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+    glActiveTexture( GL_TEXTURE0 );
+    m_textureLoaded = true;
+  }
 }
 
 //----------------------------------------------------------------------------------------------------------------------

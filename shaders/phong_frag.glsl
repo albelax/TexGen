@@ -146,7 +146,7 @@ void main()
   float Ks = texture(SpecularTexture,texCoord).r;
   float Kd = 1.0f;
 
-  FragColor = Ks * pow( max( dot(r,v), 0.0 ), 10 ) + // spec
+  FragColor = Ks * pow( max( dot(r,v), 0.0 ), 20 ) + // spec
               Kd * vec4( texture( ColourTexture, texCoord ).rgb, 1);
 
 }
