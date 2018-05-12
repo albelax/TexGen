@@ -14,6 +14,7 @@ uniform vec4 LightPosition;
 
 uniform vec3 baseColor;
 uniform vec3 dotsColor;
+uniform vec3 camPos;
 
 layout ( location = 0 ) out vec4 FragColor;
 
@@ -130,7 +131,7 @@ void main()
 
   vec3 s = normalize( vec3( LightPosition.xyz ) - FragmentPosition ); // Calculate the light vector
 
-  vec3 v = normalize( -vec3( FragmentPosition ) ); // eye
+  vec3 v = normalize( vec3( camPos.xyz ) - FragmentPosition  ); // eye
 
   vec3 tgt = normalize( texture( NormalTexture, texCoord ).rgb * 2.0 - 1.0 );
 
@@ -143,9 +144,9 @@ void main()
 
   float power = beckmannSpecular(s,v,n,1.0);
   float Ks = texture(SpecularTexture,texCoord).r;
-  float Kd = 1.0f-Ks;
+  float Kd = 1.0f;
 
-  FragColor = Ks*pow( max( dot(r,v), 0.0 ), power ) + // spec
+  FragColor = Ks * pow( max( dot(r,v), 0.0 ), 10 ) + // spec
               Kd * vec4( texture( ColourTexture, texCoord ).rgb, 1);
 
 }

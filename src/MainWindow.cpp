@@ -235,7 +235,7 @@ void MainWindow::makeSpecularMenu()
 void MainWindow::makeNormalMenu()
 {
   QSlider * depth = new QSlider( Qt::Horizontal, Q_NULLPTR );
-  depth->setMinimum(1);
+  depth->setMinimum(0);
   depth->setMaximum(20);
   depth->setValue(1);
 
@@ -270,7 +270,7 @@ void MainWindow::resetSpecularSettings()
   static_cast<QCheckBox *>(m_specularMenu[1])->setTristate(false);
   static_cast<QCheckBox *>(m_specularMenu[9])->setTristate(false);
 
-  m_gl->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),
+  m_activeScene->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),
       static_cast<QSlider *>(m_specularMenu[3])->value(),
       static_cast<QCheckBox *>(m_specularMenu[1])->isChecked(),
       static_cast<QSlider *>(m_specularMenu[7])->value(),

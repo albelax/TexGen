@@ -1,55 +1,62 @@
 #include "Camera.h"
 
-/**
- *
- * This class was taken from a Rendering workshop
- * it belongs to Richard Southern
- *
- **/
 
-Camera::Camera() :
-    m_fovy(glm::pi<float>() * 0.25f),
-    m_zNear(1.0f),
-m_zFar(8.0f),
-    m_lastX(0.0),
-    m_lastY(0.0)
+//-----------------------------------------------------------------------------------------------------
+void Camera::resize(const int _width, const int _height)
 {
-    resize(1, 1);
+  // Check we won't get a divide by zero
+  m_aspectRatio = (!_height)? 1.0f : (float(_width)/float(_height));
 }
-
-/**
- * @brief Camera::resize
- * @param width
- * @param height
- */
-void Camera::resize(int width, int height)
+//-----------------------------------------------------------------------------------------------------
+glm::vec3 Camera::getCameraOrigin() const noexcept
 {
-    m_windowWidth = width;
-    m_windowHeight = height;
-		m_aspect = (height == 0)?1.0f:( float( width ) / float( height ) );
+  return m_camOrigin;
 }
-
-
-/**
- * @brief Camera::elapsedTime
- * @return
- */
-double Camera::elapsedTime()
+//-----------------------------------------------------------------------------------------------------
+void Camera::setTarget(const float _x, const float _y, const float _z) noexcept
 {
-    auto now = std::chrono::high_resolution_clock::now();
-    double ret_val = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastTime).count()  * 0.001;
-    m_lastTime = now;
-    return ret_val;
+  m_target.x = _x;
+  m_target.y = _y;
+  m_target.z = _z;
 }
-
-
-/**
- * @brief Camera::update
- *  You should do something in this function to handle the calculation of the
- *  view and projection matrices V and P respectively
- */
+//-----------------------------------------------------------------------------------------------------
+void Camera::setOrigin(const float _x, const float _y, float _z) noexcept
+{
+  m_camOrigin.x = _x;
+  m_camOrigin.y = _y;
+  m_camOrigin.z = _z;
+}
+//-----------------------------------------------------------------------------------------------------
 void Camera::update()
 {
-    m_V = glm::mat4(1.0f);
-		m_P = glm::perspective( m_fovy, m_aspect, m_zNear, m_zFar );
+  m_projectMatrix = glm::perspective( m_fovy, m_aspectRatio, m_nearClippingPlane, m_farClippingPlane);
 }
+//-----------------------------------------------------------------------------------------------------
+void Camera::setMousePos(const float _mouseX, const float _mouseY)
+{
+  m_lastPos.x = _mouseX;
+  m_lastPos.y = _mouseY;
+}
+//-----------------------------------------------------------------------------------------------------
+void Camera::setFov(const float _fov)
+{
+  m_fovy = _fov;
+}
+//-----------------------------------------------------------------------------------------------------
+void Camera::resetPosition()
+{
+  m_lastPos = {0.0f, 0.0f};
+  m_target = {0.0f, 0.0f, -2.0f};
+  m_camOrigin = {0.0f, 0.0f, 0.0f};
+}
+//-----------------------------------------------------------------------------------------------------
+const glm::mat4& Camera::viewMatrix()
+{
+  return m_viewMatrix;
+}
+//-----------------------------------------------------------------------------------------------------
+const glm::mat4& Camera::projMatrix()
+{
+  return m_projectMatrix;
+}
+//-----------------------------------------------------------------------------------------------------

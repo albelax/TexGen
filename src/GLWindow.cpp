@@ -14,9 +14,9 @@ GLWindow::GLWindow( QWidget *_parent ) : Scene( _parent )
 {
   m_plane = Mesh( "models/plane.obj", "plane" );
   this->resize( _parent->size() );
-  m_camera.setInitialMousePos( 0, 0 );
+  m_camera.setMousePos( 0, 0 );
   m_camera.setTarget( 0.0f, 0.0f, -2.0f );
-  m_camera.setEye( 0.0f, 0.0f, 0.0f );
+  m_camera.setOrigin( 0.0f, 0.0f, 0.0f );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -25,9 +25,9 @@ GLWindow::GLWindow(QWidget * _parent, Image * _image ) : Scene( _parent )
 {
   m_plane = Mesh( "models/plane.obj", "plane" );
   this->resize( _parent->size() );
-  m_camera.setInitialMousePos( 0, 0 );
+  m_camera.setMousePos( 0, 0 );
   m_camera.setTarget( 0.0f, 0.0f, -2.0f );
-  m_camera.setEye( 0.0f, 0.0f, 0.0f );
+  m_camera.setOrigin( 0.0f, 0.0f, 0.0f );
 
   m_editedImage = _image;
 }
@@ -63,7 +63,7 @@ GLWindow::~GLWindow()
 
 void GLWindow::mouseMove( QMouseEvent * _event )
 {
-  m_camera.handleMouseMove( _event->pos().x(), _event->pos().y() );
+  m_camera.handleMouseMove( glm::vec2(_event->pos().x(), _event->pos().y()) );
 
   if ( _event->buttons() == Qt::LeftButton )
   {
@@ -99,7 +99,7 @@ void GLWindow::mouseClick(QMouseEvent * _event)
     m_stroke.clear();
   }
 
-  m_camera.handleMouseClick(_event->pos().x(), _event->pos().y(), _event );
+  m_camera.handleMouseClick( *_event );
   update();
 }
 

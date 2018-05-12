@@ -4,9 +4,9 @@ PBRViewport::PBRViewport(QWidget *_parent) : Scene( _parent )
 {
   m_plane = Mesh("models/plane.obj","tile" );
   this->resize(_parent->size());
-  m_camera.setInitialMousePos(0,0);
+  m_camera.setMousePos(0,0);
   m_camera.setTarget(0.0f, 0.0f, -2.0f);
-  m_camera.setEye(0.0f, 0.0f, 0.0f);
+  m_camera.setOrigin(0.0f, 0.0f, 0.0f);
 }
 
 PBRViewport::PBRViewport( QWidget *_parent, Image * _image ) : Scene( _parent )
@@ -14,9 +14,9 @@ PBRViewport::PBRViewport( QWidget *_parent, Image * _image ) : Scene( _parent )
   m_editedImage = _image;
   m_plane = Mesh("models/plane.obj","tile" );
   this->resize(_parent->size());
-  m_camera.setInitialMousePos(0,0);
+  m_camera.setMousePos(0,0);
   m_camera.setTarget(0.0f, 0.0f, -2.0f);
-  m_camera.setEye(0.0f, 0.0f, 0.0f);
+  m_camera.setOrigin(0.0f, 0.0f, 0.0f);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ PBRViewport::~PBRViewport()
 
 void PBRViewport::mouseMove(QMouseEvent * _event)
 {
-	m_camera.handleMouseMove( _event->pos().x(), _event->pos().y() );
+	m_camera.handleMouseMove( glm::vec2(_event->pos().x(), _event->pos().y()) );
 	update();
 }
 
@@ -66,7 +66,7 @@ void PBRViewport::mouseMove(QMouseEvent * _event)
 
 void PBRViewport::mouseClick(QMouseEvent * _event)
 {
-	m_camera.handleMouseClick(_event->pos().x(), _event->pos().y(), _event);
+	m_camera.handleMouseClick(*_event);
 	update();
 }
 
@@ -195,6 +195,8 @@ void PBRViewport::init()
 
 	GLuint tmpTexture;
 	addTexture( m_editedImage->getDiffuse(), &tmpTexture, 25 ); // void one, for some reason is needed ....
+
+	glUniform3f(glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ),m_camera.getCameraEye()[0],m_camera.getCameraEye()[1],m_camera.getCameraEye()[2]);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -204,6 +206,7 @@ void PBRViewport::paintGL()
 	glViewport( 0, 0, width(), height() );
 	glClearColor( 1, 1, 1, 1.0f );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+	glUniform3f(glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ),m_camera.getCameraEye()[0],m_camera.getCameraEye()[1],m_camera.getCameraEye()[2]);
 
 	renderScene();
 	update();
