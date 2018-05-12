@@ -86,6 +86,36 @@ void Image::loadImage( QImage _image )
 
   width = m_image.width();
   height = m_image.height();
+  regionWidth = ceil(float(width)/float(m_res));
+  regionHeight = ceil(float(height)/float(m_res));
+
+  m_intensity.resize( width );
+  m_chroma.resize( width );
+  m_shadingMap.resize( width );
+  m_specular.resize( width );
+
+  for( int i = 0; i < width; ++i )
+  {
+    m_intensity[i].resize( height );
+    m_shadingMap[i].resize( height );
+    m_chroma[i].resize( height );
+    m_specular[i].resize( height );
+  }
+
+  B.resize( int(regionWidth) );
+  A.resize( int(regionWidth) );
+  regions.resize(int(regionWidth));
+  whichPixelWhichRegion.resize( int( regionWidth ) );
+  numberOfPixelsInChromaRegions.resize( int(regionWidth) );
+
+  for( int i = 0; i < regionWidth; ++i )
+  {
+    A[i].resize( int(regionHeight) );
+    B[i].resize( int(regionHeight) );
+    regions[i].resize( int(regionHeight) );
+    whichPixelWhichRegion[i].resize( int(regionHeight) );
+    numberOfPixelsInChromaRegions[i].resize( int(regionHeight) );
+  }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
