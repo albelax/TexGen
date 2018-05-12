@@ -72,19 +72,19 @@ void PBRViewport::mouseClick(QMouseEvent * _event)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-//void PBRViewport::addTexture( QImage _image )
-//{
-//	GLuint tmp;
-//	m_textures.push_back( tmp );
-//	glActiveTexture(GL_TEXTURE0 + (m_textures.size() - 1));
-//	glGenTextures(1, &m_textures[m_textures.size() - 1]);
+void PBRViewport::addTexture( QImage _image )
+{
+	GLuint tmp;
+	m_textures.push_back( tmp );
+	glActiveTexture(GL_TEXTURE0 + (m_textures.size() - 1));
+	glGenTextures(1, &m_textures[m_textures.size() - 1]);
 
-//  QImage image = QGLWidget::convertToGLFormat( _image );
-//  if( _image.isNull() )
-//    qWarning( "IMAGE IS NULL" );
-//  glBindTexture( GL_TEXTURE_2D, m_textures[m_textures.size() - 1] );
-//  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits() );
-//}
+  QImage image = QGLWidget::convertToGLFormat( _image );
+  if( _image.isNull() )
+    qWarning( "IMAGE IS NULL" );
+  glBindTexture( GL_TEXTURE_2D, m_textures[m_textures.size() - 1] );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits() );
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -238,7 +238,6 @@ void PBRViewport::renderScene()
 
 void PBRViewport::calculateNormals( int _depth )
 {
-  glActiveTexture( GL_TEXTURE0 );
 
   auto tmp = m_editedImage->getDiffuse();
   tmp = m_editedImage->calculateNormalMap( tmp, _depth );
@@ -251,6 +250,32 @@ void PBRViewport::calculateNormals( int _depth )
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glImage.width(), glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
 
   glUniform1i( m_normalTextureAddress, 1 );
+
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+
+  update();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void PBRViewport::calculateSpecular( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize )
+{
+  float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
+  float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
+
+  m_editedImage->specular( tmpBrightness, tmpContrast, _invert, _sharpness, _equalize );
+  auto tmp = m_editedImage->getSpecular();
+  QImage glImage = QGLWidget::convertToGLFormat( tmp );
+  if(glImage.isNull())
+    qWarning("IMAGE IS NULL");
+
+  glBindTexture( GL_TEXTURE_2D, m_specularTexture );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glImage.width(), glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
+
+  glUniform1i( m_specularTextureAddress, 2 );
 
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );

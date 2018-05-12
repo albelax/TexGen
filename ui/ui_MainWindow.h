@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.6.2
+** Created by: Qt User Interface Compiler version 5.9.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -139,27 +139,27 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "TexSketch", 0));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "TexSketch", Q_NULLPTR));
         s_transformGB->setTitle(QString());
-        label->setText(QApplication::translate("MainWindow", "Viewport Mode", 0));
+        label->setText(QApplication::translate("MainWindow", "Viewport Mode", Q_NULLPTR));
         viewport->clear();
         viewport->insertItems(0, QStringList()
-         << QApplication::translate("MainWindow", "2D", 0)
-         << QApplication::translate("MainWindow", "3D", 0)
+         << QApplication::translate("MainWindow", "2D", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "3D", Q_NULLPTR)
         );
-        Image->setText(QApplication::translate("MainWindow", "Image", 0));
+        Image->setText(QApplication::translate("MainWindow", "Image", Q_NULLPTR));
         m_selectImage->clear();
         m_selectImage->insertItems(0, QStringList()
-         << QApplication::translate("MainWindow", "Original", 0)
-         << QApplication::translate("MainWindow", "Grayscale", 0)
-         << QApplication::translate("MainWindow", "Albedo", 0)
-         << QApplication::translate("MainWindow", "Shading", 0)
-         << QApplication::translate("MainWindow", "Normal", 0)
-         << QApplication::translate("MainWindow", "Specular", 0)
+         << QApplication::translate("MainWindow", "Original", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "Grayscale", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "Albedo", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "Shading", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "Normal", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "Specular", Q_NULLPTR)
         );
         s_drawGB->setTitle(QString());
-        menuFiles->setTitle(QApplication::translate("MainWindow", "File", 0));
-        menuedit->setTitle(QApplication::translate("MainWindow", "Edit", 0));
+        menuFiles->setTitle(QApplication::translate("MainWindow", "File", Q_NULLPTR));
+        menuedit->setTitle(QApplication::translate("MainWindow", "Edit", Q_NULLPTR));
     } // retranslateUi
 
 };
