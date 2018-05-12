@@ -137,7 +137,6 @@ void Image::vectorAdd()
 
 QImage Image::calculateNormalMap( QImage & image, int _depth )
 {
-  std::cout << width << " normal width\n";
   float * r = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
   float * g = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
   float * b = static_cast<float *>( malloc( width * height * sizeof( float ) ) );

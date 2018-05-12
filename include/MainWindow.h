@@ -72,7 +72,6 @@ private:
   void mouseReleaseEvent(QMouseEvent *_event);
   void makeSpecularMenu();
   void makeNormalMenu();
-
 };
 
 #endif // MAINWINDOW_H

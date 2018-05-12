@@ -19,8 +19,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
     m_activeScene = m_gl;
   }
 
-  m_ui -> s_mainWindowGridLayout -> addWidget(m_activeScene, 0, 0, 3, 5);
-//  m_imageProcessor = Image();/
+  m_ui->s_mainWindowGridLayout->addWidget(m_activeScene, 0, 0, 3, 5);
+
   createActions();
   createMenus();
   makeSpecularMenu();
@@ -117,8 +117,6 @@ void MainWindow::open()
 
   if( !fileName.isEmpty() && dynamic_cast<GLWindow *>( m_activeScene ) )
   {
-    // this needs to change, otherwise it won't work with the pbr scene
-//    dynamic_cast<GLWindow *>( m_activeScene )->setImagePath( fileName.toLatin1().data() );
     dynamic_cast<GLWindow *>( m_activeScene )->loadImage( fileName.toLatin1().data() );
   }
 }
@@ -260,7 +258,7 @@ void MainWindow::updateSpecular()
 
 void MainWindow::updateNormal()
 {
-  m_activeScene->calculateNormals( static_cast<QSlider *>(m_normalMenu[1])->value() );
+  m_activeScene->calculateNormals( static_cast<QSlider *>( m_normalMenu[1])->value() );
 }
 
 //------------------------------------------------------------------------

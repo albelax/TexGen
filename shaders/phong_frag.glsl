@@ -120,4 +120,6 @@ void main()
   vec3 LightIntensity = PhongReflection(s, n, v);
 
   FragColor = vec4( texture( ColourTexture, texCoord ).rgb, 1);
+  FragColor = vec4( texture( NormalTexture, texCoord ).rgb, 1);
+
 }

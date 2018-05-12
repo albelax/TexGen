@@ -72,19 +72,31 @@ void PBRViewport::mouseClick(QMouseEvent * _event)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void PBRViewport::addTexture( QImage _image )
-{
-	GLuint tmp;
-	m_textures.push_back(tmp);
-	glActiveTexture(GL_TEXTURE0 + (m_textures.size() - 1));
-	glGenTextures(1, &m_textures[m_textures.size() - 1]);
+//void PBRViewport::addTexture( QImage _image )
+//{
+//	GLuint tmp;
+//	m_textures.push_back( tmp );
+//	glActiveTexture(GL_TEXTURE0 + (m_textures.size() - 1));
+//	glGenTextures(1, &m_textures[m_textures.size() - 1]);
 
-//  QImage image = _image;
-//	image.load(_image.c_str());
+//  QImage image = QGLWidget::convertToGLFormat( _image );
+//  if( _image.isNull() )
+//    qWarning( "IMAGE IS NULL" );
+//  glBindTexture( GL_TEXTURE_2D, m_textures[m_textures.size() - 1] );
+//  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits() );
+//}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void PBRViewport::addTexture( QImage _image, GLuint *_texture, unsigned int _offset )
+{
+	glActiveTexture( GL_TEXTURE0 + _offset );
+	glGenTextures( 1, _texture );
+
   QImage image = QGLWidget::convertToGLFormat( _image );
-  if(_image.isNull())
-		qWarning("IMAGE IS NULL");
-	glBindTexture( GL_TEXTURE_2D, m_textures[m_textures.size()-1] );
+  if( _image.isNull() )
+    qWarning( "IMAGE IS NULL" );
+  glBindTexture( GL_TEXTURE_2D, *_texture );
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits() );
 }
 
@@ -149,9 +161,9 @@ void PBRViewport::init()
 	m_normalTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "NormalTexture" );
 	m_specularTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "SpecularTexture" );
 
-	// load color texture
-  addTexture( m_editedImage->getDiffuse() ); // TODO
-  glUniform1i( m_colourTextureAddress, 0 );
+//// load color texture
+	addTexture( m_editedImage->getDiffuse(), &m_diffuseTexture, 0 );
+	glUniform1i( m_colourTextureAddress, 0 );
 
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
@@ -159,9 +171,10 @@ void PBRViewport::init()
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 	glGenerateMipmap( GL_TEXTURE_2D );
 
-//	// load normal texture
+//// load normal texture
   auto tmp = m_editedImage->getDiffuse();
-  addTexture( m_editedImage->calculateNormalMap( tmp, 2 ) ); // TODO
+  addTexture( m_editedImage->calculateNormalMap( tmp, 1 ), &m_normalTexture, 1 );
+
   glUniform1i( m_normalTextureAddress, 1 );
 
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
@@ -170,15 +183,18 @@ void PBRViewport::init()
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
   glGenerateMipmap( GL_TEXTURE_2D);
 
-//	// load specular texture
-//  addTexture( m_editedImage->getSpecular() ); // TODO
-//	glUniform1i( m_specularTextureAddress, 1 );
+//// load specular texture
+	addTexture( m_editedImage->getDiffuse(), &m_specularTexture, 2 );
+	glUniform1i( m_specularTextureAddress, 2 );
 
-//	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-//	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-//	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-//	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-//	glGenerateMipmap( GL_TEXTURE_2D);
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glGenerateMipmap( GL_TEXTURE_2D);
+
+	GLuint tmpTexture;
+	addTexture( m_editedImage->getDiffuse(), &tmpTexture, 25 ); // void one, for some reason is needed ....
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -214,14 +230,32 @@ void PBRViewport::renderScene()
 
   glUniformMatrix3fv( m_NAddress, 1, GL_FALSE, glm::value_ptr( N ) );
 
-//	glBindVertexArray( m_vao );
-//	glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
-//	glEnableVertexAttribArray( glGetAttribLocation( m_shader.getShaderProgram(), "VertexPosition" ) );
-//	glVertexAttribPointer( glGetAttribLocation( m_shader.getShaderProgram(), "VertexPosition" ), 3, GL_FLOAT, GL_FALSE, 0, 0 );
-
-//	glBindBuffer( GL_ARRAY_BUFFER, m_tbo );
-//	glEnableVertexAttribArray( glGetAttribLocation( m_shader.getShaderProgram(), "TexCoord" ) );
-//	glVertexAttribPointer( glGetAttribLocation( m_shader.getShaderProgram(), "TexCoord" ), 2, GL_FLOAT, GL_FALSE, 0, (void*) 0 );
 
   glDrawArrays( GL_TRIANGLES, m_plane.getBufferIndex() / 3, ( m_plane.getAmountVertexData() / 3 ) );
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void PBRViewport::calculateNormals( int _depth )
+{
+  glActiveTexture( GL_TEXTURE0 );
+
+  auto tmp = m_editedImage->getDiffuse();
+  tmp = m_editedImage->calculateNormalMap( tmp, _depth );
+  QImage glImage = QGLWidget::convertToGLFormat( tmp );
+
+  if( glImage.isNull() )
+    qWarning("IMAGE IS NULL");
+
+  glBindTexture( GL_TEXTURE_2D, m_normalTexture );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glImage.width(), glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
+
+  glUniform1i( m_normalTextureAddress, 1 );
+
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+
+  update();
 }

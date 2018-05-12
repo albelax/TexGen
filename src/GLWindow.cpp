@@ -380,11 +380,7 @@ void GLWindow::loadImage( char *_path )
   m_image.load( _path );
   m_preview = m_image.copy();
 
-  // free memory of the old image before reallocating the new one
-//  auto tmp = m_editedImage;
-//  m_editedImage = new Image( m_image );
   m_editedImage->loadImage( m_image );
-//  delete tmp;
 
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
   if(m_glImage.isNull())

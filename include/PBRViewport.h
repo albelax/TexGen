@@ -19,7 +19,7 @@ public:
   ~PBRViewport();
   void mouseMove( QMouseEvent * _event ) override;
   void mouseClick( QMouseEvent * _event ) override;
-  void calculateNormals( int _depth ) override {}
+  void calculateNormals( int _depth ) override;
   void calculateSpecular( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override {}
 
 protected:
@@ -31,6 +31,7 @@ protected:
   void resizeGL( int _w , int _h );
   void renderScene();
   void addTexture( QImage _image );
+  void addTexture( QImage _image, GLuint * _texture, unsigned int _offset );
 
 private :
   void init();
@@ -39,6 +40,11 @@ private :
   GLint m_normalTextureAddress;
   GLint m_colourTextureAddress;
   GLuint m_depthTexture;
+
+  GLuint m_diffuseTexture;
+  GLuint m_normalTexture;
+  GLuint m_specularTexture;
+  QImage m_normal;
 };
 
 #endif
