@@ -9,6 +9,7 @@ in vec2 texCoord;
 uniform bool addingColor;
 uniform sampler2D ColourTexture;
 uniform sampler2D NormalTexture;
+uniform sampler2D SpecularTexture;
 uniform vec4 LightPosition;
 
 uniform vec3 baseColor;
@@ -102,7 +103,26 @@ vec3 PhongReflection(vec3 _s, vec3 _n, vec3 _v)
         Light.Ls * Material.Ks * pow( max( dot( r, _v ), 0.0 ), Material.Shininess ) );
 }
 
+// below is taken from https://github.com/stackgl/glsl-specular-beckmann
+// begin citation
 
+float beckmannDistribution(float x, float roughness) {
+  float NdotH = max(x, 0.0001);
+  float cos2Alpha = NdotH * NdotH;
+  float tan2Alpha = (cos2Alpha - 1.0) / cos2Alpha;
+  float roughness2 = roughness * roughness;
+  float denom = 3.141592653589793 * roughness2 * cos2Alpha * cos2Alpha;
+  return exp(tan2Alpha / roughness2) / denom;
+}
+
+float beckmannSpecular(
+  vec3 lightDirection,
+  vec3 viewDirection,
+  vec3 surfaceNormal,
+  float roughness) {
+  return beckmannDistribution(dot(surfaceNormal, normalize(lightDirection + viewDirection)), roughness);
+}
+// end citation
 
 void main()
 {
@@ -117,9 +137,15 @@ void main()
   vec3 src = vec3( 0.0, 0.0, 1.0 );
   n = rotateVector( src, tgt, n);
 
+  vec3 r = reflect( -s, n );
+
   vec3 LightIntensity = PhongReflection(s, n, v);
 
-  FragColor = vec4( texture( ColourTexture, texCoord ).rgb, 1);
-  FragColor = vec4( texture( NormalTexture, texCoord ).rgb, 1);
+  float power = beckmannSpecular(s,v,n,1.0);
+  float Ks = texture(SpecularTexture,texCoord).r;
+  float Kd = 1.0f-Ks;
+
+  FragColor = Ks*pow( max( dot(r,v), 0.0 ), power ) + // spec
+              Kd * vec4( texture( ColourTexture, texCoord ).rgb, 1);
 
 }

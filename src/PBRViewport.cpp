@@ -184,7 +184,7 @@ void PBRViewport::init()
   glGenerateMipmap( GL_TEXTURE_2D);
 
 //// load specular texture
-	addTexture( m_editedImage->getDiffuse(), &m_specularTexture, 2 );
+	addTexture( m_editedImage->getSpecular(), &m_specularTexture, 2 );
 	glUniform1i( m_specularTextureAddress, 2 );
 
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
