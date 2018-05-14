@@ -277,9 +277,37 @@ void PBRViewport::calculateSpecular( int _brightness, int _contrast, bool _inver
   float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
   float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
 
-  m_editedImage->specular( tmpBrightness, tmpContrast, _invert, _sharpness, _equalize );
+  m_editedImage->specular( tmpBrightness, tmpContrast, _invert, _sharpness, _equalize, Image::SPECULAR );
   auto tmp = m_editedImage->getSpecular();
   QImage glImage = QGLWidget::convertToGLFormat( tmp );
+  if(glImage.isNull())
+    qWarning("IMAGE IS NULL");
+
+  glBindTexture( GL_TEXTURE_2D, m_specularTexture );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glImage.width(), glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
+
+  glUniform1i( m_specularTextureAddress, 2 );
+
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+	glGenerateMipmap( GL_TEXTURE_2D );
+
+  update();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void PBRViewport::calculateRoughness( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize )
+{
+  float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
+  float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
+
+  m_editedImage->specular( tmpBrightness, tmpContrast, _invert, _sharpness, _equalize, Image::ROUGHNESS );
+  auto tmp = m_editedImage->getRoughness();
+  QImage glImage = QGLWidget::convertToGLFormat( tmp );
+
   if(glImage.isNull())
     qWarning("IMAGE IS NULL");
 
@@ -295,5 +323,5 @@ void PBRViewport::calculateSpecular( int _brightness, int _contrast, bool _inver
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 	glGenerateMipmap( GL_TEXTURE_2D );
 
-  update();
+	update();
 }

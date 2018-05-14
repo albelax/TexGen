@@ -25,23 +25,33 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   createMenus();
   makeSpecularMenu();
   makeNormalMenu();
+  makeRoughnessMenu();
   m_currentMenu = &m_originalMenu;
 
   // specular
   //	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), m_gl, SLOT(selectImage(int)));
   connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLayout(int)));
+  connect(m_ui->viewport, SIGNAL(currentIndexChanged(int)), this, SLOT(swapView(int)));
+
+  // specular
   connect((QSlider *)m_specularMenu[3], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
   connect((QSlider *)m_specularMenu[5], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
   connect((QSlider *)m_specularMenu[7], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
   connect((QCheckBox *)m_specularMenu[1], SIGNAL(clicked(bool)), this, SLOT(updateSpecular()));
-  // normal
-  connect((QSlider *)m_normalMenu[1], SIGNAL(sliderReleased() ), this, SLOT(updateNormal()));
   connect((QCheckBox *)m_specularMenu[9], SIGNAL(clicked(bool)), this, SLOT(updateSpecular()));
   connect((QPushButton *)m_specularMenu[10], SIGNAL(released()), this, SLOT(resetSpecularSettings()));
-  connect(m_ui->viewport, SIGNAL(currentIndexChanged(int)), this, SLOT(swapView(int)));
 
-//  std::cout << "m_gl: " << sizeof( GLWindow ) << " pbr: " << sizeof( PBRViewport ) <<
-//               " Qimage: " << sizeof( QImage ) << " Image processor " << sizeof( Image ) << "\n";
+  // normal
+  connect((QSlider *)m_normalMenu[1], SIGNAL(sliderReleased() ), this, SLOT(updateNormal()));
+
+  // roughness
+  connect((QSlider *)m_roughnessMenu[3], SIGNAL(sliderReleased() ), this, SLOT(updateRoughness()));
+  connect((QSlider *)m_roughnessMenu[5], SIGNAL(sliderReleased() ), this, SLOT(updateRoughness()));
+  connect((QSlider *)m_roughnessMenu[7], SIGNAL(sliderReleased() ), this, SLOT(updateRoughness()));
+  connect((QCheckBox *)m_roughnessMenu[1], SIGNAL(clicked(bool)), this, SLOT(updateRoughness()));
+  connect((QCheckBox *)m_roughnessMenu[9], SIGNAL(clicked(bool)), this, SLOT(updateRoughness()));
+//  connect((QPushButton *)m_roughnessMenu[10], SIGNAL(released()), this, SLOT(resetSpecularSettings()));
+
 }
 
 //------------------------------------------------------------------------
@@ -59,7 +69,7 @@ void MainWindow::keyPressEvent(QKeyEvent *_event)
   // we then switch on the key value and set the camera in the GLWindow
   switch (_event->key())
   {
-    case Qt::Key_Escape : QApplication::exit(EXIT_SUCCESS); break;
+    case Qt::Key_Escape : QApplication::exit( EXIT_SUCCESS ); break;
     default : break;
   }
 }
@@ -68,7 +78,7 @@ void MainWindow::keyPressEvent(QKeyEvent *_event)
 
 void MainWindow::mouseMoveEvent(QMouseEvent * _event)
 {
-  m_activeScene->mouseMove(_event);
+  m_activeScene->mouseMove( _event );
 }
 
 //------------------------------------------------------------------------
@@ -176,6 +186,19 @@ void MainWindow::changeLayout( int _n )
     }
     updateNormal();
   }
+
+  if ( _n == Image::ROUGHNESS )
+  {
+    m_currentMenu = &m_roughnessMenu;
+
+    for ( auto &_widget : m_roughnessMenu )
+    {
+      layout->setAlignment( this, Qt::AlignTop );
+      layout->addWidget( _widget ); // probably should be added only once?
+      _widget->show();
+    }
+    updateRoughness();
+  }
 }
 
 //------------------------------------------------------------------------
@@ -237,6 +260,44 @@ void MainWindow::makeSpecularMenu()
 
 //------------------------------------------------------------------------
 
+void MainWindow::makeRoughnessMenu()
+{
+  QSlider * contrast = new QSlider( Qt::Horizontal, Q_NULLPTR );
+  contrast->setMinimum(0);
+  contrast->setMaximum(100);
+  contrast->setValue(20);
+
+  QSlider * brightness = new QSlider( Qt::Horizontal, Q_NULLPTR );
+  brightness->setMinimum(0);
+  brightness->setMaximum(100);
+  brightness->setValue(50);
+
+  QSlider * sharpness = new QSlider( Qt::Horizontal, Q_NULLPTR );
+  sharpness->setMinimum(0);
+  sharpness->setMaximum(5);
+  sharpness->setValue(1);
+
+  m_roughnessMenu.push_back( new QLabel( "Invert", 0, 0 ) );
+  m_roughnessMenu.push_back( new QCheckBox() );
+
+  m_roughnessMenu.push_back( new QLabel( "Contrast", 0, 0 ) );
+  m_roughnessMenu.push_back( contrast );
+
+  m_roughnessMenu.push_back( new QLabel( "Brightness", 0, 0 ) );
+  m_roughnessMenu.push_back( brightness );
+
+  m_roughnessMenu.push_back( new QLabel( "Sharpness", 0, 0 ) );
+  m_roughnessMenu.push_back( sharpness );
+
+  m_roughnessMenu.push_back( new QLabel( "Histogram equalization", 0, 0 ) );
+  m_roughnessMenu.push_back( new QCheckBox() );
+
+  // 10
+  m_roughnessMenu.push_back( new QPushButton("Reset",nullptr));
+}
+
+//------------------------------------------------------------------------
+
 void MainWindow::makeNormalMenu()
 {
   QSlider * depth = new QSlider( Qt::Horizontal, Q_NULLPTR );
@@ -264,6 +325,17 @@ void MainWindow::updateSpecular()
 void MainWindow::updateNormal()
 {
   m_activeScene->calculateNormals( static_cast<QSlider *>( m_normalMenu[1])->value() );
+}
+
+//------------------------------------------------------------------------
+
+void MainWindow::updateRoughness()
+{
+  m_activeScene->calculateRoughness(static_cast<QSlider *>(m_roughnessMenu[5])->value(),
+      static_cast<QSlider *>(m_roughnessMenu[3])->value(),
+      static_cast<QCheckBox *>(m_roughnessMenu[1])->isChecked(),
+      static_cast<QSlider *>(m_roughnessMenu[7])->value(),
+      static_cast<QCheckBox *>(m_roughnessMenu[9])->isChecked());
 }
 
 //------------------------------------------------------------------------

@@ -156,6 +156,7 @@ public:
          << QApplication::translate("MainWindow", "Shading", Q_NULLPTR)
          << QApplication::translate("MainWindow", "Normal", Q_NULLPTR)
          << QApplication::translate("MainWindow", "Specular", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "Roughness", Q_NULLPTR)
         );
         s_drawGB->setTitle(QString());
         menuFiles->setTitle(QApplication::translate("MainWindow", "File", Q_NULLPTR));

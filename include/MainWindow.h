@@ -37,6 +37,7 @@ private slots:
 
   void updateSpecular();
   void updateNormal();
+  void updateRoughness();
   void resetSpecularSettings();
   void swapView( int _n );
 
@@ -51,10 +52,6 @@ private:
 
   QAction * openAct;
   QAction * saveAct;
-  QAction * calculateIntensityAct;
-  QAction * calculateSeparationAct;
-  QAction * calculateNormalsAct;
-  QAction * calculateSpecularAct;
 
   QList<QAction *> saveAsActs;
   QAction * exitAct;
@@ -63,6 +60,8 @@ private:
   std::vector<QWidget *> * m_currentMenu;
   std::vector<QWidget *> m_normalMenu;
   std::vector<QWidget *> m_specularMenu;
+  std::vector<QWidget *> m_roughnessMenu;
+
 
   void createActions();
   void createMenus();
@@ -71,6 +70,7 @@ private:
   void mousePressEvent(QMouseEvent *_event);
   void mouseReleaseEvent(QMouseEvent *_event);
   void makeSpecularMenu();
+  void makeRoughnessMenu();
   void makeNormalMenu();
 };
 

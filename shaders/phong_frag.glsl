@@ -142,8 +142,8 @@ void main()
 
   vec3 LightIntensity = PhongReflection(s, n, v);
 
-  float power = beckmannSpecular(s,v,n,1.0);
-  float Ks = texture(SpecularTexture,texCoord).r;
+  float power = beckmannSpecular(s, v, n, 1.0f );
+  float Ks = texture(SpecularTexture, texCoord).r;
   float Kd = 1.0f;
 
   FragColor = Ks * pow( max( dot(r,v), 0.0 ), 20 ) + // spec

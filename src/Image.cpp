@@ -18,16 +18,16 @@ Image::Image( QImage & _image )
 
   width = m_image.width();
   height = m_image.height();
-  //  std::cout << "image w: " << width << " image h: " << height << '\n';
 
   regionWidth = ceil(float(width)/float(m_res));
   regionHeight = ceil(float(height)/float(m_res));
-  //  std::cout << "region w: " << regionWidth << " region h: " << regionHeight << '\n';
 
   m_intensity.resize( width );
   m_chroma.resize( width );
   m_shadingMap.resize( width );
   m_specular.resize( width );
+  m_roughness.resize( width );
+
 
   for( int i = 0; i < width; ++i )
   {
@@ -35,6 +35,8 @@ Image::Image( QImage & _image )
     m_shadingMap[i].resize( height );
     m_chroma[i].resize( height );
     m_specular[i].resize( height );
+    m_roughness[i].resize( height );
+
   }
 
   B.resize( int(regionWidth) );
@@ -93,6 +95,7 @@ void Image::loadImage( QImage _image )
   m_chroma.resize( width );
   m_shadingMap.resize( width );
   m_specular.resize( width );
+  m_roughness.resize( width );
 
   for( int i = 0; i < width; ++i )
   {
@@ -100,6 +103,7 @@ void Image::loadImage( QImage _image )
     m_shadingMap[i].resize( height );
     m_chroma[i].resize( height );
     m_specular[i].resize( height );
+    m_roughness[i].resize( height );
   }
 
   B.resize( int(regionWidth) );
@@ -751,8 +755,18 @@ void Image::equalizeHistogram(map _map)
 
 
 //---------------------------------------------------------------------------------------------------------------------
-void Image::specular( float _brightness, float _contrast, bool _invert, int _sharpness, bool _equalize)
+
+void Image::specular( float _brightness, float _contrast, bool _invert, int _sharpness, bool _equalize, Image::map _map )
 {
+  std::vector<std::vector<float>> * activeMap;
+
+  switch ( _map )
+  {
+    case Image::SPECULAR: activeMap = &m_specular; break;
+    case Image::ROUGHNESS: activeMap = &m_roughness; break;
+    default: break;
+  }
+
   for( int i = 0; i < width; ++i )
   {
     for( int j = 0 ; j < height; ++j )
@@ -761,7 +775,7 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
 
       //---DESATURATE---------------
       // https://stackoverflow.com/a/28873770
-      m_specular[i][j] = desaturate(myColor.redF(),myColor.greenF(),myColor.blueF());
+      ( *activeMap )[i][j] = desaturate( myColor.redF(), myColor.greenF(), myColor.blueF() );
     }
   }
   //---SHARPEN-----------
@@ -769,12 +783,12 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
 
   for(int n = 0; n<_sharpness; ++n)
   {
-    std::vector<std::vector<float>> m_specular2 = m_specular;
+    std::vector<std::vector<float>> m_specular2 = ( *activeMap );
     for (int i = 1; i < width-1; i++)
     {
       for (int j = 1; j < height-1; j++)
       {
-        double sum = m_specular[i][j] * k;
+        double sum = ( *activeMap )[i][j] * k;
 
         double weight = k;
 
@@ -783,7 +797,7 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
         {
           for (int n = 0; n < 3; n++)
           {
-            if (l[m] + i != i && l[n] + j != j)
+            if ( l[m] + i != i && l[n] + j != j )
             {
               sum = sum + m_specular2[l[m] + i][ l[n] + j] * (-k / 8);
               weight = weight + (-k / 8);
@@ -791,7 +805,7 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
           }
         }
         sum = sum / weight;
-        m_specular[i][j] = sum;
+        ( *activeMap )[i][j] = sum;
       }
     }
   }
@@ -810,15 +824,16 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
     {
       //---BRIGHTNESS & CONTRAST--------------
       // https://math.stackexchange.com/a/906280
-      m_specular[i][j] = newContrast*(m_specular[i][j] - 0.5f) + 0.5f + newBrightness;
-      m_specular[i][j] = clampF(m_specular[i][j],1.0f,0.0f);
+     ( *activeMap )[i][j] = newContrast*(( *activeMap )[i][j] - 0.5f) + 0.5f + newBrightness;
+     ( *activeMap )[i][j] = clampF(( *activeMap )[i][j],1.0f,0.0f);
 
       //---INVERT---------------
-      if(_invert) m_specular[i][j] =1.0f-m_specular[i][j];
+      if ( _invert )
+        ( *activeMap )[i][j] = 1.0f - ( *activeMap )[i][j];
     }
   }
 
-  if(_equalize)
+  if( _equalize )
   {
     equalizeHistogram(map::SPECULAR);
   }
@@ -835,6 +850,23 @@ QImage Image::getSpecular()
     for ( int j = 0; j < height; ++j )
     {
       float pixel = m_specular[i][j] * 255;
+      out.setPixel(i,j,qRgb( pixel, pixel, pixel));
+    }
+  }
+  return out;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+QImage Image::getRoughness()
+{
+  QImage out;
+  out = m_image.copy();
+  for ( int i = 0; i < width; ++i )
+  {
+    for ( int j = 0; j < height; ++j )
+    {
+      float pixel = m_roughness[i][j] * 255;
       out.setPixel(i,j,qRgb( pixel, pixel, pixel));
     }
   }

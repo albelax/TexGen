@@ -88,7 +88,7 @@ void GLWindow::mouseMove( QMouseEvent * _event )
     m_ratio[0] = m_image.width() / width();
     m_ratio[1] = m_image.height() / height();
 
-    glm::vec2 tmp( _event->pos().x(), _event->pos().y() );
+    glm::vec2 tmp( _event->pos().x() - 5 , _event->pos().y() - 35 );
     m_stroke.push_back( tmp );
   }
 
@@ -464,11 +464,37 @@ void GLWindow::calculateSpecular( int _brightness, int _contrast, bool _invert, 
   float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
   float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
 
-  m_editedImage->specular( tmpBrightness, tmpContrast, _invert, _sharpness, _equalize );
+  m_editedImage->specular( tmpBrightness, tmpContrast, _invert, _sharpness, _equalize, Image::SPECULAR );
   m_preview = m_editedImage->getSpecular();
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
   if(m_glImage.isNull())
     qWarning("IMAGE IS NULL");
+  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
+
+  glUniform1i( m_colourTextureAddress, 0 );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+
+  update();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+
+void GLWindow::calculateRoughness( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize)
+{
+  float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
+  float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
+
+  m_editedImage->specular( tmpBrightness, tmpContrast, _invert, _sharpness, _equalize, Image::ROUGHNESS );
+  m_preview = m_editedImage->getRoughness();
+  m_glImage = QGLWidget::convertToGLFormat( m_preview );
+
+  if(m_glImage.isNull())
+    qWarning("IMAGE IS NULL");
+
   glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
 
