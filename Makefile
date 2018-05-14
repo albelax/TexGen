@@ -36,7 +36,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = TexSketch1.0.0
-DISTDIR = /home/i7434091/TexSketch/obj/TexSketch1.0.0
+DISTDIR = /home/i7449874/Documents/GitHubStuff/TexSketch/obj/TexSketch1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-rpath,/opt/Qt5.9.0/5.9/gcc_64/lib
 LIBS          = $(SUBLIBS) -lGLEW -L/usr/lib64/nvidia -lOpenCL -L/opt/Qt5.9.0/5.9/gcc_64/lib -lQt5OpenGL -lQt5Widgets -lQt5Gui -lQt5Core -lGL -lpthread 
@@ -80,7 +80,11 @@ OBJECTS       = obj/main.o \
 		obj/moc_GLWindow.o \
 		obj/moc_PBRViewport.o \
 		obj/moc_Scene.o
-DIST          = /opt/Qt5.9.0/5.9/gcc_64/mkspecs/features/spec_pre.prf \
+DIST          = shaders/pbr_frag.glsl \
+		shaders/pbr_vert.glsl \
+		shaders/renderedVert.glsl \
+		shaders/renderedFrag.glsl \
+		/opt/Qt5.9.0/5.9/gcc_64/mkspecs/features/spec_pre.prf \
 		/opt/Qt5.9.0/5.9/gcc_64/mkspecs/common/unix.conf \
 		/opt/Qt5.9.0/5.9/gcc_64/mkspecs/common/linux.conf \
 		/opt/Qt5.9.0/5.9/gcc_64/mkspecs/common/sanitize.conf \
@@ -1407,7 +1411,7 @@ moc/moc_MainWindow.cpp: /opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets/QMainWindow \
 		include/MainWindow.h \
 		moc/moc_predefs.h \
 		/opt/Qt5.9.0/5.9/gcc_64/bin/moc
-	/opt/Qt5.9.0/5.9/gcc_64/bin/moc $(DEFINES) --include moc/moc_predefs.h -I/opt/Qt5.9.0/5.9/gcc_64/mkspecs/linux-g++ -I/home/i7434091/TexSketch -I/home/i7434091/TexSketch/include -I/home/i7434091/TexSketch/cl/include -I/home/i7434091/TexSketch/ui -I/home/i7434091/TexSketch/glm -I/home/i7434091/TexSketch/shaders -I/home/i7434091/TexSketch/images -I/usr/include/CL -I/home/i7434091/TexSketch/cl/include -I/opt/Qt5.9.0/5.9/gcc_64/include -I/opt/Qt5.9.0/5.9/gcc_64/include/QtOpenGL -I/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets -I/opt/Qt5.9.0/5.9/gcc_64/include/QtGui -I/opt/Qt5.9.0/5.9/gcc_64/include/QtCore -I/usr/local/include/c++/6.4.0 -I/usr/local/include/c++/6.4.0/x86_64-pc-linux-gnu -I/usr/local/include/c++/6.4.0/backward -I/usr/local/lib/gcc/x86_64-pc-linux-gnu/6.4.0/include -I/usr/local/include -I/usr/local/lib/gcc/x86_64-pc-linux-gnu/6.4.0/include-fixed -I/usr/include include/MainWindow.h -o moc/moc_MainWindow.cpp
+	/opt/Qt5.9.0/5.9/gcc_64/bin/moc $(DEFINES) --include moc/moc_predefs.h -I/opt/Qt5.9.0/5.9/gcc_64/mkspecs/linux-g++ -I/home/i7449874/Documents/GitHubStuff/TexSketch -I/home/i7449874/Documents/GitHubStuff/TexSketch/include -I/home/i7449874/Documents/GitHubStuff/TexSketch/cl/include -I/home/i7449874/Documents/GitHubStuff/TexSketch/ui -I/home/i7449874/Documents/GitHubStuff/TexSketch/glm -I/home/i7449874/Documents/GitHubStuff/TexSketch/shaders -I/home/i7449874/Documents/GitHubStuff/TexSketch/images -I/usr/include/CL -I/home/i7449874/Documents/GitHubStuff/TexSketch/cl/include -I/opt/Qt5.9.0/5.9/gcc_64/include -I/opt/Qt5.9.0/5.9/gcc_64/include/QtOpenGL -I/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets -I/opt/Qt5.9.0/5.9/gcc_64/include/QtGui -I/opt/Qt5.9.0/5.9/gcc_64/include/QtCore -I/usr/local/include/c++/6.4.0 -I/usr/local/include/c++/6.4.0/x86_64-pc-linux-gnu -I/usr/local/include/c++/6.4.0/backward -I/usr/local/lib/gcc/x86_64-pc-linux-gnu/6.4.0/include -I/usr/local/include -I/usr/local/lib/gcc/x86_64-pc-linux-gnu/6.4.0/include-fixed -I/usr/include include/MainWindow.h -o moc/moc_MainWindow.cpp
 
 moc/moc_GLWindow.cpp: include/Shader.h \
 		include/TrackballCamera.h \
@@ -1759,7 +1763,7 @@ moc/moc_GLWindow.cpp: include/Shader.h \
 		include/GLWindow.h \
 		moc/moc_predefs.h \
 		/opt/Qt5.9.0/5.9/gcc_64/bin/moc
-	/opt/Qt5.9.0/5.9/gcc_64/bin/moc $(DEFINES) --include moc/moc_predefs.h -I/opt/Qt5.9.0/5.9/gcc_64/mkspecs/linux-g++ -I/home/i7434091/TexSketch -I/home/i7434091/TexSketch/include -I/home/i7434091/TexSketch/cl/include -I/home/i7434091/TexSketch/ui -I/home/i7434091/TexSketch/glm -I/home/i7434091/TexSketch/shaders -I/home/i7434091/TexSketch/images -I/usr/include/CL -I/home/i7434091/TexSketch/cl/include -I/opt/Qt5.9.0/5.9/gcc_64/include -I/opt/Qt5.9.0/5.9/gcc_64/include/QtOpenGL -I/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets -I/opt/Qt5.9.0/5.9/gcc_64/include/QtGui -I/opt/Qt5.9.0/5.9/gcc_64/include/QtCore -I/usr/local/include/c++/6.4.0 -I/usr/local/include/c++/6.4.0/x86_64-pc-linux-gnu -I/usr/local/include/c++/6.4.0/backward -I/usr/local/lib/gcc/x86_64-pc-linux-gnu/6.4.0/include -I/usr/local/include -I/usr/local/lib/gcc/x86_64-pc-linux-gnu/6.4.0/include-fixed -I/usr/include include/GLWindow.h -o moc/moc_GLWindow.cpp
+	/opt/Qt5.9.0/5.9/gcc_64/bin/moc $(DEFINES) --include moc/moc_predefs.h -I/opt/Qt5.9.0/5.9/gcc_64/mkspecs/linux-g++ -I/home/i7449874/Documents/GitHubStuff/TexSketch -I/home/i7449874/Documents/GitHubStuff/TexSketch/include -I/home/i7449874/Documents/GitHubStuff/TexSketch/cl/include -I/home/i7449874/Documents/GitHubStuff/TexSketch/ui -I/home/i7449874/Documents/GitHubStuff/TexSketch/glm -I/home/i7449874/Documents/GitHubStuff/TexSketch/shaders -I/home/i7449874/Documents/GitHubStuff/TexSketch/images -I/usr/include/CL -I/home/i7449874/Documents/GitHubStuff/TexSketch/cl/include -I/opt/Qt5.9.0/5.9/gcc_64/include -I/opt/Qt5.9.0/5.9/gcc_64/include/QtOpenGL -I/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets -I/opt/Qt5.9.0/5.9/gcc_64/include/QtGui -I/opt/Qt5.9.0/5.9/gcc_64/include/QtCore -I/usr/local/include/c++/6.4.0 -I/usr/local/include/c++/6.4.0/x86_64-pc-linux-gnu -I/usr/local/include/c++/6.4.0/backward -I/usr/local/lib/gcc/x86_64-pc-linux-gnu/6.4.0/include -I/usr/local/include -I/usr/local/lib/gcc/x86_64-pc-linux-gnu/6.4.0/include-fixed -I/usr/include include/GLWindow.h -o moc/moc_GLWindow.cpp
 
 moc/moc_PBRViewport.cpp: include/Shader.h \
 		include/Scene.h \
@@ -2113,7 +2117,7 @@ moc/moc_PBRViewport.cpp: include/Shader.h \
 		include/PBRViewport.h \
 		moc/moc_predefs.h \
 		/opt/Qt5.9.0/5.9/gcc_64/bin/moc
-	/opt/Qt5.9.0/5.9/gcc_64/bin/moc $(DEFINES) --include moc/moc_predefs.h -I/opt/Qt5.9.0/5.9/gcc_64/mkspecs/linux-g++ -I/home/i7434091/TexSketch -I/home/i7434091/TexSketch/include -I/home/i7434091/TexSketch/cl/include -I/home/i7434091/TexSketch/ui -I/home/i7434091/TexSketch/glm -I/home/i7434091/TexSketch/shaders -I/home/i7434091/TexSketch/images -I/usr/include/CL -I/home/i7434091/TexSketch/cl/include -I/opt/Qt5.9.0/5.9/gcc_64/include -I/opt/Qt5.9.0/5.9/gcc_64/include/QtOpenGL -I/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets -I/opt/Qt5.9.0/5.9/gcc_64/include/QtGui -I/opt/Qt5.9.0/5.9/gcc_64/include/QtCore -I/usr/local/include/c++/6.4.0 -I/usr/local/include/c++/6.4.0/x86_64-pc-linux-gnu -I/usr/local/include/c++/6.4.0/backward -I/usr/local/lib/gcc/x86_64-pc-linux-gnu/6.4.0/include -I/usr/local/include -I/usr/local/lib/gcc/x86_64-pc-linux-gnu/6.4.0/include-fixed -I/usr/include include/PBRViewport.h -o moc/moc_PBRViewport.cpp
+	/opt/Qt5.9.0/5.9/gcc_64/bin/moc $(DEFINES) --include moc/moc_predefs.h -I/opt/Qt5.9.0/5.9/gcc_64/mkspecs/linux-g++ -I/home/i7449874/Documents/GitHubStuff/TexSketch -I/home/i7449874/Documents/GitHubStuff/TexSketch/include -I/home/i7449874/Documents/GitHubStuff/TexSketch/cl/include -I/home/i7449874/Documents/GitHubStuff/TexSketch/ui -I/home/i7449874/Documents/GitHubStuff/TexSketch/glm -I/home/i7449874/Documents/GitHubStuff/TexSketch/shaders -I/home/i7449874/Documents/GitHubStuff/TexSketch/images -I/usr/include/CL -I/home/i7449874/Documents/GitHubStuff/TexSketch/cl/include -I/opt/Qt5.9.0/5.9/gcc_64/include -I/opt/Qt5.9.0/5.9/gcc_64/include/QtOpenGL -I/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets -I/opt/Qt5.9.0/5.9/gcc_64/include/QtGui -I/opt/Qt5.9.0/5.9/gcc_64/include/QtCore -I/usr/local/include/c++/6.4.0 -I/usr/local/include/c++/6.4.0/x86_64-pc-linux-gnu -I/usr/local/include/c++/6.4.0/backward -I/usr/local/lib/gcc/x86_64-pc-linux-gnu/6.4.0/include -I/usr/local/include -I/usr/local/lib/gcc/x86_64-pc-linux-gnu/6.4.0/include-fixed -I/usr/include include/PBRViewport.h -o moc/moc_PBRViewport.cpp
 
 moc/moc_Scene.cpp: include/Shader.h \
 		include/Mesh.h \
@@ -2458,7 +2462,7 @@ moc/moc_Scene.cpp: include/Shader.h \
 		include/Scene.h \
 		moc/moc_predefs.h \
 		/opt/Qt5.9.0/5.9/gcc_64/bin/moc
-	/opt/Qt5.9.0/5.9/gcc_64/bin/moc $(DEFINES) --include moc/moc_predefs.h -I/opt/Qt5.9.0/5.9/gcc_64/mkspecs/linux-g++ -I/home/i7434091/TexSketch -I/home/i7434091/TexSketch/include -I/home/i7434091/TexSketch/cl/include -I/home/i7434091/TexSketch/ui -I/home/i7434091/TexSketch/glm -I/home/i7434091/TexSketch/shaders -I/home/i7434091/TexSketch/images -I/usr/include/CL -I/home/i7434091/TexSketch/cl/include -I/opt/Qt5.9.0/5.9/gcc_64/include -I/opt/Qt5.9.0/5.9/gcc_64/include/QtOpenGL -I/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets -I/opt/Qt5.9.0/5.9/gcc_64/include/QtGui -I/opt/Qt5.9.0/5.9/gcc_64/include/QtCore -I/usr/local/include/c++/6.4.0 -I/usr/local/include/c++/6.4.0/x86_64-pc-linux-gnu -I/usr/local/include/c++/6.4.0/backward -I/usr/local/lib/gcc/x86_64-pc-linux-gnu/6.4.0/include -I/usr/local/include -I/usr/local/lib/gcc/x86_64-pc-linux-gnu/6.4.0/include-fixed -I/usr/include include/Scene.h -o moc/moc_Scene.cpp
+	/opt/Qt5.9.0/5.9/gcc_64/bin/moc $(DEFINES) --include moc/moc_predefs.h -I/opt/Qt5.9.0/5.9/gcc_64/mkspecs/linux-g++ -I/home/i7449874/Documents/GitHubStuff/TexSketch -I/home/i7449874/Documents/GitHubStuff/TexSketch/include -I/home/i7449874/Documents/GitHubStuff/TexSketch/cl/include -I/home/i7449874/Documents/GitHubStuff/TexSketch/ui -I/home/i7449874/Documents/GitHubStuff/TexSketch/glm -I/home/i7449874/Documents/GitHubStuff/TexSketch/shaders -I/home/i7449874/Documents/GitHubStuff/TexSketch/images -I/usr/include/CL -I/home/i7449874/Documents/GitHubStuff/TexSketch/cl/include -I/opt/Qt5.9.0/5.9/gcc_64/include -I/opt/Qt5.9.0/5.9/gcc_64/include/QtOpenGL -I/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets -I/opt/Qt5.9.0/5.9/gcc_64/include/QtGui -I/opt/Qt5.9.0/5.9/gcc_64/include/QtCore -I/usr/local/include/c++/6.4.0 -I/usr/local/include/c++/6.4.0/x86_64-pc-linux-gnu -I/usr/local/include/c++/6.4.0/backward -I/usr/local/lib/gcc/x86_64-pc-linux-gnu/6.4.0/include -I/usr/local/include -I/usr/local/lib/gcc/x86_64-pc-linux-gnu/6.4.0/include-fixed -I/usr/include include/Scene.h -o moc/moc_Scene.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:

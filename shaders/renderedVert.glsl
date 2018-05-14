@@ -10,8 +10,7 @@ out vec2 texCoord;
 /************************************************************************************/
 void main()
 {
-	texCoord = TexCoord;
-	FragmentPosition = VertexPosition;
-	gl_Position = vec4(VertexPosition, 1.0);
+        texCoord = TexCoord;
+        FragmentPosition = VertexPosition;
+        gl_Position = vec4(VertexPosition, 1.0);
 }
-

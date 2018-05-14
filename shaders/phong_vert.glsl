@@ -24,7 +24,7 @@ void main()
     // Set the position of the current vertex
 		gl_Position = MVP * vec4(VertexPosition, 1.0);
 		FragmentPosition = vec3(MV * vec4(VertexPosition, 1.0));
-    FragmentNormal = N * VertexNormal;
+                FragmentNormal = N * VertexNormal;
 		texCoord = TexCoord;
 }
 

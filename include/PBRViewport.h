@@ -34,17 +34,25 @@ protected:
   void addTexture( QImage _image, GLuint * _texture, unsigned int _offset );
 
 private :
-  void init();
+  void init(bool _pbr);
   GLint m_colorAddress;
   GLint m_specularTextureAddress;
   GLint m_normalTextureAddress;
   GLint m_colourTextureAddress;
   GLuint m_depthTexture;
+  GLuint m_metallicTextureAddress;
+  GLuint m_roughnessTextureAddress;
 
   GLuint m_diffuseTexture;
   GLuint m_normalTexture;
   GLuint m_specularTexture;
+  GLuint m_roughnessTexture;
+  GLuint m_metallicTexture;
   QImage m_normal;
+
+  // Which shader to use
+  bool m_pbr;
+
 };
 
 #endif

@@ -35,7 +35,7 @@ void PBRViewport::initializeGL()
 	glEnable( GL_TEXTURE_2D );
 	glClearColor( 0.5f, 0.5f, 0.5f, 1.0f );
 	glViewport( 0, 0, devicePixelRatio(), devicePixelRatio() );
-	init();
+	init(true);
 	m_MV = glm::translate( m_MV, glm::vec3(0.0f, 0.0f, -2.0f) );
 
 }
@@ -79,11 +79,11 @@ void PBRViewport::addTexture( QImage _image )
 	glActiveTexture(GL_TEXTURE0 + (m_textures.size() - 1));
 	glGenTextures(1, &m_textures[m_textures.size() - 1]);
 
-  QImage image = QGLWidget::convertToGLFormat( _image );
-  if( _image.isNull() )
-    qWarning( "IMAGE IS NULL" );
-  glBindTexture( GL_TEXTURE_2D, m_textures[m_textures.size() - 1] );
-  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits() );
+	QImage image = QGLWidget::convertToGLFormat( _image );
+	if( _image.isNull() )
+		qWarning( "IMAGE IS NULL" );
+	glBindTexture( GL_TEXTURE_2D, m_textures[m_textures.size() - 1] );
+	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits() );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -93,24 +93,34 @@ void PBRViewport::addTexture( QImage _image, GLuint *_texture, unsigned int _off
 	glActiveTexture( GL_TEXTURE0 + _offset );
 	glGenTextures( 1, _texture );
 
-  QImage image = QGLWidget::convertToGLFormat( _image );
-  if( _image.isNull() )
-    qWarning( "IMAGE IS NULL" );
-  glBindTexture( GL_TEXTURE_2D, *_texture );
-  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits() );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	QImage image = QGLWidget::convertToGLFormat( _image );
+	if( _image.isNull() )
+		qWarning( "IMAGE IS NULL" );
+	glBindTexture( GL_TEXTURE_2D, *_texture );
+	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits() );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void PBRViewport::init()
+void PBRViewport::init(bool _pbr)
 {
+	m_pbr = _pbr;
 	//	std::cerr << "OpenGL Version :" << glGetString(GL_VERSION) << std::endl;
 	std::string shadersAddress = "shaders/";
-	m_shader = Shader( "m_shader", shadersAddress + "phong_vert.glsl", shadersAddress + "phong_frag.glsl" );
+
+	if(_pbr)
+	{
+		m_shader = Shader( "m_pbrShader", shadersAddress + "pbr_vert.glsl", shadersAddress + "pbr_frag.glsl" );
+	}
+	else
+	{
+		m_shader = Shader( "m_shader", shadersAddress + "phong_vert.glsl", shadersAddress + "phong_frag.glsl" );
+	}
+
 	glLinkProgram( m_shader.getShaderProgram() );
 	glUseProgram( m_shader.getShaderProgram() );
 
@@ -155,6 +165,16 @@ void PBRViewport::init()
 	glVertexAttribPointer( t, 2, GL_FLOAT, GL_FALSE, 0, (void*) 0 );
 
 	// link matrices with shader locations
+	if(_pbr)
+	{
+		m_roughnessTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "RoughnessTexture" );
+		m_metallicTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "MetallicTexture" );
+	}
+	else
+	{
+		m_specularTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "SpecularTexture" );
+	}
+
 	m_MVAddress = glGetUniformLocation( m_shader.getShaderProgram(), "MV" );
 	m_MVPAddress = glGetUniformLocation( m_shader.getShaderProgram(), "MVP" );
 	m_NAddress = glGetUniformLocation( m_shader.getShaderProgram(), "N" );
@@ -163,9 +183,8 @@ void PBRViewport::init()
 	// textures --------------------
 	m_colourTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "ColourTexture" );
 	m_normalTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "NormalTexture" );
-	m_specularTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "SpecularTexture" );
 
-//// load color texture
+	//// load color texture
 	addTexture( m_editedImage->getDiffuse(), &m_diffuseTexture, 0 );
 	glUniform1i( m_colourTextureAddress, 0 );
 
@@ -175,34 +194,62 @@ void PBRViewport::init()
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 	glGenerateMipmap( GL_TEXTURE_2D );
 
-//// load normal texture
-  auto tmp = m_editedImage->getDiffuse();
-  addTexture( m_editedImage->calculateNormalMap( tmp, 1 ), &m_normalTexture, 1 );
+	//// load normal texture
+	auto tmp = m_editedImage->getDiffuse();
+	addTexture( m_editedImage->calculateNormalMap( tmp, 1 ), &m_normalTexture, 1 );
 
-  glUniform1i( m_normalTextureAddress, 1 );
-
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-
-  glGenerateMipmap( GL_TEXTURE_2D);
-
-//// load specular texture
-	addTexture( m_editedImage->getSpecular(), &m_specularTexture, 2 );
-	glUniform1i( m_specularTextureAddress, 2 );
-
+	glUniform1i( m_normalTextureAddress, 1 );
 
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+
 	glGenerateMipmap( GL_TEXTURE_2D);
+
+	//// load specular texture
+
+	if(!_pbr)
+	{
+		addTexture( m_editedImage->getSpecular(), &m_specularTexture, 2 );
+		glUniform1i( m_specularTextureAddress, 2 );
+
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+		glGenerateMipmap( GL_TEXTURE_2D);
+	}
+	else
+	{
+		// TODO: load
+		addTexture( m_editedImage->getSpecular(), &m_roughnessTexture, 2 );
+		glUniform1i( m_roughnessTextureAddress, 2 );
+
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+		glGenerateMipmap( GL_TEXTURE_2D);
+
+		addTexture( m_editedImage->getSpecular(), &m_metallicTexture, 3 );
+		glUniform1i( m_metallicTextureAddress, 3 );
+
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+		glGenerateMipmap( GL_TEXTURE_2D);
+	}
 
 	GLuint tmpTexture;
 	addTexture( m_editedImage->getDiffuse(), &tmpTexture, 25 ); // void one, for some reason is needed ....
 
 	glUniform3f(glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ),m_camera.getCameraEye()[0],m_camera.getCameraEye()[1],m_camera.getCameraEye()[2]);
+	if(_pbr)
+	{
+		glUniform1f(glGetUniformLocation( m_shader.getShaderProgram(), "ao"),1.0f);
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -229,18 +276,19 @@ void PBRViewport::renderScene()
 	glUseProgram( m_shader.getShaderProgram() );
 	m_camera.update();
 	m_projection = glm::perspective( glm::radians( 60.0f ),
-																		static_cast<float>( width() ) / static_cast<float>( height() ), 0.1f, 100.0f );
+																	 static_cast<float>( width() ) / static_cast<float>( height() ), 0.1f, 100.0f );
 	m_view = glm::lookAt( glm::vec3( 0.0f, 0.0f, 5.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 1.0f, 0.0f ) );
 	m_MVP = m_projection * m_camera.viewMatrix() * m_MV;
 	glm::mat3 N = glm::mat3( glm::inverse( glm::transpose( m_MV ) ) );
 
-  glUniformMatrix4fv( m_MVPAddress, 1, GL_FALSE, glm::value_ptr( m_MVP ) );
-  glUniformMatrix4fv( m_MVAddress, 1, GL_FALSE, glm::value_ptr( m_MV ) );
+	glUniformMatrix4fv( m_MVPAddress, 1, GL_FALSE, glm::value_ptr( m_MVP ) );
 
-  glUniformMatrix3fv( m_NAddress, 1, GL_FALSE, glm::value_ptr( N ) );
+	glUniformMatrix4fv( m_MVAddress, 1, GL_FALSE, glm::value_ptr( m_MV ) );
+
+	glUniformMatrix3fv( m_NAddress, 1, GL_FALSE, glm::value_ptr( N ) );
 
 
-  glDrawArrays( GL_TRIANGLES, m_plane.getBufferIndex() / 3, ( m_plane.getAmountVertexData() / 3 ) );
+	glDrawArrays( GL_TRIANGLES, m_plane.getBufferIndex() / 3, ( m_plane.getAmountVertexData() / 3 ) );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -261,11 +309,11 @@ void PBRViewport::calculateNormals( int _depth )
   glUniform1i( m_normalTextureAddress, 1 );
 
 
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-	glGenerateMipmap( GL_TEXTURE_2D );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+  glGenerateMipmap( GL_TEXTURE_2D );
 
   update();
 }
@@ -289,11 +337,11 @@ void PBRViewport::calculateSpecular( int _brightness, int _contrast, bool _inver
   glUniform1i( m_specularTextureAddress, 2 );
 
 
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-	glGenerateMipmap( GL_TEXTURE_2D );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+  glGenerateMipmap( GL_TEXTURE_2D );
 
   update();
 }
