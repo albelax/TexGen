@@ -9,7 +9,7 @@
 class Image
 {
 public:
-  enum map { ORIGINAL, INTENSITY, ALBEDO, SHADING, NORMAL, SPECULAR, CHROMA };
+  enum map { ORIGINAL, INTENSITY, ALBEDO, SHADING, NORMAL, SPECULAR, ROUGHNESS, CHROMA };
   Image();
   Image( QImage & _image );
   void threshold();
@@ -18,7 +18,7 @@ public:
   void separation();
   void shading();
   void strokeRefinement( QImage _stroke );
-  void specular(float _brightness, float _contrast, bool _invert, int _sharpness, bool _equalize);
+  void specular(float _brightness, float _contrast, bool _invert, int _sharpness, bool _equalize, Image::map _map );
 
   float contrast(float _amount, float _value);
   float desaturate(float _r, float _g, float _b);
@@ -35,6 +35,7 @@ public:
   QImage calculateNormalMap( QImage & image, int _depth );
   QImage getDiffuse() { return m_image; }
   QImage getSpecular();
+  QImage getRoughness();
   QImage getIntensity();
 
 private:
@@ -48,7 +49,7 @@ private:
   void initCL();
   void rgbToHsv();
 
-  // CL4
+  // CL
   cl::Platform m_CLPlatform;
   cl::Device m_device;
   cl::Context m_CLContext;
@@ -62,6 +63,7 @@ private:
   std::vector<std::vector<float>> albedoIntensityMap;
   std::vector<std::vector<float>> m_shadingMap;
   std::vector<std::vector<float>> m_specular;
+  std::vector<std::vector<float>> m_roughness;
   std::vector<std::vector<float>> B;
   std::vector<std::vector<std::vector<float>>> A;
   std::vector<std::vector<std::vector<float>>> m_chroma;

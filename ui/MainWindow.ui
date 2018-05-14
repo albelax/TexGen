@@ -97,6 +97,11 @@
            <string>Specular</string>
           </property>
          </item>
+         <item>
+          <property name="text">
+           <string>Roughness</string>
+          </property>
+         </item>
         </widget>
        </item>
       </layout>

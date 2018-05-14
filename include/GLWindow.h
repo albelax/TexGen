@@ -49,6 +49,7 @@ public slots:
   void calculateNormals( int _depth ) override;
   void calculateSeparation();
   void calculateSpecular( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
+  void calculateRoughness( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
 
 protected:
   /// @brief  The following methods must be implimented in the sub class

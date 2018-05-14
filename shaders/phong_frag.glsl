@@ -144,9 +144,15 @@ void main()
 
     vec3 LightIntensity = PhongReflection(s, n, v);
 
+<<<<<<< HEAD
     float power = beckmannSpecular(s,v,n,1.0);
     float Ks = texture(SpecularTexture,texCoord).r;
     float Kd = 1.0f;
+=======
+  float power = beckmannSpecular(s, v, n, 1.0f );
+  float Ks = texture(SpecularTexture, texCoord).r;
+  float Kd = 1.0f;
+>>>>>>> roughness
 
     FragColor = Ks * pow( max( dot(r,v), 0.0 ), 20 ) + // spec
             Kd * vec4( texture( ColourTexture, texCoord ).rgb, 1);

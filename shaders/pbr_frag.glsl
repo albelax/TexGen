@@ -40,7 +40,9 @@ const vec3 lightColors[4] = vec3[4](
 
 // Define pi
 const float PI = 3.14159265359;
+
 // ----------------------------------------------------------------------------
+
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
     float a = roughness*roughness;
@@ -181,7 +183,7 @@ void main()
 //    // gamma correct
     color = pow(color, vec3(1.0/2.2));
 
-    fragColour = vec4(color, 1.0);
+    fragColour = vec4( color, 1.0 );
 
 //    fragColour = vec4(vec3(1.0f,0.0f,0.0f), 1.0);
 }

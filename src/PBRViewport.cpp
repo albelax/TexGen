@@ -170,6 +170,7 @@ void PBRViewport::init(bool _pbr)
 		m_roughnessTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "RoughnessTexture" );
 		m_metallicTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "MetallicTexture" );
 	}
+
 	else
 	{
 		m_specularTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "SpecularTexture" );
@@ -220,10 +221,11 @@ void PBRViewport::init(bool _pbr)
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 		glGenerateMipmap( GL_TEXTURE_2D);
 	}
+
 	else
 	{
 		// TODO: load
-		addTexture( m_editedImage->getSpecular(), &m_roughnessTexture, 2 );
+		addTexture( m_editedImage->getRoughness(), &m_roughnessTexture, 2 );
 		glUniform1i( m_roughnessTextureAddress, 2 );
 
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
@@ -325,7 +327,7 @@ void PBRViewport::calculateSpecular( int _brightness, int _contrast, bool _inver
   float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
   float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
 
-  m_editedImage->specular( tmpBrightness, tmpContrast, _invert, _sharpness, _equalize );
+  m_editedImage->specular( tmpBrightness, tmpContrast, _invert, _sharpness, _equalize, Image::SPECULAR );
   auto tmp = m_editedImage->getSpecular();
   QImage glImage = QGLWidget::convertToGLFormat( tmp );
   if(glImage.isNull())
@@ -336,12 +338,40 @@ void PBRViewport::calculateSpecular( int _brightness, int _contrast, bool _inver
 
   glUniform1i( m_specularTextureAddress, 2 );
 
-
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-  glGenerateMipmap( GL_TEXTURE_2D );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+	glGenerateMipmap( GL_TEXTURE_2D );
 
   update();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void PBRViewport::calculateRoughness( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize )
+{
+  float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
+  float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
+
+  m_editedImage->specular( tmpBrightness, tmpContrast, _invert, _sharpness, _equalize, Image::ROUGHNESS );
+  auto tmp = m_editedImage->getRoughness();
+  QImage glImage = QGLWidget::convertToGLFormat( tmp );
+
+  if(glImage.isNull())
+    qWarning("IMAGE IS NULL");
+
+  glBindTexture( GL_TEXTURE_2D, m_specularTexture );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glImage.width(), glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
+
+  glUniform1i( m_specularTextureAddress, 2 );
+
+
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+	glGenerateMipmap( GL_TEXTURE_2D );
+
+	update();
 }
