@@ -43,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
 
   // normal
   connect((QSlider *)m_normalMenu[1], SIGNAL(sliderReleased() ), this, SLOT(updateNormal()));
+  connect((QCheckBox *)m_normalMenu[3], SIGNAL(clicked(bool)), this, SLOT(updateNormal()));
 
   // roughness
   connect((QSlider *)m_roughnessMenu[3], SIGNAL(sliderReleased() ), this, SLOT(updateRoughness()));
@@ -307,6 +308,10 @@ void MainWindow::makeNormalMenu()
 
   m_normalMenu.push_back( new QLabel( "Depth", 0, 0 ) );
   m_normalMenu.push_back( depth );
+
+  m_normalMenu.push_back( new QLabel( "Invert", 0, 0 ) );
+  m_normalMenu.push_back( new QCheckBox() );
+
 }
 
 //------------------------------------------------------------------------
@@ -324,7 +329,7 @@ void MainWindow::updateSpecular()
 
 void MainWindow::updateNormal()
 {
-  m_activeScene->calculateNormals( static_cast<QSlider *>( m_normalMenu[1])->value() );
+  m_activeScene->calculateNormals( static_cast<QSlider *>( m_normalMenu[1])->value(), static_cast<QCheckBox *>( m_normalMenu[3])->isChecked() );
 }
 
 //------------------------------------------------------------------------

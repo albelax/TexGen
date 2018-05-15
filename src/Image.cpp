@@ -169,7 +169,7 @@ void Image::vectorAdd()
 
 //---------------------------------------------------------------------------------------------------------------------
 
-QImage Image::calculateNormalMap( QImage & image, int _depth )
+QImage Image::calculateNormalMap( QImage & image, int _depth, bool _invert )
 {
   float * r = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
   float * g = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
@@ -221,20 +221,22 @@ QImage Image::calculateNormalMap( QImage & image, int _depth )
   queue.enqueueWriteBuffer(bufferOutB, CL_TRUE, 0, width * height * sizeof( float ), o_b);
 
 
-  cl::Kernel kernel_add = cl::Kernel( m_program, "calculateMap" );
-  kernel_add.setArg(0,buffer_A);
-  kernel_add.setArg(1,buffer_B);
-  kernel_add.setArg(2,buffer_C);
+  cl::Kernel kernelNormal = cl::Kernel( m_program, "calculateMap" );
+  kernelNormal.setArg(0,buffer_A);
+  kernelNormal.setArg(1,buffer_B);
+  kernelNormal.setArg(2,buffer_C);
 
-  kernel_add.setArg(3,bufferOutR);
-  kernel_add.setArg(4,bufferOutG);
-  kernel_add.setArg(5,bufferOutB);
+  kernelNormal.setArg(3,bufferOutR);
+  kernelNormal.setArg(4,bufferOutG);
+  kernelNormal.setArg(5,bufferOutB);
 
-  kernel_add.setArg(6, width);
-  kernel_add.setArg(7,_depth);
+  kernelNormal.setArg(6, width);
+  kernelNormal.setArg(7, _depth);
+  kernelNormal.setArg(8, (int)_invert);
 
 
-  queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(width, height), cl::NullRange);
+
+  queue.enqueueNDRangeKernel(kernelNormal, cl::NullRange, cl::NDRange(width, height), cl::NullRange);
 
 
   queue.enqueueReadBuffer(bufferOutR, CL_TRUE, 0, width * height * sizeof( float ), r);

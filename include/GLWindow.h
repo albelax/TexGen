@@ -46,7 +46,7 @@ public :
 public slots:
   void selectImage( int _i );
   void calculateIntensity();
-  void calculateNormals( int _depth ) override;
+  void calculateNormals( int _depth, bool _invert ) override;
   void calculateSeparation();
   void calculateSpecular( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
   void calculateRoughness( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;

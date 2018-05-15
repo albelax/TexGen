@@ -4,7 +4,13 @@
 #include <QImage>
 #include <vector>
 #include <glm.hpp>
+
+#ifdef __APPLE__
+#include <cl/cl.hpp>
+#else
 #include <CL/cl.hpp>
+#endif
+
 
 class Image
 {
@@ -32,7 +38,7 @@ public:
   void save( map _image, std::string _destination );
   void vectorAdd();
   void loadImage( QImage _image );
-  QImage calculateNormalMap( QImage & image, int _depth );
+  QImage calculateNormalMap( QImage & image, int _depth, bool _invert );
   QImage getDiffuse() { return m_image; }
   QImage getSpecular();
   QImage getRoughness();

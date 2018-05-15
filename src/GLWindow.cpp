@@ -188,7 +188,7 @@ void GLWindow::paintGL()
     glBindTexture( GL_TEXTURE_2D, m_renderedTexture);
     renderTexture();
   }
-  std::array<float, 2> ratio = {1,1};
+  std::array<float, 2> ratio = { 1, 1 };
   drawStroke( p, ratio );
 
   //    update();
@@ -342,7 +342,7 @@ void GLWindow::showSpecular()
 void GLWindow::showNormalMap()
 {
   glActiveTexture( GL_TEXTURE0 );
-  m_preview = m_editedImage->calculateNormalMap( m_image, 1 );
+  m_preview = m_editedImage->calculateNormalMap( m_image, 1, false );
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
   if(m_glImage.isNull())
     qWarning("IMAGE IS NULL");
@@ -425,11 +425,9 @@ void GLWindow::calculateIntensity()
 
 //------------------------------------------------------------------------------------------------------------------------------
 
-void GLWindow::calculateNormals( int _depth )
+void GLWindow::calculateNormals(int _depth , bool _invert)
 {
-  m_editedImage->calculateNormalMap( m_image, _depth );
-
-  m_preview = m_editedImage->calculateNormalMap( m_image, _depth );
+  m_preview = m_editedImage->calculateNormalMap( m_image, _depth, _invert );
 
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
 

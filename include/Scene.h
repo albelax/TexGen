@@ -21,7 +21,7 @@ public:
   virtual void mouseMove( QMouseEvent * _event ) = 0;
   virtual void mouseClick( QMouseEvent * _event ) = 0;
   void loadImage(); // = 0;
-  virtual void calculateNormals( int _depth ) = 0;
+  virtual void calculateNormals( int _depth, bool _invert ) = 0;
   virtual void calculateSpecular( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) = 0;
   virtual void calculateRoughness( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) = 0;
 

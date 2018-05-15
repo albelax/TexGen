@@ -35,7 +35,7 @@ void PBRViewport::initializeGL()
 	glEnable( GL_TEXTURE_2D );
 	glClearColor( 0.5f, 0.5f, 0.5f, 1.0f );
 	glViewport( 0, 0, devicePixelRatio(), devicePixelRatio() );
-	init(true);
+  init( false );
 	m_MV = glm::translate( m_MV, glm::vec3(0.0f, 0.0f, -2.0f) );
 
 }
@@ -197,7 +197,7 @@ void PBRViewport::init(bool _pbr)
 
 	//// load normal texture
 	auto tmp = m_editedImage->getDiffuse();
-	addTexture( m_editedImage->calculateNormalMap( tmp, 1 ), &m_normalTexture, 1 );
+  addTexture( m_editedImage->calculateNormalMap( tmp, 1, false ), &m_normalTexture, 1 );
 
 	glUniform1i( m_normalTextureAddress, 1 );
 
@@ -263,8 +263,8 @@ void PBRViewport::paintGL()
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	glUniform3f(glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ),m_camera.getCameraEye()[0],m_camera.getCameraEye()[1],m_camera.getCameraEye()[2]);
 
-	renderScene();
-	update();
+  renderScene();
+//	update();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -295,11 +295,11 @@ void PBRViewport::renderScene()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void PBRViewport::calculateNormals( int _depth )
+void PBRViewport::calculateNormals(int _depth , bool _invert )
 {
 
   auto tmp = m_editedImage->getDiffuse();
-  tmp = m_editedImage->calculateNormalMap( tmp, _depth );
+  tmp = m_editedImage->calculateNormalMap( tmp, _depth, _invert );
   QImage glImage = QGLWidget::convertToGLFormat( tmp );
 
   if( glImage.isNull() )
