@@ -143,7 +143,7 @@ void MainWindow::save()
                                                   initialPath,tr("%1 Files (*.%2);;All Files (*)"));
   if (!fileName.isEmpty())
   {
-    m_gl->save( fileName.toLatin1().data() );
+   dynamic_cast<GLWindow *>( m_activeScene )->save( fileName.toLatin1().data() );
   }
 }
 //------------------------------------------------------------------------

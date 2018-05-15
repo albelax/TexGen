@@ -35,7 +35,8 @@ void PBRViewport::initializeGL()
 	glEnable( GL_TEXTURE_2D );
 	glClearColor( 0.5f, 0.5f, 0.5f, 1.0f );
 	glViewport( 0, 0, devicePixelRatio(), devicePixelRatio() );
-  init( false );
+	init( true );
+	m_MV = glm::mat4(1.0f);
 	m_MV = glm::translate( m_MV, glm::vec3(0.0f, 0.0f, -2.0f) );
 
 }
@@ -136,8 +137,8 @@ void PBRViewport::init(bool _pbr)
 
 	// load vertices
 	glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
-	glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float), 0, GL_STATIC_DRAW );
-	glBufferSubData( GL_ARRAY_BUFFER, 0, m_plane.getAmountVertexData() * sizeof(float), &m_plane.getVertexData() );
+	glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float) * 3.f, 0, GL_STATIC_DRAW );
+	glBufferSubData( GL_ARRAY_BUFFER, 0, m_plane.getAmountVertexData() * sizeof(float) * 3.f, &m_plane.getVertexData() );
 
 	// pass vertices to shader
 	GLint pos = glGetAttribLocation( m_shader.getShaderProgram(), "VertexPosition" );
@@ -146,8 +147,8 @@ void PBRViewport::init(bool _pbr)
 
 	// load normals
 	glBindBuffer( GL_ARRAY_BUFFER,	m_nbo );
-	glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float), 0, GL_STATIC_DRAW );
-	glBufferSubData( GL_ARRAY_BUFFER, 0, m_plane.getAmountVertexData() * sizeof(float), &m_plane.getNormalsData() );
+	glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float) * 3.f, 0, GL_STATIC_DRAW );
+	glBufferSubData( GL_ARRAY_BUFFER, 0, m_plane.getAmountVertexData() * sizeof(float) * 3.f, &m_plane.getNormalsData() );
 
 	// pass normals to shader
 	GLint n = glGetAttribLocation( m_shader.getShaderProgram(), "VertexNormal" );
@@ -156,8 +157,8 @@ void PBRViewport::init(bool _pbr)
 
 	// load texture coordinates
 	glBindBuffer( GL_ARRAY_BUFFER,	m_tbo );
-	glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float), 0, GL_STATIC_DRAW) ;
-	glBufferSubData( GL_ARRAY_BUFFER, 0, m_plane.getAmountVertexData() * sizeof(float), &m_plane.getUVsData() );
+	glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float) * 2.f, 0, GL_STATIC_DRAW) ;
+	glBufferSubData( GL_ARRAY_BUFFER, 0, m_plane.getAmountVertexData() * sizeof(float) * 2.f, &m_plane.getUVsData() );
 
 	// pass texture coords to shader
 	GLint t = glGetAttribLocation( m_shader.getShaderProgram(), "TexCoord" );
@@ -181,7 +182,7 @@ void PBRViewport::init(bool _pbr)
 	m_NAddress = glGetUniformLocation( m_shader.getShaderProgram(), "N" );
 	m_colorAddress = glGetUniformLocation( m_shader.getShaderProgram(), "baseColor" );
 
-	// textures --------------------
+//	 textures --------------------
 	m_colourTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "ColourTexture" );
 	m_normalTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "NormalTexture" );
 
@@ -197,7 +198,7 @@ void PBRViewport::init(bool _pbr)
 
 	//// load normal texture
 	auto tmp = m_editedImage->getDiffuse();
-  addTexture( m_editedImage->calculateNormalMap( tmp, 1, false ), &m_normalTexture, 1 );
+	addTexture( m_editedImage->calculateNormalMap( tmp, 1, false ), &m_normalTexture, 1 );
 
 	glUniform1i( m_normalTextureAddress, 1 );
 
@@ -246,8 +247,8 @@ void PBRViewport::init(bool _pbr)
 
 	GLuint tmpTexture;
 	addTexture( m_editedImage->getDiffuse(), &tmpTexture, 25 ); // void one, for some reason is needed ....
-
-	glUniform3f(glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ),m_camera.getCameraEye()[0],m_camera.getCameraEye()[1],m_camera.getCameraEye()[2]);
+	auto camPos = m_camera.getCameraEye();
+	glUniform3f(glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ),camPos.x, camPos.y, camPos.z);
 	if(_pbr)
 	{
 		glUniform1f(glGetUniformLocation( m_shader.getShaderProgram(), "ao"),1.0f);
@@ -258,11 +259,12 @@ void PBRViewport::init(bool _pbr)
 
 void PBRViewport::paintGL()
 {
+	makeCurrent();
 	glViewport( 0, 0, width(), height() );
 	glClearColor( 1, 1, 1, 1.0f );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-	glUniform3f(glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ),m_camera.getCameraEye()[0],m_camera.getCameraEye()[1],m_camera.getCameraEye()[2]);
-
+	auto camPos = m_camera.getCameraEye();
+	glUniform3f(glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ),camPos.x, camPos.y, camPos.z);
   renderScene();
 //	update();
 }
@@ -277,11 +279,13 @@ void PBRViewport::renderScene()
 
 	glUseProgram( m_shader.getShaderProgram() );
 	m_camera.update();
-	m_projection = glm::perspective( glm::radians( 60.0f ),
-																	 static_cast<float>( width() ) / static_cast<float>( height() ), 0.1f, 100.0f );
-	m_view = glm::lookAt( glm::vec3( 0.0f, 0.0f, 5.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 1.0f, 0.0f ) );
-	m_MVP = m_projection * m_camera.viewMatrix() * m_MV;
-	glm::mat3 N = glm::mat3( glm::inverse( glm::transpose( m_MV ) ) );
+//	m_projection = m_camera.projMatrix() * m_camera.viewMatrix() * m_MV;
+
+//	m_projection = glm::perspective( glm::radians( 60.0f ),
+//																	 static_cast<float>( width() ) / static_cast<float>( height() ), 0.1f, 100.0f );
+//	m_view = glm::lookAt( glm::vec3( 0.0f, 0.0f, 5.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 1.0f, 0.0f ) );
+	m_MVP = m_camera.projMatrix() * m_camera.viewMatrix() * m_MV;
+	glm::mat3 N = glm::mat3 (glm::inverse( glm::transpose( m_MV ) )) ;
 
 	glUniformMatrix4fv( m_MVPAddress, 1, GL_FALSE, glm::value_ptr( m_MVP ) );
 
@@ -290,7 +294,7 @@ void PBRViewport::renderScene()
 	glUniformMatrix3fv( m_NAddress, 1, GL_FALSE, glm::value_ptr( N ) );
 
 
-	glDrawArrays( GL_TRIANGLES, m_plane.getBufferIndex() / 3, ( m_plane.getAmountVertexData() / 3 ) );
+	glDrawArrays( GL_TRIANGLES, m_plane.getBufferIndex(), ( m_plane.getAmountVertexData() ) );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
