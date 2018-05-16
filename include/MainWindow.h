@@ -33,6 +33,7 @@ public:
 private slots:
   void open();
   void save();
+  void changeMesh();
   void changeLayout( int _n );
 
   void updateSpecular();
@@ -52,6 +53,7 @@ private:
 
   QAction * openAct;
   QAction * saveAct;
+  QAction * loadMeshAct;
 
   QList<QAction *> saveAsActs;
   QAction * exitAct;
@@ -62,6 +64,7 @@ private:
   std::vector<QWidget *> m_specularMenu;
   std::vector<QWidget *> m_roughnessMenu;
 
+  bool m_pbrCreated = false;
 
   void createActions();
   void createMenus();

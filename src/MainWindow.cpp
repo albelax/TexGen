@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   if ( pbr )
   {
     m_pbrViewport = new PBRViewport( this );
+    m_pbrCreated = true;
     m_activeScene = m_pbrViewport;
   }
   else
@@ -104,6 +105,7 @@ void MainWindow::createMenus()
 
   m_ui->menuFiles->addAction(openAct);
   m_ui->menuFiles->addAction(saveAct);
+  m_ui->menuFiles->addAction(loadMeshAct);
 }
 
 //------------------------------------------------------------------------
@@ -113,6 +115,10 @@ void MainWindow::createActions()
   openAct = new QAction(tr("&Open..."), this);
   openAct->setShortcuts(QKeySequence::Open);
   connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+
+  loadMeshAct = new QAction(tr("&Load mesh..."), this);
+  loadMeshAct->setShortcuts(QKeySequence::Open);
+  connect(loadMeshAct, SIGNAL(triggered()), this, SLOT(changeMesh()));
 
   saveAct = new QAction(tr("&Save..."), this);
   saveAct->setShortcuts(QKeySequence::Save);
@@ -128,6 +134,18 @@ void MainWindow::open()
   if( !fileName.isEmpty() && dynamic_cast<GLWindow *>( m_activeScene ) )
   {
     dynamic_cast<GLWindow *>( m_activeScene )->loadImage( fileName.toLatin1().data() );
+  }
+}
+
+//------------------------------------------------------------------------
+
+void MainWindow::changeMesh()
+{
+  QString fileName = QFileDialog::getOpenFileName( this, tr("Open File"), QDir::currentPath() );
+
+  if( !fileName.isEmpty() && dynamic_cast<PBRViewport *>( m_activeScene ) )
+  {
+    dynamic_cast<PBRViewport *>( m_activeScene )->changeMesh(fileName.toStdString() );
   }
 }
 
