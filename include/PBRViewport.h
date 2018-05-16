@@ -24,6 +24,7 @@ public:
   void calculateSpecular( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
   void calculateRoughness( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
   void changeMesh(std::string _filename);
+  void init(bool _pbr);
 
 protected:
   /// @brief  The following methods must be implimented in the sub class
@@ -37,7 +38,6 @@ protected:
   void addTexture( QImage _image, GLuint * _texture, unsigned int _offset );
 
 private :
-  void init(bool _pbr);
   GLint m_colorAddress;
   GLint m_specularTextureAddress;
   GLint m_normalTextureAddress;

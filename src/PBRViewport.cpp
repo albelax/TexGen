@@ -21,7 +21,8 @@ PBRViewport::PBRViewport( QWidget *_parent, Image * _image ) : Scene( _parent )
 
 void PBRViewport::changeMesh(std::string _filename)
 {
-  m_mesh = Mesh(_filename,"newMesh");
+  makeCurrent();
+  m_mesh = Mesh(_filename, "newMesh");
   init(m_pbr);
 }
 
