@@ -22,7 +22,7 @@ uniform vec3 camPos;
 const float scale = 10.0f;
 const float height = 4.0f;
 const vec3 lightPositions[4] = vec3[4](
-      vec3(-scale, height, -scale),
+      vec3(0, 0, 10),
       vec3( scale, height, -scale),
       vec3(-scale, height,  scale),
       vec3( scale, height,  scale)
