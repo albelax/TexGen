@@ -35,7 +35,7 @@ protected:
   GLint m_NAddress;
   Image * m_editedImage;
   Shader m_shader;
-  Mesh m_plane;
+  Mesh m_mesh;
   glm::mat4 m_view;
   glm::mat4 m_projection;
   glm::mat4 m_MV;
