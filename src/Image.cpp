@@ -27,6 +27,7 @@ Image::Image( QImage & _image )
   m_shadingMap.resize( width );
   m_specular.resize( width );
   m_roughness.resize( width );
+  m_metallic.resize( width );
 
 
   for( int i = 0; i < width; ++i )
@@ -36,7 +37,7 @@ Image::Image( QImage & _image )
     m_chroma[i].resize( height );
     m_specular[i].resize( height );
     m_roughness[i].resize( height );
-
+    m_metallic[i].resize( height );
   }
 
   B.resize( int(regionWidth) );
@@ -96,6 +97,7 @@ void Image::loadImage( QImage _image )
   m_shadingMap.resize( width );
   m_specular.resize( width );
   m_roughness.resize( width );
+  m_metallic.resize( width );
 
   for( int i = 0; i < width; ++i )
   {
@@ -104,6 +106,8 @@ void Image::loadImage( QImage _image )
     m_chroma[i].resize( height );
     m_specular[i].resize( height );
     m_roughness[i].resize( height );
+    m_metallic[i].resize( height );
+
   }
 
   B.resize( int(regionWidth) );
@@ -245,14 +249,14 @@ QImage Image::calculateNormalMap( QImage & image, int _depth, bool _invert )
 
   queue.finish();
 
-  QImage out;
-  out = image.copy();
+//  QImage out;
+  m_normal = image.copy();
 
   for ( int i = 0; i < width; ++i )
   {
     for ( int j = 0; j < height; ++j )
     {
-      out.setPixel(i,j,qRgb( r[j * width + i]*255, g[j * width + i]*255, b[j * width + i]*255 ));
+      m_normal.setPixel(i,j,qRgb( r[j * width + i]*255, g[j * width + i]*255, b[j * width + i]*255 ));
     }
   }
 
@@ -262,14 +266,14 @@ QImage Image::calculateNormalMap( QImage & image, int _depth, bool _invert )
   free( o_r );
   free( o_g );
   free( o_b );
-  return out;
+
+  return m_normal;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 
 void Image::threshold()
 {
-
   for( int i = 0; i < width; ++i )
   {
     for( int j = 0; j < height; ++j )
@@ -510,24 +514,23 @@ void Image::separation()
         }
       }
     }
-
   }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 
-void Image::strokeRefinement(QImage _stroke)
+void Image::strokeRefinement( QImage _stroke )
 {
   std::vector<glm::vec2> strokePixels;
   strokePixels.reserve( _stroke.width() * _stroke.height());
 
-  for(int i = 0; i<_stroke.width(); ++i)
+  for(int i = 0; i < _stroke.width(); ++i)
   {
     for(int j = 0; j<_stroke.height(); ++j)
     {
       if(qRed(_stroke.pixel(i,j)) > 0)
       {
-        strokePixels.push_back(glm::vec2(i,j));
+        strokePixels.push_back( glm::vec2( i, j ) );
       }
     }
   }
@@ -638,7 +641,7 @@ void Image::save( std::vector<std::vector<float>> & _image, std::string _destina
       float r = _image[i][j]*255.0f;
       float g = _image[i][j]*255.0f;
       float b = _image[i][j]*255.0f;
-      out.setPixel(i,j,qRgb( r, g, b ));
+      out.setPixel( i, j, qRgb( r, g, b ) );
     }
   }
   out.save( _destination.c_str(), 0, -1 );
@@ -674,7 +677,7 @@ float Image::contrast(float _amount, float _value)
   float factor = (259.0f * (contrast + 255.0f)) / (255.0f * (259.0f - contrast));
   float newSpec = ( factor*(specInt-128) + 128 );
   newSpec = newSpec < 0 ? 0 : (newSpec > 255 ? 255 : newSpec);
-  return newSpec/255.0f;
+  return newSpec / 255.0f;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -826,8 +829,8 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
     {
       //---BRIGHTNESS & CONTRAST--------------
       // https://math.stackexchange.com/a/906280
-     ( *activeMap )[i][j] = newContrast*(( *activeMap )[i][j] - 0.5f) + 0.5f + newBrightness;
-     ( *activeMap )[i][j] = clampF(( *activeMap )[i][j],1.0f,0.0f);
+      ( *activeMap )[i][j] = newContrast*(( *activeMap )[i][j] - 0.5f) + 0.5f + newBrightness;
+      ( *activeMap )[i][j] = clampF(( *activeMap )[i][j],1.0f,0.0f);
 
       //---INVERT---------------
       if ( _invert )
@@ -886,10 +889,71 @@ QImage Image::getIntensity()
     for ( int j = 0; j < height; ++j )
     {
       float pixel = m_intensity[i][j] * 255;
-      out.setPixel(i,j,qRgb( pixel, pixel, pixel));
+      out.setPixel( i, j, qRgb( pixel, pixel, pixel ) );
     }
   }
   return out;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+void Image::metallic( int _x, int _y, int _lowerBound, int _upperBound )
+{
+  float r = 0;
+  float g = 0;
+  float b = 0;
+
+  for ( int i = -1; i < 2; ++i )
+  {
+    for ( int j = -1; j < 2; ++j )
+    {
+      r += m_image.pixelColor( _x + i, _y + j ).red();
+      g += m_image.pixelColor( _x + i, _y + j ).green();
+      b += m_image.pixelColor( _x + i, _y + j ).blue();
+    }
+  }
+
+  QColor sample;// = m_image.pixelColor( _x, _y );
+  sample.setRed( r/9.0f);
+  sample.setGreen( g/ 9.0f);
+  sample.setBlue( b/ 9.0f);
+
+  for ( int i = 0; i < width; ++i )
+  {
+    for ( int j = 0; j < height; ++j )
+    {
+      QColor pixel = m_image.pixelColor( i, j );
+      if ( inRange( sample, pixel, _lowerBound, _upperBound )  )
+        m_metallic[i][j] = 255;
+      else
+        m_metallic[i][j] = 0;
+    }
+  }
+  QImage out;
+  out = m_image.copy();
+  for ( int i = 0; i < width; ++i )
+  {
+    for ( int j = 0; j < height; ++j )
+    {
+      float pixel = m_metallic[i][j];
+      out.setPixel(i, j, qRgb( pixel, pixel, pixel));
+    }
+  }
+  out.save( "pippo.jpg", 0, -1);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+bool Image::inRange( QColor & _sample, QColor & _color, int _lowerBound, int _upperBound )
+{
+  bool inRange = false;
+  bool r = _color.red() < _sample.red() + _upperBound && _color.red() > _sample.red() - _lowerBound;
+  bool g = _color.green() < _sample.green() + _upperBound && _color.green() > _sample.green() - _lowerBound;
+  bool b = _color.blue() < _sample.blue() + _upperBound && _color.blue() > _sample.blue() - _lowerBound;
+
+  if ( r & g & b )
+    inRange = true;
+  return inRange;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

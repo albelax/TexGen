@@ -19,7 +19,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
     m_gl = new GLWindow(this, & m_imageProcessor);
     m_activeScene = m_gl;
   }
-
+//  m_activeScene->setFixedWidth(600);
+//  m_activeScene->setFixedHeight(600);
   m_ui->s_mainWindowGridLayout->addWidget(m_activeScene, 0, 0, 3, 5);
 
   createActions();

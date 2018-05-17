@@ -23,7 +23,7 @@ const float scale = 10.0f;
 const float height = 4.0f;
 const vec3 lightPositions[4] = vec3[4](
       vec3(0, 0, 10),
-      vec3( scale, height, -scale),
+      vec3( 0, 5, 0),
       vec3(-scale, height,  scale),
       vec3( scale, height,  scale)
       );
@@ -132,14 +132,14 @@ void main()
 
   // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0
   // of 0.04 and if it's a metal, use their albedo color as F0 (metallic workflow)
-  vec3 F0 = vec3(0.04);
-F0 = mix(F0, albedo, metallic);
+  vec3 F0 = vec3( 0.04 );
+  F0 = mix( F0, albedo, metallic );
 
   // reflectance equation
   vec3 Lo = vec3(0.0);
-  for(int i = 0; i < 4; ++i)
+  for( int i = 0; i < 4; ++i )
   {
-    vec3 trans = vec3(0.0, 0.0, -2.0);
+    vec3 trans = vec3( 0.0, 0.0, -2.0 );
     vec3 ray = lightPositions[i] - WorldPos + trans;
     // calculate per-light radiance
     vec3 L = normalize(ray);
@@ -182,9 +182,9 @@ F0 = mix(F0, albedo, metallic);
   vec3 color = ambient + Lo;
 
   // HDR tonemapping
-  color = color / (color + vec3(1.0));
+//  color = color / (color + vec3(1.0));
   // gamma correct
-  color = pow(color, vec3(1.0/2.2));
+//  color = pow(color, vec3(1.0/2.2));
 
   fragColour = vec4(color, 1.0);
 }

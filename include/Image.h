@@ -26,8 +26,9 @@ public:
   void strokeRefinement( QImage _stroke );
   void specular(float _brightness, float _contrast, bool _invert, int _sharpness, bool _equalize, Image::map _map );
 
-  float contrast(float _amount, float _value);
-  float desaturate(float _r, float _g, float _b);
+  void metallic( int _x, int _y, int _lowerBound, int _upperBound );
+  float contrast( float _amount, float _value );
+  float desaturate( float _r, float _g, float _b );
   void equalizeHistogram( map _map );
 
   float clampF(float value, float high, float low);
@@ -43,7 +44,7 @@ public:
   QImage getSpecular();
   QImage getRoughness();
   QImage getIntensity();
-
+  QImage getNormal() { return m_normal; }
 private:
   int width;   // aliasing avoids loading m_image in the cache every time we need the width
   int height;
@@ -51,7 +52,7 @@ private:
   int regionHeight; /// \brief regionHeight, the amount of regions in the y
   int m_iterations = 20;  /// \brief m_iterations, number of iteration for the separation
   int m_res = 16;  /// \brief m_res, resolution of each region
-
+  bool inRange( QColor & _sample, QColor & _color, int _lowerBound, int _upperBound );
   void initCL();
   void rgbToHsv();
 
@@ -70,10 +71,11 @@ private:
   std::vector<std::vector<float>> m_shadingMap;
   std::vector<std::vector<float>> m_specular;
   std::vector<std::vector<float>> m_roughness;
+  std::vector<std::vector<float>> m_metallic;
   std::vector<std::vector<float>> B;
   std::vector<std::vector<std::vector<float>>> A;
   std::vector<std::vector<std::vector<float>>> m_chroma;
-
+  QImage m_normal;
   /// \brief numberOfPixelsInChromaRegions, First two vectors are regions x and y
   /// Third vector is the chroma region index
   std::vector<std::vector<std::vector<int>>> numberOfPixelsInChromaRegions;

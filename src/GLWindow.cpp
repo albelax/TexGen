@@ -8,6 +8,7 @@
 #include <math.h>
 #include "Image.h"
 
+
 //----------------------------------------------------------------------------------------------------------------------
 
 GLWindow::GLWindow( QWidget *_parent ) : Scene( _parent )
@@ -65,7 +66,7 @@ void GLWindow::initializeGL()
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-    glActiveTexture( GL_TEXTURE0 );
+//    glActiveTexture( GL_TEXTURE0 );
     m_textureLoaded = true;
   }
 }
@@ -88,8 +89,11 @@ void GLWindow::mouseMove( QMouseEvent * _event )
     m_ratio[0] = m_image.width() / width();
     m_ratio[1] = m_image.height() / height();
 
+
     glm::vec2 tmp( _event->pos().x() - 5 , _event->pos().y() - 35 );
     m_stroke.push_back( tmp );
+    std::cout << tmp.x << " " << tmp.y << "\n";
+
   }
 
   update();
@@ -110,11 +114,11 @@ void GLWindow::mouseClick(QMouseEvent * _event)
     QPainter newP( &strokedImage );
     drawStroke( newP, m_ratio );
 
-    //    m_editedImage->strokeRefinement(strokedImage);
-
-
     strokedImage.save( "images/testy.png", 0, -1 );
     m_stroke.clear();
+    glm::vec2 tmp( _event->pos().x() - 5 , _event->pos().y() - 35 );
+    std::cout << tmp.x << " " << tmp.y << "\n";
+    m_editedImage->metallic( tmp.x, tmp.y, 25, 25);
   }
 
   m_camera.handleMouseClick( *_event );
@@ -122,7 +126,6 @@ void GLWindow::mouseClick(QMouseEvent * _event)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-
 
 void GLWindow::addTexture( std::string _image )
 {
@@ -169,7 +172,7 @@ void GLWindow::init()
   glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float), 0, GL_STATIC_DRAW) ;
   glBufferSubData( GL_ARRAY_BUFFER, m_mesh.getBufferIndex()/3*2 * sizeof( float ), m_mesh.getAmountVertexData() * sizeof(float), &m_mesh.getUVsData() );
 
-  glActiveTexture( GL_TEXTURE0 );
+//  glActiveTexture( GL_TEXTURE0 );
   glGenTextures( 1, &m_renderedTexture );
 
 }
@@ -277,7 +280,7 @@ void GLWindow::showOriginalImage()
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-  glActiveTexture( GL_TEXTURE0 );
+//  glActiveTexture( GL_TEXTURE0 );
   m_textureLoaded = true;
 }
 
@@ -305,7 +308,7 @@ void GLWindow::showGrayscale()
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-  glActiveTexture( GL_TEXTURE0 );
+//  glActiveTexture( GL_TEXTURE0 );
   m_textureLoaded = true;
 }
 
@@ -333,7 +336,7 @@ void GLWindow::showSpecular()
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-  glActiveTexture( GL_TEXTURE0 );
+//  glActiveTexture( GL_TEXTURE0 );
   m_textureLoaded = true;
 }
 
@@ -354,7 +357,7 @@ void GLWindow::showNormalMap()
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-  glActiveTexture( GL_TEXTURE0 );
+//  glActiveTexture( GL_TEXTURE0 );
   m_textureLoaded = true;
 }
 
@@ -379,7 +382,7 @@ void GLWindow::selectImage( int _i )
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-  glActiveTexture( GL_TEXTURE0 );
+//  glActiveTexture( GL_TEXTURE0 );
   update();
 }
 
@@ -411,7 +414,7 @@ void GLWindow::loadImage( char *_path )
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-  glActiveTexture( GL_TEXTURE0 );
+//  glActiveTexture( GL_TEXTURE0 );
   m_textureLoaded = true;
   update();
 }
