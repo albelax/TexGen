@@ -43,6 +43,7 @@ private slots:
   void swapView( int _n );
 
 private:
+  bool m_pbrCreated = false;
   Ui::MainWindow * m_ui;
   GLWindow * m_gl;
   PBRViewport * m_pbrViewport;
@@ -55,16 +56,15 @@ private:
   QAction * saveAct;
   QAction * loadMeshAct;
 
-  QList<QAction *> saveAsActs;
   QAction * exitAct;
+  QList<QAction *> saveAsActs;
   std::vector<QLayoutItem *> m_originalLayout;
-  std::vector<QWidget *> m_originalMenu;
   std::vector<QWidget *> * m_currentMenu;
+  std::vector<QWidget *> m_originalMenu;
   std::vector<QWidget *> m_normalMenu;
   std::vector<QWidget *> m_specularMenu;
   std::vector<QWidget *> m_roughnessMenu;
-
-  bool m_pbrCreated = false;
+  std::vector<QWidget *> m_metallicMenu;
 
   void createActions();
   void createMenus();
@@ -75,6 +75,8 @@ private:
   void makeSpecularMenu();
   void makeRoughnessMenu();
   void makeNormalMenu();
+  void makeMetallicMenu();
+
 };
 
 #endif // MAINWINDOW_H

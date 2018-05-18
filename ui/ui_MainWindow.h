@@ -22,6 +22,7 @@
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QSpacerItem>
+#include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -43,7 +44,7 @@ public:
     QSpacerItem *horizontalSpacer_2;
     QSpacerItem *horizontalSpacer;
     QGroupBox *s_drawGB;
-    QGridLayout *gridLayout_2;
+    QVBoxLayout *verticalLayout;
     QSpacerItem *verticalSpacer;
     QMenuBar *menubar;
     QMenu *menuFiles;
@@ -108,11 +109,11 @@ public:
 
         s_drawGB = new QGroupBox(centralwidget);
         s_drawGB->setObjectName(QStringLiteral("s_drawGB"));
-        gridLayout_2 = new QGridLayout(s_drawGB);
-        gridLayout_2->setObjectName(QStringLiteral("gridLayout_2"));
+        verticalLayout = new QVBoxLayout(s_drawGB);
+        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-        gridLayout_2->addItem(verticalSpacer, 0, 1, 1, 1);
+        verticalLayout->addItem(verticalSpacer);
 
 
         s_mainWindowGridLayout->addWidget(s_drawGB, 2, 5, 1, 1);

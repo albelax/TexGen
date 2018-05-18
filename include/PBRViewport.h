@@ -29,10 +29,10 @@ public:
 protected:
   /// @brief  The following methods must be implimented in the sub class
   /// this is called when the window is created
-  void initializeGL();
+  void initializeGL() override;
   /// @brief this is the main gl drawing routine which is called whenever the window needs to
-  void paintGL();
-  void resizeGL( int _w , int _h );
+  void paintGL() override;
+  void resizeGL( int _w , int _h ) override;
   void renderScene();
   void addTexture( QImage _image );
   void addTexture( QImage _image, GLuint * _texture, unsigned int _offset );

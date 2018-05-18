@@ -92,8 +92,6 @@ void GLWindow::mouseMove( QMouseEvent * _event )
 
     glm::vec2 tmp( _event->pos().x() - 5 , _event->pos().y() - 35 );
     m_stroke.push_back( tmp );
-    std::cout << tmp.x << " " << tmp.y << "\n";
-
   }
 
   update();
@@ -103,10 +101,10 @@ void GLWindow::mouseMove( QMouseEvent * _event )
 
 void GLWindow::mouseClick(QMouseEvent * _event)
 {
-  if (_event->type() ==  QMouseEvent::MouseButtonRelease)
+  if ( _event->type() == QMouseEvent::MouseButtonRelease )
   {
-    m_ratio[0] = m_image.width() / width();
-    m_ratio[1] = m_image.height() / height();
+    m_ratio[0] = static_cast<float>( m_image.width() ) / static_cast<float>( width() ) ;
+    m_ratio[1] = static_cast<float>( m_image.height() ) / static_cast<float>(  height() );
 
     QImage strokedImage = m_image;
     strokedImage.fill( Qt::white );
@@ -116,9 +114,12 @@ void GLWindow::mouseClick(QMouseEvent * _event)
 
     strokedImage.save( "images/testy.png", 0, -1 );
     m_stroke.clear();
-    glm::vec2 tmp( _event->pos().x() - 5 , _event->pos().y() - 35 );
-    std::cout << tmp.x << " " << tmp.y << "\n";
-    m_editedImage->metallic( tmp.x, tmp.y, 25, 25);
+    glm::vec2 tmp( _event->pos().x()  - 5, _event->pos().y() - 35 );
+
+    std::array<int, 3> lowerBound = {{ 25, 25, 25 }};
+    std::array<int, 3> upperBound = {{ 25, 25, 25 }};
+
+    m_editedImage->metallic( tmp.x * m_ratio[0], tmp.y  * m_ratio[1], lowerBound, upperBound );
   }
 
   m_camera.handleMouseClick( *_event );
@@ -172,7 +173,6 @@ void GLWindow::init()
   glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float), 0, GL_STATIC_DRAW) ;
   glBufferSubData( GL_ARRAY_BUFFER, m_mesh.getBufferIndex()/3*2 * sizeof( float ), m_mesh.getAmountVertexData() * sizeof(float), &m_mesh.getUVsData() );
 
-//  glActiveTexture( GL_TEXTURE0 );
   glGenTextures( 1, &m_renderedTexture );
 
 }

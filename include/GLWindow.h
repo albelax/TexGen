@@ -54,9 +54,9 @@ public slots:
 protected:
   /// @brief  The following methods must be implimented in the sub class
   /// this is called when the window is created
-  void initializeGL();
+  void initializeGL() override;
   /// @brief this is the main gl drawing routine which is called whenever the window needs to
-  void paintGL();
+  void paintGL() override;
   void addTexture( std::string _image );
   void renderTexture();
   void renderNormals();

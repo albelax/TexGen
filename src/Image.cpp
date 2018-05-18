@@ -718,7 +718,7 @@ void Image::equalizeHistogram(map _map)
   // Build LUT from cumulative histrogram
 
   // Find first non-zero bin
-  int p = 0;
+  unsigned int p = 0;
   while (!hist[p]) ++p;
 
   if (hist[p] == total)
@@ -897,7 +897,7 @@ QImage Image::getIntensity()
 
 //---------------------------------------------------------------------------------------------------------------------
 
-void Image::metallic( int _x, int _y, int _lowerBound, int _upperBound )
+void Image::metallic( int _x, int _y, std::array<int, 3> _lowerBound, std::array<int, 3> _upperBound )
 {
   float r = 0;
   float g = 0;
@@ -905,7 +905,7 @@ void Image::metallic( int _x, int _y, int _lowerBound, int _upperBound )
 
   for ( int i = -1; i < 2; ++i )
   {
-    for ( int j = -1; j < 2; ++j )
+    for ( int j = -0; j < 2; ++j )
     {
       r += m_image.pixelColor( _x + i, _y + j ).red();
       g += m_image.pixelColor( _x + i, _y + j ).green();
@@ -914,9 +914,9 @@ void Image::metallic( int _x, int _y, int _lowerBound, int _upperBound )
   }
 
   QColor sample;// = m_image.pixelColor( _x, _y );
-  sample.setRed( r/9.0f);
-  sample.setGreen( g/ 9.0f);
-  sample.setBlue( b/ 9.0f);
+  sample.setRed( r / 9.0f);
+  sample.setGreen( g / 9.0f);
+  sample.setBlue( b / 9.0f);
 
   for ( int i = 0; i < width; ++i )
   {
@@ -944,12 +944,12 @@ void Image::metallic( int _x, int _y, int _lowerBound, int _upperBound )
 
 //---------------------------------------------------------------------------------------------------------------------
 
-bool Image::inRange( QColor & _sample, QColor & _color, int _lowerBound, int _upperBound )
+bool Image::inRange( QColor & _sample, QColor & _color,  std::array<int, 3> _lowerBound, std::array<int, 3> _upperBound )
 {
   bool inRange = false;
-  bool r = _color.red() < _sample.red() + _upperBound && _color.red() > _sample.red() - _lowerBound;
-  bool g = _color.green() < _sample.green() + _upperBound && _color.green() > _sample.green() - _lowerBound;
-  bool b = _color.blue() < _sample.blue() + _upperBound && _color.blue() > _sample.blue() - _lowerBound;
+  bool r = _color.red() < _sample.red() + _upperBound[0] && _color.red() > _sample.red() - _lowerBound[0];
+  bool g = _color.green() < _sample.green() + _upperBound[1] && _color.green() > _sample.green() - _lowerBound[1];
+  bool b = _color.blue() < _sample.blue() + _upperBound[2] && _color.blue() > _sample.blue() - _lowerBound[2];
 
   if ( r & g & b )
     inRange = true;

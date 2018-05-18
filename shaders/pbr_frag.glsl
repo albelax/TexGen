@@ -23,7 +23,7 @@ const float scale = 10.0f;
 const float height = 4.0f;
 const vec3 lightPositions[4] = vec3[4](
       vec3(0, 0, 10),
-      vec3( 0, 5, 0),
+      vec3( 0, 10, 0),
       vec3(-scale, height,  scale),
       vec3( scale, height,  scale)
       );
@@ -55,6 +55,7 @@ float DistributionGGX(vec3 N, vec3 H, float roughness)
   return nom / denom;
 }
 // ----------------------------------------------------------------------------
+
 float GeometrySchlickGGX(float NdotV, float roughness)
 {
   float r = (roughness + 1.0);
@@ -65,6 +66,7 @@ float GeometrySchlickGGX(float NdotV, float roughness)
 
   return nom / denom;
 }
+
 // ----------------------------------------------------------------------------
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 {
@@ -115,9 +117,9 @@ vec3 rotateVector( vec3 src, vec3 tgt, vec3 vec )
 
 void main()
 {
-  vec3 N = normalize(Normal);
-  vec3 V = normalize(camPos - WorldPos);
-  vec3 R = reflect(-V, N);
+  vec3 N = normalize( Normal );
+  vec3 V = normalize( camPos - WorldPos );
+  vec3 R = reflect( -V, N );
 
   // normal texture
   vec3 tgt = normalize( texture( NormalTexture, TexCoords ).rgb * 2.0 - 1.0 );
@@ -126,9 +128,9 @@ void main()
 
   // other textures
 
-  vec3 albedo = texture(ColourTexture, TexCoords).rgb;
-  float metallic = texture(MetallicTexture, TexCoords).r;
-  float roughness = texture(RoughnessTexture,TexCoords).r;
+  vec3 albedo = texture( ColourTexture, TexCoords ).rgb;
+  float metallic = texture( MetallicTexture, TexCoords ).r;
+  float roughness = texture( RoughnessTexture, TexCoords ).r;
 
   // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0
   // of 0.04 and if it's a metal, use their albedo color as F0 (metallic workflow)
@@ -182,9 +184,9 @@ void main()
   vec3 color = ambient + Lo;
 
   // HDR tonemapping
-//  color = color / (color + vec3(1.0));
+  color = color / (color + vec3(1.0));
   // gamma correct
-//  color = pow(color, vec3(1.0/2.2));
+  color = pow(color, vec3(1.0/2.2));
 
   fragColour = vec4(color, 1.0);
 }

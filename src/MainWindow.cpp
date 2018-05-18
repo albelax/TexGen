@@ -237,7 +237,6 @@ void MainWindow::swapView( int _n )
     m_activeScene = new PBRViewport( this, &m_imageProcessor ); // TODO: change constructor
   }
   m_ui -> s_mainWindowGridLayout -> addWidget(m_activeScene, 0, 0, 3, 5);
-
 }
 
 //------------------------------------------------------------------------
@@ -275,7 +274,7 @@ void MainWindow::makeSpecularMenu()
   m_specularMenu.push_back( new QCheckBox() );
 
   // 10
-  m_specularMenu.push_back( new QPushButton("Reset",nullptr));
+  m_specularMenu.push_back( new QPushButton( "Reset", nullptr ) );
 }
 
 //------------------------------------------------------------------------
@@ -331,6 +330,14 @@ void MainWindow::makeNormalMenu()
   m_normalMenu.push_back( new QLabel( "Invert", 0, 0 ) );
   m_normalMenu.push_back( new QCheckBox() );
 
+}
+
+//------------------------------------------------------------------------
+
+void MainWindow::makeMetallicMenu()
+{
+  m_metallicMenu.push_back( new QLabel( "Pick", 0, 0 ) );
+  m_metallicMenu.push_back( new QCheckBox() );
 }
 
 //------------------------------------------------------------------------

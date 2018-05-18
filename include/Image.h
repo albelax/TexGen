@@ -26,7 +26,7 @@ public:
   void strokeRefinement( QImage _stroke );
   void specular(float _brightness, float _contrast, bool _invert, int _sharpness, bool _equalize, Image::map _map );
 
-  void metallic( int _x, int _y, int _lowerBound, int _upperBound );
+  void metallic(int _x, int _y, std::array<int, 3> _lowerBound, std::array<int, 3> _upperBound );
   float contrast( float _amount, float _value );
   float desaturate( float _r, float _g, float _b );
   void equalizeHistogram( map _map );
@@ -52,7 +52,7 @@ private:
   int regionHeight; /// \brief regionHeight, the amount of regions in the y
   int m_iterations = 20;  /// \brief m_iterations, number of iteration for the separation
   int m_res = 16;  /// \brief m_res, resolution of each region
-  bool inRange( QColor & _sample, QColor & _color, int _lowerBound, int _upperBound );
+  bool inRange( QColor & _sample, QColor & _color, std::array<int, 3> _lowerBound, std::array<int, 3> _upperBound );
   void initCL();
   void rgbToHsv();
 
