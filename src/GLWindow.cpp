@@ -66,7 +66,6 @@ void GLWindow::initializeGL()
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-//    glActiveTexture( GL_TEXTURE0 );
     m_textureLoaded = true;
   }
 }
@@ -193,8 +192,6 @@ void GLWindow::paintGL()
   }
   std::array<float, 2> ratio = { 1, 1 };
   drawStroke( p, ratio );
-
-  //    update();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -308,7 +305,6 @@ void GLWindow::showGrayscale()
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-//  glActiveTexture( GL_TEXTURE0 );
   m_textureLoaded = true;
 }
 

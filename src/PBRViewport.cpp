@@ -128,7 +128,9 @@ void PBRViewport::init(bool _pbr)
 	{
 		m_shader = Shader( "m_shader", shadersAddress + "phong_vert.glsl", shadersAddress + "phong_frag.glsl" );
 	}
+	m_gradient = Shader( "m_gradient", shadersAddress + "gradientVert.glsl", shadersAddress + "gradientFrag.glsl" );
 
+	glLinkProgram( m_gradient.getShaderProgram() );
 	glLinkProgram( m_shader.getShaderProgram() );
 	glUseProgram( m_shader.getShaderProgram() );
 
@@ -271,16 +273,12 @@ void PBRViewport::paintGL()
 	glViewport( 0, 0, width(), height() );
 	glClearColor( 1, 1, 1, 1.0f );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-	auto camPos = m_camera.getCameraEye();
-	glUniform3f(glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ), camPos.x, camPos.y, camPos.z);
-//	addTexture( m_editedImage->getDiffuse(), &m_diffuseTexture, 0 );
-//	addTexture( m_editedImage->getNormal(), &m_normalTexture, 1 );
-//	addTexture( m_editedImage->getRoughness(), &m_roughnessTexture, 3 );
-//	addTexture( m_editedImage->getSpecular(), &m_metallicTexture, 4 );
 
+	glUseProgram( m_gradient.getShaderProgram() );
+	glDrawArrays( GL_TRIANGLES, 0, 9 );
+	glUseProgram( m_shader.getShaderProgram() );
 
 	renderScene();
-//	update();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -288,16 +286,14 @@ void PBRViewport::paintGL()
 void PBRViewport::renderScene()
 {
 	glViewport( 0, 0, width(), height() );
-	glClearColor( 1, 1, 1, 1.0f );
-	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+	glClear( GL_DEPTH_BUFFER_BIT );
 
 	glUseProgram( m_shader.getShaderProgram() );
-	m_camera.update();
-//	m_projection = m_camera.projMatrix() * m_camera.viewMatrix() * m_MV;
+	auto camPos = m_camera.getCameraEye();
+	glUniform3f( glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ), camPos.x, camPos.y, camPos.z );
 
-//	m_projection = glm::perspective( glm::radians( 60.0f ),
-//																	 static_cast<float>( width() ) / static_cast<float>( height() ), 0.1f, 100.0f );
-//	m_view = glm::lookAt( glm::vec3( 0.0f, 0.0f, 5.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 1.0f, 0.0f ) );
+	m_camera.update();
+
 	m_MVP = m_camera.projMatrix() * m_camera.viewMatrix() * m_MV;
 	glm::mat3 N = glm::mat3 (glm::inverse( glm::transpose( m_MV ) )) ;
 

@@ -86,6 +86,8 @@ DIST          = shaders/pbr_frag.glsl \
 		shaders/pbr_vert.glsl \
 		shaders/renderedVert.glsl \
 		shaders/renderedFrag.glsl \
+		shaders/gradientVert.glsl \
+		shaders/gradientFrag.glsl \
 		/opt/Qt5.9.0/5.9/gcc_64/mkspecs/features/spec_pre.prf \
 		/opt/Qt5.9.0/5.9/gcc_64/mkspecs/common/unix.conf \
 		/opt/Qt5.9.0/5.9/gcc_64/mkspecs/common/linux.conf \
