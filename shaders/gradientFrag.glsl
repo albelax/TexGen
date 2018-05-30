@@ -8,6 +8,6 @@ out vec4 FragColor;
 
 void main()
 {
-  FragColor = vec4( texture( renderedTexure, texCoord ).rgb, 1.0f );
-  //	FragColor = vec4( 1,0,0, 1.0f );
+  float correction = 0.1f;
+  FragColor = vec4( 0.392f, 0.474f, 0.498f, 1.0f ) * texCoord.y + correction;
 }

@@ -19,8 +19,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
     m_gl = new GLWindow(this, & m_imageProcessor);
     m_activeScene = m_gl;
   }
-//  m_activeScene->setFixedWidth(600);
-//  m_activeScene->setFixedHeight(600);
+  //  m_activeScene->setFixedWidth(600);
+  //  m_activeScene->setFixedHeight(600);
   m_ui->s_mainWindowGridLayout->addWidget(m_activeScene, 0, 0, 3, 5);
 
   createActions();
@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   //	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), m_gl, SLOT(selectImage(int)));
   //connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLayout(int)));
   //connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLayout(int)));
+  connect(m_ui->viewport, SIGNAL(currentIndexChanged(int)), this, SLOT(swapView(int)));
   connect(m_ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeLayout(int)));
 
   // specular
@@ -54,20 +55,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   connect((QSlider *)m_roughnessMenu[7], SIGNAL(sliderReleased() ), this, SLOT(updateRoughness()));
   connect((QCheckBox *)m_roughnessMenu[1], SIGNAL(clicked(bool)), this, SLOT(updateRoughness()));
   connect((QCheckBox *)m_roughnessMenu[9], SIGNAL(clicked(bool)), this, SLOT(updateRoughness()));
-//  connect((QPushButton *)m_roughnessMenu[10], SIGNAL(released()), this, SLOT(resetSpecularSettings()));
+  //  connect((QPushButton *)m_roughnessMenu[10], SIGNAL(released()), this, SLOT(resetSpecularSettings()));
 
   QWidget * diffuseTab = new QWidget;
 
-//  QWidget * specularTab = new QWidget;
-//  QVBoxLayout *specularLayout = new QVBoxLayout;
-//  for ( auto &_widget : m_specularMenu)
-//  {
-//    _widget->setParent(specularTab);
-//    specularLayout->setAlignment( this, Qt::AlignTop );
-//    specularLayout->addWidget( _widget ); // probably should be added only once?
-//    _widget->show();
-//  }
-//  specularTab->setLayout(specularLayout);
+  //  QWidget * specularTab = new QWidget;
+  //  QVBoxLayout *specularLayout = new QVBoxLayout;
+  //  for ( auto &_widget : m_specularMenu)
+  //  {
+  //    _widget->setParent(specularTab);
+  //    specularLayout->setAlignment( this, Qt::AlignTop );
+  //    specularLayout->addWidget( _widget ); // probably should be added only once?
+  //    _widget->show();
+  //  }
+  //  specularTab->setLayout(specularLayout);
 
   QWidget * normalTab = new QWidget;
   QVBoxLayout *normalLayout = new QVBoxLayout;
@@ -177,7 +178,7 @@ void MainWindow::open()
 {
   QString fileName = QFileDialog::getOpenFileName( this, tr("Open File"), QDir::currentPath() );
 
-  if( !fileName.isEmpty() && dynamic_cast<GLWindow *>( m_activeScene ) )
+  if( !fileName.isEmpty() && dynamic_cast<GLWindow *>( m_activeScene ) )//w-discrepancy sample i of the total sample set of size
   {
     dynamic_cast<GLWindow *>( m_activeScene )->loadImage( fileName.toLatin1().data() );
   }
@@ -206,7 +207,7 @@ void MainWindow::save()
                                                   initialPath,tr("%1 Files (*.%2);;All Files (*)"));
   if (!fileName.isEmpty())
   {
-   dynamic_cast<GLWindow *>( m_activeScene )->save( fileName.toLatin1().data() );
+    dynamic_cast<GLWindow *>( m_activeScene )->save( fileName.toLatin1().data() );
   }
 }
 //------------------------------------------------------------------------

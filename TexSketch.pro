@@ -64,4 +64,6 @@ DISTFILES += \
     shaders/pbr_frag.glsl \
     shaders/pbr_vert.glsl \
     shaders/renderedVert.glsl \
-    shaders/renderedFrag.glsl
+    shaders/renderedFrag.glsl \
+    shaders/gradientVert.glsl \
+    shaders/gradientFrag.glsl
