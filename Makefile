@@ -61,7 +61,8 @@ SOURCES       = src/main.cpp \
 		src/Image.cpp \
 		src/PBRViewport.cpp \
 		src/Scene.cpp \
-		src/CameraStates.cpp moc/moc_MainWindow.cpp \
+		src/CameraStates.cpp qrc_style.cpp \
+		moc/moc_MainWindow.cpp \
 		moc/moc_GLWindow.cpp \
 		moc/moc_PBRViewport.cpp \
 		moc/moc_Scene.cpp
@@ -76,6 +77,7 @@ OBJECTS       = obj/main.o \
 		obj/PBRViewport.o \
 		obj/Scene.o \
 		obj/CameraStates.o \
+		obj/qrc_style.o \
 		obj/moc_MainWindow.o \
 		obj/moc_GLWindow.o \
 		obj/moc_PBRViewport.o \
@@ -474,6 +476,7 @@ Makefile: TexSketch.pro /opt/Qt5.9.0/5.9/gcc_64/mkspecs/linux-clang/qmake.conf /
 		/opt/Qt5.9.0/5.9/gcc_64/mkspecs/features/yacc.prf \
 		/opt/Qt5.9.0/5.9/gcc_64/mkspecs/features/lex.prf \
 		TexSketch.pro \
+		Style/style.qrc \
 		/opt/Qt5.9.0/5.9/gcc_64/lib/libQt5OpenGL.prl \
 		/opt/Qt5.9.0/5.9/gcc_64/lib/libQt5Widgets.prl \
 		/opt/Qt5.9.0/5.9/gcc_64/lib/libQt5Gui.prl \
@@ -659,6 +662,7 @@ Makefile: TexSketch.pro /opt/Qt5.9.0/5.9/gcc_64/mkspecs/linux-clang/qmake.conf /
 /opt/Qt5.9.0/5.9/gcc_64/mkspecs/features/yacc.prf:
 /opt/Qt5.9.0/5.9/gcc_64/mkspecs/features/lex.prf:
 TexSketch.pro:
+Style/style.qrc:
 /opt/Qt5.9.0/5.9/gcc_64/lib/libQt5OpenGL.prl:
 /opt/Qt5.9.0/5.9/gcc_64/lib/libQt5Widgets.prl:
 /opt/Qt5.9.0/5.9/gcc_64/lib/libQt5Gui.prl:
@@ -677,6 +681,7 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
+	$(COPY_FILE) --parents Style/style.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /opt/Qt5.9.0/5.9/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents include/MainWindow.h include/GLWindow.h include/Mesh.h include/Shader.h include/Camera.h include/TrackballCamera.h include/Image.h include/PBRViewport.h include/Scene.h include/CameraStates.h $(DISTDIR)/
 	$(COPY_FILE) --parents src/main.cpp src/MainWindow.cpp src/GLWindow.cpp src/Mesh.cpp src/Shader.cpp src/Camera.cpp src/TrackballCamera.cpp src/Image.cpp src/PBRViewport.cpp src/Scene.cpp src/CameraStates.cpp $(DISTDIR)/
@@ -704,8 +709,53 @@ check: first
 
 benchmark: first
 
-compiler_rcc_make_all:
+compiler_rcc_make_all: qrc_style.cpp
 compiler_rcc_clean:
+	-$(DEL_FILE) qrc_style.cpp
+qrc_style.cpp: Style/style.qrc \
+		/opt/Qt5.9.0/5.9/gcc_64/bin/rcc \
+		Style/rc/Vsepartoolbar.png \
+		Style/rc/close-pressed.png \
+		Style/rc/Hmovetoolbar.png \
+		Style/rc/up_arrow.png \
+		Style/rc/left_arrow_disabled.png \
+		Style/rc/close-hover.png \
+		Style/rc/checkbox_unchecked.png \
+		Style/rc/radio_unchecked_disabled.png \
+		Style/rc/radio_checked.png \
+		Style/rc/checkbox_checked_disabled.png \
+		Style/rc/Hsepartoolbar.png \
+		Style/rc/sizegrip.png \
+		Style/rc/down_arrow.png \
+		Style/rc/stylesheet-branch-more.png \
+		Style/rc/radio_unchecked.png \
+		Style/rc/branch_closed-on.png \
+		Style/rc/checkbox_unchecked_disabled.png \
+		Style/rc/branch_open.png \
+		Style/rc/left_arrow.png \
+		Style/rc/stylesheet-branch-end.png \
+		Style/rc/undock.png \
+		Style/rc/right_arrow.png \
+		Style/rc/checkbox_indeterminate.png \
+		Style/rc/checkbox_checked_focus.png \
+		Style/rc/stylesheet-vline.png \
+		Style/rc/radio_checked_focus.png \
+		Style/rc/branch_closed.png \
+		Style/rc/right_arrow_disabled.png \
+		Style/rc/down_arrow_disabled.png \
+		Style/rc/branch_open-on.png \
+		Style/rc/radio_unchecked_focus.png \
+		Style/rc/Vmovetoolbar.png \
+		Style/rc/transparent.png \
+		Style/rc/close.png \
+		Style/rc/radio_checked_disabled.png \
+		Style/rc/checkbox_checked.png \
+		Style/rc/up_arrow_disabled.png \
+		Style/rc/checkbox_indeterminate_focus.png \
+		Style/rc/checkbox_unchecked_focus.png \
+		Style/style.qss
+	/opt/Qt5.9.0/5.9/gcc_64/bin/rcc -name style Style/style.qrc -o qrc_style.cpp
+
 compiler_moc_predefs_make_all: moc/moc_predefs.h
 compiler_moc_predefs_clean:
 	-$(DEL_FILE) moc/moc_predefs.h
@@ -2477,7 +2527,7 @@ compiler_yacc_impl_make_all:
 compiler_yacc_impl_clean:
 compiler_lex_make_all:
 compiler_lex_clean:
-compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean compiler_uic_clean 
+compiler_clean: compiler_rcc_clean compiler_moc_predefs_clean compiler_moc_header_clean compiler_uic_clean 
 
 ####### Compile
 
@@ -3877,7 +3927,8 @@ obj/MainWindow.o: src/MainWindow.cpp include/MainWindow.h \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets/QLabel \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets/QMenu \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets/QMenuBar \
-		/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets/QSpacerItem
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets/QSpacerItem \
+		/opt/Qt5.9.0/5.9/gcc_64/include/QtWidgets/QVBoxLayout
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/MainWindow.o src/MainWindow.cpp
 
 obj/GLWindow.o: src/GLWindow.cpp include/GLWindow.h \
@@ -5738,6 +5789,9 @@ obj/CameraStates.o: src/CameraStates.cpp include/CameraStates.h \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/qtouchdevice.h \
 		/opt/Qt5.9.0/5.9/gcc_64/include/QtGui/QKeyEvent
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/CameraStates.o src/CameraStates.cpp
+
+obj/qrc_style.o: qrc_style.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/qrc_style.o qrc_style.cpp
 
 obj/moc_MainWindow.o: moc/moc_MainWindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/moc_MainWindow.o moc/moc_MainWindow.cpp
