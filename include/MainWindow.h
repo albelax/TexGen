@@ -66,6 +66,8 @@ private:
   std::vector<QWidget *> m_roughnessMenu;
   std::vector<QWidget *> m_metallicMenu;
 
+  QTabWidget * m_tabWidget;
+
   void createActions();
   void createMenus();
   void keyPressEvent(QKeyEvent * _event);
@@ -76,6 +78,8 @@ private:
   void makeRoughnessMenu();
   void makeNormalMenu();
   void makeMetallicMenu();
+
+  bool tabsInitialized = false;
 
 };
 

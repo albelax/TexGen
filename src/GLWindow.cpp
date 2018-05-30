@@ -51,7 +51,7 @@ void GLWindow::initializeGL()
   glEnable( GL_MULTISAMPLE );
   glEnable( GL_TEXTURE_2D );
   glClearColor( 0.5f, 0.5f, 0.5f, 1.0f );
-  glViewport( 0, 0, devicePixelRatio(), devicePixelRatio() );
+  glViewport( 0, 0, devicePixelRatio(), devicePixelRatio() ); // FIX
   init();
 
   if( m_preview.isNull() == 0 )

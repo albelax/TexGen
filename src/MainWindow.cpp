@@ -32,8 +32,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
 
   // specular
   //	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), m_gl, SLOT(selectImage(int)));
-  connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLayout(int)));
-  connect(m_ui->viewport, SIGNAL(currentIndexChanged(int)), this, SLOT(swapView(int)));
+  //connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLayout(int)));
+  //connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLayout(int)));
+  connect(m_ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeLayout(int)));
 
   // specular
   connect((QSlider *)m_specularMenu[3], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
@@ -55,6 +56,48 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   connect((QCheckBox *)m_roughnessMenu[9], SIGNAL(clicked(bool)), this, SLOT(updateRoughness()));
 //  connect((QPushButton *)m_roughnessMenu[10], SIGNAL(released()), this, SLOT(resetSpecularSettings()));
 
+  QWidget * diffuseTab = new QWidget;
+
+//  QWidget * specularTab = new QWidget;
+//  QVBoxLayout *specularLayout = new QVBoxLayout;
+//  for ( auto &_widget : m_specularMenu)
+//  {
+//    _widget->setParent(specularTab);
+//    specularLayout->setAlignment( this, Qt::AlignTop );
+//    specularLayout->addWidget( _widget ); // probably should be added only once?
+//    _widget->show();
+//  }
+//  specularTab->setLayout(specularLayout);
+
+  QWidget * normalTab = new QWidget;
+  QVBoxLayout *normalLayout = new QVBoxLayout;
+  for ( auto &_widget : m_normalMenu)
+  {
+    _widget->setParent(normalTab);
+    normalLayout->setAlignment( this, Qt::AlignTop );
+    normalLayout->addWidget( _widget ); // probably should be added only once?
+    _widget->show();
+  }
+  normalTab->setLayout(normalLayout);
+
+  QWidget * roughnessTab = new QWidget;
+  QVBoxLayout *roughnessLayout = new QVBoxLayout;
+  for ( auto &_widget : m_roughnessMenu)
+  {
+    _widget->setParent(roughnessTab);
+    roughnessLayout->setAlignment( this, Qt::AlignTop );
+    roughnessLayout->addWidget( _widget ); // probably should be added only once?
+    _widget->show();
+  }
+  roughnessTab->setLayout(roughnessLayout);
+
+  m_ui->tabWidget->removeTab(0);
+  m_ui->tabWidget->removeTab(0);
+  m_ui->tabWidget->addTab(diffuseTab,tr("Diffuse"));
+  m_ui->tabWidget->addTab(normalTab,tr("Normal"));
+  m_ui->tabWidget->addTab(roughnessTab,tr("Roughness"));
+
+  tabsInitialized = true;
 }
 
 //------------------------------------------------------------------------
@@ -62,6 +105,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
 MainWindow::~MainWindow()
 {
   delete m_ui;
+  delete m_tabWidget;
 }
 
 //------------------------------------------------------------------------
@@ -169,54 +213,20 @@ void MainWindow::save()
 
 void MainWindow::changeLayout( int _n )
 {
-  QLayout * layout = m_ui->s_drawGB->layout();
-
-  for( auto &_widget : *m_currentMenu )
-  {
-    _widget->hide();
-  }
+  if(tabsInitialized==false) return;
 
   if ( _n == Image::ORIGINAL && dynamic_cast<GLWindow *>( m_activeScene ) )
   {
     dynamic_cast<GLWindow *>( m_activeScene )->selectImage(_n);
   }
 
-  if ( _n == Image::SPECULAR )
+  if ( _n == 1 )
   {
-    m_currentMenu = &m_specularMenu;
-
-    for ( auto &_widget : m_specularMenu)
-    {
-      layout->setAlignment( this, Qt::AlignTop );
-      layout->addWidget( _widget ); // probably should be added only once?
-      _widget->show();
-    }
-    updateSpecular();
-  }
-
-  if ( _n == Image::NORMAL )
-  {
-    m_currentMenu = &m_normalMenu;
-
-    for ( auto &_widget : m_normalMenu )
-    {
-      layout->setAlignment( this, Qt::AlignTop );
-      layout->addWidget( _widget ); // probably should be added only once?
-      _widget->show();
-    }
     updateNormal();
   }
 
-  if ( _n == Image::ROUGHNESS )
+  if ( _n == 2 )
   {
-    m_currentMenu = &m_roughnessMenu;
-
-    for ( auto &_widget : m_roughnessMenu )
-    {
-      layout->setAlignment( this, Qt::AlignTop );
-      layout->addWidget( _widget ); // probably should be added only once?
-      _widget->show();
-    }
     updateRoughness();
   }
 }

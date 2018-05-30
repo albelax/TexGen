@@ -22,7 +22,7 @@
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QSpacerItem>
-#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QTabWidget>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -36,16 +36,14 @@ public:
     QGridLayout *gridLayout;
     QLabel *label;
     QComboBox *viewport;
-    QLabel *Image;
     QSpacerItem *horizontalSpacer_4;
-    QComboBox *m_selectImage;
     QSpacerItem *horizontalSpacer_5;
     QSpacerItem *horizontalSpacer_6;
     QSpacerItem *horizontalSpacer_2;
     QSpacerItem *horizontalSpacer;
-    QGroupBox *s_drawGB;
-    QVBoxLayout *verticalLayout;
-    QSpacerItem *verticalSpacer;
+    QTabWidget *tabWidget;
+    QWidget *diffuseTab;
+    QWidget *normalTab;
     QMenuBar *menubar;
     QMenu *menuFiles;
     QMenu *menuedit;
@@ -74,22 +72,12 @@ public:
 
         gridLayout->addWidget(viewport, 3, 0, 1, 1);
 
-        Image = new QLabel(s_transformGB);
-        Image->setObjectName(QStringLiteral("Image"));
-
-        gridLayout->addWidget(Image, 4, 0, 1, 1);
-
         horizontalSpacer_4 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
         gridLayout->addItem(horizontalSpacer_4, 2, 3, 1, 1);
 
-        m_selectImage = new QComboBox(s_transformGB);
-        m_selectImage->setObjectName(QStringLiteral("m_selectImage"));
 
-        gridLayout->addWidget(m_selectImage, 5, 0, 1, 1);
-
-
-        s_mainWindowGridLayout->addWidget(s_transformGB, 0, 5, 1, 1);
+        s_mainWindowGridLayout->addWidget(s_transformGB, 0, 6, 1, 1);
 
         horizontalSpacer_5 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
@@ -107,16 +95,16 @@ public:
 
         s_mainWindowGridLayout->addItem(horizontalSpacer, 0, 4, 1, 1);
 
-        s_drawGB = new QGroupBox(centralwidget);
-        s_drawGB->setObjectName(QStringLiteral("s_drawGB"));
-        verticalLayout = new QVBoxLayout(s_drawGB);
-        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
-        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        tabWidget = new QTabWidget(centralwidget);
+        tabWidget->setObjectName(QStringLiteral("tabWidget"));
+        diffuseTab = new QWidget();
+        diffuseTab->setObjectName(QStringLiteral("diffuseTab"));
+        tabWidget->addTab(diffuseTab, QString());
+        normalTab = new QWidget();
+        normalTab->setObjectName(QStringLiteral("normalTab"));
+        tabWidget->addTab(normalTab, QString());
 
-        verticalLayout->addItem(verticalSpacer);
-
-
-        s_mainWindowGridLayout->addWidget(s_drawGB, 2, 5, 1, 1);
+        s_mainWindowGridLayout->addWidget(tabWidget, 1, 6, 1, 1);
 
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
@@ -133,7 +121,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        m_selectImage->setCurrentIndex(0);
+        tabWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -149,18 +137,8 @@ public:
          << QApplication::translate("MainWindow", "2D", Q_NULLPTR)
          << QApplication::translate("MainWindow", "3D", Q_NULLPTR)
         );
-        Image->setText(QApplication::translate("MainWindow", "Image", Q_NULLPTR));
-        m_selectImage->clear();
-        m_selectImage->insertItems(0, QStringList()
-         << QApplication::translate("MainWindow", "Original", Q_NULLPTR)
-         << QApplication::translate("MainWindow", "Grayscale", Q_NULLPTR)
-         << QApplication::translate("MainWindow", "Albedo", Q_NULLPTR)
-         << QApplication::translate("MainWindow", "Shading", Q_NULLPTR)
-         << QApplication::translate("MainWindow", "Normal", Q_NULLPTR)
-         << QApplication::translate("MainWindow", "Specular", Q_NULLPTR)
-         << QApplication::translate("MainWindow", "Roughness", Q_NULLPTR)
-        );
-        s_drawGB->setTitle(QString());
+        tabWidget->setTabText(tabWidget->indexOf(diffuseTab), QApplication::translate("MainWindow", "Tab 1", Q_NULLPTR));
+        tabWidget->setTabText(tabWidget->indexOf(normalTab), QApplication::translate("MainWindow", "Tab 2", Q_NULLPTR));
         menuFiles->setTitle(QApplication::translate("MainWindow", "File", Q_NULLPTR));
         menuedit->setTitle(QApplication::translate("MainWindow", "Edit", Q_NULLPTR));
     } // retranslateUi

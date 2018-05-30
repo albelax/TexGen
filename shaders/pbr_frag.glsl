@@ -7,7 +7,6 @@ in vec2 TexCoords;
 in vec3 WorldPos;
 in vec3 Normal;
 
-
 // material parameters
 uniform sampler2D ColourTexture;
 uniform sampler2D RoughnessTexture;
