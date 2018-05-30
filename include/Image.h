@@ -45,6 +45,8 @@ public:
   QImage getRoughness();
   QImage getIntensity();
   QImage getNormal() { return m_normal; }
+
+  bool isNull() {return m_image.isNull();}
 private:
   int width;   // aliasing avoids loading m_image in the cache every time we need the width
   int height;

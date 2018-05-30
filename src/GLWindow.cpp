@@ -430,6 +430,9 @@ void GLWindow::calculateIntensity()
 
 void GLWindow::calculateNormals(int _depth , bool _invert)
 {
+
+  if(m_image.isNull()) return;
+
   m_preview = m_editedImage->calculateNormalMap( m_image, _depth, _invert );
 
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
@@ -488,6 +491,8 @@ void GLWindow::calculateRoughness( int _brightness, int _contrast, bool _invert,
 {
   float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
   float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
+
+  if(m_editedImage->isNull()) return;
 
   m_editedImage->specular( tmpBrightness, tmpContrast, _invert, _sharpness, _equalize, Image::ROUGHNESS );
   m_preview = m_editedImage->getRoughness();

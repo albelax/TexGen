@@ -58,6 +58,8 @@ macx: LIBS += -framework OpenCL
 linux: LIBS += -L/usr/lib64/nvidia -lOpenCL
 INCLUDEPATH += /usr/include/CL /usr/local/include/ cl/include/
 
+RESOURCES += $$PWD/Style/style.qrc
+
 DISTFILES += \
     shaders/pbr_frag.glsl \
     shaders/pbr_vert.glsl \
