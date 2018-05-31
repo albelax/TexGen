@@ -23,7 +23,7 @@ void PBRViewport::changeMesh(std::string _filename)
 {
   makeCurrent();
   m_mesh = Mesh(_filename, "newMesh");
-  init(m_pbr);
+  init( m_pbr );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -146,8 +146,9 @@ void PBRViewport::init(bool _pbr)
 
 	// load vertices
 	glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
-	glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float) * 3.f, 0, GL_STATIC_DRAW );
+	glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float), 0, GL_STATIC_DRAW );
 	glBufferSubData( GL_ARRAY_BUFFER, 0, m_mesh.getAmountVertexData() * sizeof(float), &m_mesh.getVertexData() );
+
 
 	// pass vertices to shader
 	GLint pos = glGetAttribLocation( m_shader.getShaderProgram(), "VertexPosition" );
@@ -191,7 +192,7 @@ void PBRViewport::init(bool _pbr)
 	m_NAddress = glGetUniformLocation( m_shader.getShaderProgram(), "N" );
 	m_colorAddress = glGetUniformLocation( m_shader.getShaderProgram(), "baseColor" );
 
-//	 textures --------------------
+	//	 textures --------------------
 	m_colourTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "ColourTexture" );
 	m_normalTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "NormalTexture" );
 
@@ -274,9 +275,9 @@ void PBRViewport::paintGL()
 	glClearColor( 1, 1, 1, 1.0f );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-	glUseProgram( m_gradient.getShaderProgram() );
-	glDrawArrays( GL_TRIANGLES, 0, 9 );
-	glUseProgram( m_shader.getShaderProgram() );
+		glUseProgram( m_gradient.getShaderProgram() );
+		glDrawArrays( GL_TRIANGLES, 0, 9 );
+		glUseProgram( m_shader.getShaderProgram() );
 
 	renderScene();
 }
@@ -295,12 +296,10 @@ void PBRViewport::renderScene()
 	m_camera.update();
 
 	m_MVP = m_camera.projMatrix() * m_camera.viewMatrix() * m_MV;
-	glm::mat3 N = glm::mat3 (glm::inverse( glm::transpose( m_MV ) )) ;
+	glm::mat3 N = glm::mat3 (glm::inverse( glm::transpose( m_MV ) ));
 
 	glUniformMatrix4fv( m_MVPAddress, 1, GL_FALSE, glm::value_ptr( m_MVP ) );
-
 	glUniformMatrix4fv( m_MVAddress, 1, GL_FALSE, glm::value_ptr( m_MV ) );
-
 	glUniformMatrix3fv( m_NAddress, 1, GL_FALSE, glm::value_ptr( N ) );
 
 	glDrawArrays( GL_TRIANGLES, m_mesh.getBufferIndex(), ( m_mesh.getAmountVertexData() / 3 ) );
@@ -315,7 +314,7 @@ void PBRViewport::calculateNormals(int _depth , bool _invert )
   QImage glImage = QGLWidget::convertToGLFormat( tmp );
 
   if( glImage.isNull() )
-    qWarning("IMAGE IS NULL");
+    qWarning( "IMAGE IS NULL" );
 
   glBindTexture( GL_TEXTURE_2D, m_normalTexture );
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glImage.width(), glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
@@ -350,11 +349,11 @@ void PBRViewport::calculateSpecular( int _brightness, int _contrast, bool _inver
 
   glUniform1i( m_metallicTextureAddress, 4 );
 
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-	glGenerateMipmap( GL_TEXTURE_2D );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+  glGenerateMipmap( GL_TEXTURE_2D );
 
   update();
 }
@@ -378,11 +377,59 @@ void PBRViewport::calculateRoughness( int _brightness, int _contrast, bool _inve
 
   glUniform1i( m_roughnessTextureAddress, 3 );
 
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-	glGenerateMipmap( GL_TEXTURE_2D );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+  glGenerateMipmap( GL_TEXTURE_2D );
 
-	update();
+  update();
 }
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void PBRViewport::makeGrid( GLfloat _size, size_t _steps )
+{
+	// allocate enough space for our verts
+	// as we are doing lines it will be 2 verts per line
+	// and we need to add 1 to each of them for the <= loop
+	// and finally muliply by 12 as we have 12 values per line pair
+	int vboSize = ( _steps + 2 ) * 12;
+	m_grid.reserve( vboSize );
+
+	// claculate the step size for each grid value
+	float step = _size/static_cast<float>(_steps);
+	// pre-calc the offset for speed
+	float s2 = _size/2.0f;
+	// assign v as our value to change each vertex pair
+	float v = -s2;
+	// loop for our grid values
+
+	for( size_t i = 0; i <= _steps; ++i )
+	{
+		// vertex 1 x,y,z
+		m_grid.push_back( -s2 ); // x
+		m_grid.push_back( v ); // y
+		m_grid.push_back( 0.0f ); // z
+
+		// vertex 2 x,y,z
+		m_grid.push_back( s2 ); // x
+		m_grid.push_back( v ); // y
+		m_grid.push_back( 0.0f ); // z
+
+		// vertex 3 x,y,z
+		m_grid.push_back( v );
+		m_grid.push_back( s2 );
+		m_grid.push_back( 0.0f );
+
+		// vertex 4 x,y,z
+		m_grid.push_back( v );
+		m_grid.push_back( -s2 );
+		m_grid.push_back( 0.0f );
+		// now change our step value
+
+		v += step;
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------

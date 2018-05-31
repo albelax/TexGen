@@ -32,15 +32,15 @@ class Ui_MainWindow
 public:
     QWidget *centralwidget;
     QGridLayout *s_mainWindowGridLayout;
+    QSpacerItem *horizontalSpacer_5;
     QGroupBox *s_transformGB;
     QGridLayout *gridLayout;
     QLabel *label;
     QComboBox *viewport;
     QSpacerItem *horizontalSpacer_4;
-    QSpacerItem *horizontalSpacer_5;
-    QSpacerItem *horizontalSpacer_6;
     QSpacerItem *horizontalSpacer_2;
     QSpacerItem *horizontalSpacer;
+    QSpacerItem *horizontalSpacer_6;
     QTabWidget *tabWidget;
     QWidget *diffuseTab;
     QWidget *normalTab;
@@ -58,6 +58,10 @@ public:
         centralwidget->setObjectName(QStringLiteral("centralwidget"));
         s_mainWindowGridLayout = new QGridLayout(centralwidget);
         s_mainWindowGridLayout->setObjectName(QStringLiteral("s_mainWindowGridLayout"));
+        horizontalSpacer_5 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        s_mainWindowGridLayout->addItem(horizontalSpacer_5, 0, 3, 1, 1);
+
         s_transformGB = new QGroupBox(centralwidget);
         s_transformGB->setObjectName(QStringLiteral("s_transformGB"));
         gridLayout = new QGridLayout(s_transformGB);
@@ -79,14 +83,6 @@ public:
 
         s_mainWindowGridLayout->addWidget(s_transformGB, 0, 6, 1, 1);
 
-        horizontalSpacer_5 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-        s_mainWindowGridLayout->addItem(horizontalSpacer_5, 0, 3, 1, 1);
-
-        horizontalSpacer_6 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-        s_mainWindowGridLayout->addItem(horizontalSpacer_6, 0, 1, 1, 1);
-
         horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
         s_mainWindowGridLayout->addItem(horizontalSpacer_2, 0, 2, 1, 1);
@@ -94,6 +90,10 @@ public:
         horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
         s_mainWindowGridLayout->addItem(horizontalSpacer, 0, 4, 1, 1);
+
+        horizontalSpacer_6 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        s_mainWindowGridLayout->addItem(horizontalSpacer_6, 0, 1, 1, 1);
 
         tabWidget = new QTabWidget(centralwidget);
         tabWidget->setObjectName(QStringLiteral("tabWidget"));

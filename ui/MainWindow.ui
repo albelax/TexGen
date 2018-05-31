@@ -18,6 +18,19 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="s_mainWindowGridLayout">
+    <item row="0" column="3">
+     <spacer name="horizontalSpacer_5">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
     <item row="0" column="6">
      <widget class="QGroupBox" name="s_transformGB">
       <property name="title">
@@ -61,32 +74,6 @@
       </layout>
      </widget>
     </item>
-    <item row="0" column="3">
-     <spacer name="horizontalSpacer_5">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="0" column="1">
-     <spacer name="horizontalSpacer_6">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
     <item row="0" column="2">
      <spacer name="horizontalSpacer_2">
       <property name="orientation">
@@ -113,6 +100,19 @@
       </property>
      </spacer>
     </item>
+    <item row="0" column="1">
+     <spacer name="horizontalSpacer_6">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
     <item row="1" column="6">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
@@ -122,6 +122,7 @@
        <attribute name="title">
         <string>Tab 1</string>
        </attribute>
+       <zorder>verticalSpacer</zorder>
       </widget>
       <widget class="QWidget" name="normalTab">
        <attribute name="title">

@@ -24,7 +24,7 @@ public:
   void calculateSpecular( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
   void calculateRoughness( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
   void changeMesh( std::string _filename );
-  void init(bool _pbr);
+  void init( bool _pbr );
 
 protected:
   /// @brief  The following methods must be implimented in the sub class
@@ -36,6 +36,7 @@ protected:
   void renderScene();
   void addTexture( QImage _image );
   void addTexture( QImage _image, GLuint * _texture, unsigned int _offset );
+  void makeGrid( GLfloat _size, size_t _steps );
 
 private :
   GLint m_colorAddress;
@@ -51,6 +52,7 @@ private :
   GLuint m_specularTexture;
   GLuint m_roughnessTexture;
   GLuint m_metallicTexture;
+  std::vector<float> m_grid;
   Shader m_gradient;
   QImage m_normal;
 

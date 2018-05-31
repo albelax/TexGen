@@ -39,11 +39,15 @@ private slots:
   void updateSpecular();
   void updateNormal();
   void updateRoughness();
+  void pickingMetallic();
+  void recalculateMetallic();
   void resetSpecularSettings();
   void swapView( int _n );
 
 private:
   bool m_pbrCreated = false;
+  bool m_pickingColor = false;
+
   Ui::MainWindow * m_ui;
   GLWindow * m_gl;
   PBRViewport * m_pbrViewport;
@@ -58,6 +62,7 @@ private:
 
   QAction * exitAct;
   QList<QAction *> saveAsActs;
+  std::array<int, 2> m_metallicPixel;
   std::vector<QLayoutItem *> m_originalLayout;
   std::vector<QWidget *> * m_currentMenu;
   std::vector<QWidget *> m_originalMenu;
