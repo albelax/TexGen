@@ -66,4 +66,6 @@ DISTFILES += \
     shaders/renderedVert.glsl \
     shaders/renderedFrag.glsl \
     shaders/gradientVert.glsl \
-    shaders/gradientFrag.glsl
+    shaders/gradientFrag.glsl \
+    shaders/skyboxFrag.glsl \
+    shaders/skyboxVert.glsl

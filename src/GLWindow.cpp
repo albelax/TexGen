@@ -118,7 +118,7 @@ void GLWindow::mouseClick(QMouseEvent * _event)
     std::array<int, 3> lowerBound = {{ 25, 25, 25 }};
     std::array<int, 3> upperBound = {{ 25, 25, 25 }};
 
-    m_editedImage->metallic( tmp.x * m_ratio[0], tmp.y  * m_ratio[1], lowerBound, upperBound );
+    //m_editedImage->metallic( tmp.x * m_ratio[0], tmp.y  * m_ratio[1], lowerBound, upperBound );
   }
 
   m_camera.handleMouseClick( *_event );

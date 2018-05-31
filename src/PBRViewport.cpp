@@ -129,7 +129,9 @@ void PBRViewport::init(bool _pbr)
 		m_shader = Shader( "m_shader", shadersAddress + "phong_vert.glsl", shadersAddress + "phong_frag.glsl" );
 	}
 	m_gradient = Shader( "m_gradient", shadersAddress + "gradientVert.glsl", shadersAddress + "gradientFrag.glsl" );
+	m_skybox = Shader( "m_skybox", shadersAddress + "skyboxVert.glsl", shadersAddress + "skyboxFrag.glsl" );
 
+	glLinkProgram( m_skybox.getShaderProgram() );
 	glLinkProgram( m_gradient.getShaderProgram() );
 	glLinkProgram( m_shader.getShaderProgram() );
 	glUseProgram( m_shader.getShaderProgram() );
@@ -191,7 +193,7 @@ void PBRViewport::init(bool _pbr)
 	m_NAddress = glGetUniformLocation( m_shader.getShaderProgram(), "N" );
 	m_colorAddress = glGetUniformLocation( m_shader.getShaderProgram(), "baseColor" );
 
-//	 textures --------------------
+	//	 textures --------------------
 	m_colourTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "ColourTexture" );
 	m_normalTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "NormalTexture" );
 
@@ -263,6 +265,31 @@ void PBRViewport::init(bool _pbr)
 	{
 		glUniform1f( glGetUniformLocation( m_shader.getShaderProgram(), "ao"), 1.0f );
 	}
+
+	// SKYBOX
+
+	glUseProgram( m_skybox.getShaderProgram() );
+	glGenVertexArrays(1,&m_skyboxVAO);
+	glGenBuffers(1, &m_skyboxVBO);
+	glBindVertexArray(m_skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+	std::vector<std::string> faces
+	{
+		"images/sky_xpos.png",
+		"images/sky_xneg.png",
+		"images/sky_yneg.png",
+		"images/sky_ypos.png",
+		"images/sky_zpos.png",
+		"images/sky_zneg.png"
+	};
+
+	m_cubemapTexture = loadCubemap(faces);
+
+	glUniform1i(glGetUniformLocation( m_skybox.getShaderProgram(), "skybox" ),0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -273,10 +300,25 @@ void PBRViewport::paintGL()
 	glViewport( 0, 0, width(), height() );
 	glClearColor( 1, 1, 1, 1.0f );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+	glDisable(GL_CULL_FACE);
 
-	glUseProgram( m_gradient.getShaderProgram() );
-	glDrawArrays( GL_TRIANGLES, 0, 9 );
-	glUseProgram( m_shader.getShaderProgram() );
+	if(!m_isSkybox)
+	{
+		glBindVertexArray(m_vao);
+		glUseProgram( m_gradient.getShaderProgram() );
+		glDrawArrays( GL_TRIANGLES, 0, 9 );
+	}
+	else
+	{
+		m_camera.update();
+		m_MVP = m_camera.projMatrix() * m_camera.viewMatrix() * m_MV;
+		glBindVertexArray(m_skyboxVAO);
+		glUseProgram( m_skybox.getShaderProgram() );
+		glUniformMatrix4fv( glGetUniformLocation( m_skybox.getShaderProgram(), "MVP" ), 1, GL_FALSE, glm::value_ptr( m_MVP ) );
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemapTexture);
+		glDrawArrays( GL_TRIANGLES, 0, 36 );
+	}
 
 	renderScene();
 }
@@ -287,7 +329,8 @@ void PBRViewport::renderScene()
 {
 	glViewport( 0, 0, width(), height() );
 	glClear( GL_DEPTH_BUFFER_BIT );
-
+	glUseProgram( m_shader.getShaderProgram() );
+	glBindVertexArray(m_vao);
 	glUseProgram( m_shader.getShaderProgram() );
 	auto camPos = m_camera.getCameraEye();
 	glUniform3f( glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ), camPos.x, camPos.y, camPos.z );
@@ -304,6 +347,7 @@ void PBRViewport::renderScene()
 	glUniformMatrix3fv( m_NAddress, 1, GL_FALSE, glm::value_ptr( N ) );
 
 	glDrawArrays( GL_TRIANGLES, m_mesh.getBufferIndex(), ( m_mesh.getAmountVertexData() / 3 ) );
+
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -350,11 +394,11 @@ void PBRViewport::calculateSpecular( int _brightness, int _contrast, bool _inver
 
   glUniform1i( m_metallicTextureAddress, 4 );
 
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-	glGenerateMipmap( GL_TEXTURE_2D );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+  glGenerateMipmap( GL_TEXTURE_2D );
 
   update();
 }
@@ -378,11 +422,35 @@ void PBRViewport::calculateRoughness( int _brightness, int _contrast, bool _inve
 
   glUniform1i( m_roughnessTextureAddress, 3 );
 
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-	glGenerateMipmap( GL_TEXTURE_2D );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+  glGenerateMipmap( GL_TEXTURE_2D );
 
-	update();
+  update();
+}
+
+unsigned int PBRViewport::loadCubemap(std::vector<std::string> faces)
+{
+  unsigned int textureID;
+  glGenTextures(1, &textureID);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+  for (unsigned int i = 0; i < faces.size(); i++)
+  {
+    QImage image = QImage(QString::fromStdString(faces[i]));
+    QImage image2 = QGLWidget::convertToGLFormat( image );
+    image2 = image2.mirrored(false,true);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                 0, GL_RGBA, image2.width(), image2.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image2.bits()
+                 );
+  }
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+  return textureID;
 }
