@@ -40,6 +40,7 @@ private slots:
   void updateNormal();
   void updateRoughness();
   void resetSpecularSettings();
+  void resetRoughnessSettings();
   void swapView( int _n );
 
 private:

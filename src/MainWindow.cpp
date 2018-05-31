@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   connect((QSlider *)m_roughnessMenu[7], SIGNAL(sliderReleased() ), this, SLOT(updateRoughness()));
   connect((QCheckBox *)m_roughnessMenu[1], SIGNAL(clicked(bool)), this, SLOT(updateRoughness()));
   connect((QCheckBox *)m_roughnessMenu[9], SIGNAL(clicked(bool)), this, SLOT(updateRoughness()));
-  //  connect((QPushButton *)m_roughnessMenu[10], SIGNAL(released()), this, SLOT(resetSpecularSettings()));
+  connect((QPushButton *)m_roughnessMenu[10], SIGNAL(released()), this, SLOT(resetRoughnessSettings()));
 
   QWidget * diffuseTab = new QWidget;
 
@@ -307,18 +307,23 @@ void MainWindow::makeRoughnessMenu()
   sharpness->setMaximum(5);
   sharpness->setValue(1);
 
+  //0-1
   m_roughnessMenu.push_back( new QLabel( "Invert", 0, 0 ) );
   m_roughnessMenu.push_back( new QCheckBox() );
 
+  //2-3
   m_roughnessMenu.push_back( new QLabel( "Contrast", 0, 0 ) );
   m_roughnessMenu.push_back( contrast );
 
+  //4-5
   m_roughnessMenu.push_back( new QLabel( "Brightness", 0, 0 ) );
   m_roughnessMenu.push_back( brightness );
 
+  //6-7
   m_roughnessMenu.push_back( new QLabel( "Sharpness", 0, 0 ) );
   m_roughnessMenu.push_back( sharpness );
 
+  //8-9
   m_roughnessMenu.push_back( new QLabel( "Histogram equalization", 0, 0 ) );
   m_roughnessMenu.push_back( new QCheckBox() );
 
@@ -386,8 +391,8 @@ void MainWindow::resetSpecularSettings()
 {
   static_cast<QSlider *>(m_specularMenu[3])->setValue(20);
   static_cast<QSlider *>(m_specularMenu[5])->setValue(50);
-  static_cast<QCheckBox *>(m_specularMenu[1])->setTristate(false);
-  static_cast<QCheckBox *>(m_specularMenu[9])->setTristate(false);
+  static_cast<QCheckBox *>(m_specularMenu[1])->setChecked(false);
+  static_cast<QCheckBox *>(m_specularMenu[9])->setChecked(false);
 
   m_activeScene->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),
       static_cast<QSlider *>(m_specularMenu[3])->value(),
@@ -397,3 +402,18 @@ void MainWindow::resetSpecularSettings()
 }
 
 //------------------------------------------------------------------------
+
+void MainWindow::resetRoughnessSettings()
+{
+  static_cast<QSlider *>(m_roughnessMenu[3])->setValue(20);
+  static_cast<QSlider *>(m_roughnessMenu[5])->setValue(50);
+  static_cast<QSlider *>(m_roughnessMenu[7])->setValue(1);
+  static_cast<QCheckBox *>(m_roughnessMenu[1])->setChecked(false);
+  static_cast<QCheckBox *>(m_roughnessMenu[9])->setChecked(false);
+
+  m_activeScene->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),
+      static_cast<QSlider *>(m_roughnessMenu[3])->value(),
+      static_cast<QCheckBox *>(m_roughnessMenu[1])->isChecked(),
+      static_cast<QSlider *>(m_roughnessMenu[7])->value(),
+      static_cast<QCheckBox *>(m_roughnessMenu[9])->isChecked());
+}

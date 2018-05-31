@@ -701,6 +701,16 @@ float Image::clampI(int value, int high, int low)
 
 void Image::equalizeHistogram(map _map)
 {
+
+  std::vector<std::vector<float>> * activeMap;
+
+  switch ( _map )
+  {
+    case Image::SPECULAR: activeMap = &m_specular; break;
+    case Image::ROUGHNESS: activeMap = &m_roughness; break;
+    default: break;
+  }
+
   int max_val = 255;
   int total = width*height;
   int n_bins = max_val + 1;
@@ -711,7 +721,7 @@ void Image::equalizeHistogram(map _map)
   {
     for(int j = 0 ; j< height ; ++j)
     {
-      hist[int(m_specular[i][j]*255)]++;
+      hist[int(( *activeMap )[i][j]*255)]++;
     }
   }
 
@@ -727,7 +737,7 @@ void Image::equalizeHistogram(map _map)
     {
       for(int j = 0 ; j< height ; ++j)
       {
-        m_specular[i][j] = float(p)/255.0f;
+        ( *activeMap )[i][j] = float(p)/255.0f;
       }
     }
     return;
@@ -753,7 +763,7 @@ void Image::equalizeHistogram(map _map)
   {
     for(int j = 0 ; j< height ; ++j)
     {
-      m_specular[i][j] = float(lut[int(m_specular[i][j]*255)])/255.0f;
+      ( *activeMap )[i][j] = float(lut[int(( *activeMap )[i][j]*255)])/255.0f;
     }
   }
 }
@@ -840,7 +850,7 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
 
   if( _equalize )
   {
-    equalizeHistogram(map::SPECULAR);
+    equalizeHistogram(_map);
   }
 }
 
