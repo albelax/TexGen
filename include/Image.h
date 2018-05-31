@@ -31,6 +31,8 @@ public:
   float desaturate( float _r, float _g, float _b );
   void equalizeHistogram( map _map );
 
+  void toggleMetallic(bool _b) {m_noMetallic = _b;}
+
   float clampF(float value, float high, float low);
   float clampI(int value, int high, int low);
 
@@ -58,6 +60,8 @@ private:
   bool inRange( QColor & _sample, QColor & _color, std::array<int, 3> _lowerBound, std::array<int, 3> _upperBound );
   void initCL();
   void rgbToHsv();
+
+  bool m_noMetallic = false;
 
   // CL
   cl::Platform m_CLPlatform;

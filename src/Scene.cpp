@@ -16,3 +16,7 @@ Scene::~Scene()
 
 //-----------------------------------------------------
 
+void Scene::toggleMetallic(bool _b)
+{
+  m_editedImage->toggleMetallic(_b);
+}

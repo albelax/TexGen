@@ -249,7 +249,7 @@ QImage Image::calculateNormalMap( QImage & image, int _depth, bool _invert )
 
   queue.finish();
 
-//  QImage out;
+  //  QImage out;
   m_normal = image.copy();
 
   for ( int i = 0; i < width; ++i )
@@ -926,38 +926,51 @@ QImage Image::getIntensity()
 
 void Image::metallic( int _x, int _y, float _range )
 {
-  float r = 0;
-  float g = 0;
-  float b = 0;
-
-  for ( int i = -1; i < 2; ++i )
+  if(!m_noMetallic)
   {
-    for ( int j = -1; j < 2; ++j )
+    float r = 0;
+    float g = 0;
+    float b = 0;
+
+    for ( int i = -1; i < 2; ++i )
     {
-      r += m_image.pixelColor( _x + i, _y + j ).red();
-      g += m_image.pixelColor( _x + i, _y + j ).green();
-      b += m_image.pixelColor( _x + i, _y + j ).blue();
+      for ( int j = -1; j < 2; ++j )
+      {
+        r += m_image.pixelColor( _x + i, _y + j ).red();
+        g += m_image.pixelColor( _x + i, _y + j ).green();
+        b += m_image.pixelColor( _x + i, _y + j ).blue();
+      }
+    }
+
+    QColor sample;
+    sample.setRed( r / 9.0f);
+    sample.setGreen( g / 9.0f);
+    sample.setBlue( b / 9.0f);
+    float sampleIntensity = desaturate( sample.red(), sample.green(), sample.blue() );
+
+    for ( int i = 0; i < width; ++i )
+    {
+      for ( int j = 0; j < height; ++j )
+      {
+        QColor pixel = m_image.pixelColor( i, j );
+        float pixelIntensity = desaturate(pixel.red(), pixel.green(), pixel.blue() );
+        if ( pixelIntensity <= sampleIntensity + _range && pixelIntensity >= sampleIntensity - _range )
+        {
+          m_metallic[i][j] = 255;
+        }
+        else
+          m_metallic[i][j] = 0;
+      }
     }
   }
-
-  QColor sample;
-  sample.setRed( r / 9.0f);
-  sample.setGreen( g / 9.0f);
-  sample.setBlue( b / 9.0f);
-  float sampleIntensity = desaturate( sample.red(), sample.green(), sample.blue() );
-
-  for ( int i = 0; i < width; ++i )
+  else
   {
-    for ( int j = 0; j < height; ++j )
+    for ( int i = 0; i < width; ++i )
     {
-      QColor pixel = m_image.pixelColor( i, j );
-      float pixelIntensity = desaturate(pixel.red(), pixel.green(), pixel.blue() );
-      if ( pixelIntensity <= sampleIntensity + _range && pixelIntensity >= sampleIntensity - _range )
+      for ( int j = 0; j < height; ++j )
       {
-        m_metallic[i][j] = 255;
-      }
-      else
         m_metallic[i][j] = 0;
+      }
     }
   }
 }

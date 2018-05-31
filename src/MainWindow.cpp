@@ -60,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
 
   connect((QCheckBox *)m_metallicMenu[1], SIGNAL(clicked(bool)), this, SLOT(pickingMetallic()));
   connect((QSlider *)m_metallicMenu[3], SIGNAL(sliderReleased() ), this, SLOT(recalculateMetallic()));
+  connect((QSlider *)m_metallicMenu[5], SIGNAL(clicked(bool) ), this, SLOT(toggleMetallic()));
 
   QWidget * diffuseTab = new QWidget;
 
@@ -85,6 +86,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
     _widget->show();
   }
 
+  normalLayout->addSpacing(400);
   normalTab->setLayout( normalLayout );
 
   QWidget * roughnessTab = new QWidget;
@@ -97,6 +99,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
     roughnessLayout->addWidget( _widget ); // probably should be added only once?
     _widget->show();
   }
+  roughnessLayout->addSpacing(100);
   roughnessTab->setLayout(roughnessLayout);
 
   QWidget * metallicTab = new QWidget;
@@ -109,6 +112,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
     metallicLayout->addWidget( _widget );
     _widget->show();
   }
+  metallicLayout->addSpacing(350);
+
   metallicTab->setLayout(metallicLayout);
 
   m_ui->tabWidget->removeTab(0);
@@ -396,6 +401,9 @@ void MainWindow::makeMetallicMenu()
   m_metallicMenu.push_back( new QLabel( "Range", 0, 0 ) );
   m_metallicMenu.push_back(range);
 
+  m_metallicMenu.push_back( new QLabel( "None", 0, 0 ) );
+  m_metallicMenu.push_back( new QCheckBox() );
+
 }
 
 //------------------------------------------------------------------------
@@ -471,8 +479,14 @@ void MainWindow::pickingMetallic()
 
 void MainWindow::recalculateMetallic()
 {
-  dynamic_cast<GLWindow*>(m_activeScene)->calculateMetallic( m_metallicPixel[0], m_metallicPixel[1], static_cast<QSlider *>(m_metallicMenu[3])->value() );
+  m_activeScene->calculateMetallic( m_metallicPixel[0], m_metallicPixel[1], static_cast<QSlider *>(m_metallicMenu[3])->value() );
   static_cast<QCheckBox *>( m_metallicMenu[1] )->setChecked( false );
 }
 
 //------------------------------------------------------------------------
+
+void MainWindow::toggleMetallic()
+{
+  m_activeScene->toggleMetallic(static_cast<QCheckBox *>(m_metallicMenu[5])->isChecked());
+  m_activeScene->calculateMetallic( m_metallicPixel[0], m_metallicPixel[1], static_cast<QSlider *>(m_metallicMenu[3])->value() );
+}

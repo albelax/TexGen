@@ -247,7 +247,7 @@ void PBRViewport::init(bool _pbr)
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 		glGenerateMipmap( GL_TEXTURE_2D);
 
-		addTexture( m_editedImage->getSpecular(), &m_metallicTexture, 4 );
+		addTexture( m_editedImage->getMetallic(), &m_metallicTexture, 4 );
 		glUniform1i( m_metallicTextureAddress, 4 );
 
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
@@ -428,6 +428,25 @@ void PBRViewport::calculateRoughness( int _brightness, int _contrast, bool _inve
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
   glGenerateMipmap( GL_TEXTURE_2D );
+
+  update();
+}
+
+void PBRViewport::calculateMetallic(int _x, int _y, float _range)
+{
+  m_editedImage->metallic( _x, _y, _range );
+  auto tmp = m_editedImage->getMetallic();
+  QImage glImage = QGLWidget::convertToGLFormat( tmp );
+  if(glImage.isNull())
+    qWarning("IMAGE IS NULL");
+  glBindTexture( GL_TEXTURE_2D, m_metallicTexture );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glImage.width(), glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
+
+  glUniform1i( m_metallicTextureAddress, 4 );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 
   update();
 }

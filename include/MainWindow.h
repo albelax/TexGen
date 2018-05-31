@@ -45,6 +45,8 @@ private slots:
   void resetRoughnessSettings();
   void swapView( int _n );
 
+  void toggleMetallic();
+
 private:
   bool m_pbrCreated = false;
   bool m_pickingColor = false;
