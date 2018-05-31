@@ -57,6 +57,7 @@ private :
   std::vector<float> m_grid;
   Shader m_gradient;
   Shader m_skybox;
+  Mesh m_plane;
   QImage m_normal;
 
   GLuint m_skyboxVAO;
@@ -65,7 +66,7 @@ private :
 
   // Which shader to use
   bool m_pbr;
-  bool m_isSkybox = true;
+  bool m_isSkybox = false;
 
   float skyboxSize = 10.0f;
 

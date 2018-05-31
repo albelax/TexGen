@@ -2,7 +2,9 @@
 
 PBRViewport::PBRViewport(QWidget *_parent) : Scene( _parent )
 {
-  m_mesh = Mesh("models/plane.obj","tile" );
+  m_mesh = Mesh( "models/plane.obj","tile" );
+  m_plane = Mesh( "models/plane.obj", "Rendering Target" );
+
   this->resize(_parent->size());
   m_camera.setMousePos(0,0);
   m_camera.setTarget(0.0f, 0.0f, -2.0f);
@@ -13,6 +15,8 @@ PBRViewport::PBRViewport( QWidget *_parent, Image * _image ) : Scene( _parent )
 {
   m_editedImage = _image;
   m_mesh = Mesh("models/plane.obj","tile" );
+  m_plane = Mesh( "models/plane.obj", "Rendering Target" );
+
   this->resize(_parent->size());
   m_camera.setMousePos(0,0);
   m_camera.setTarget(0.0f, 0.0f, -2.0f);
@@ -117,7 +121,6 @@ void PBRViewport::addTexture( QImage _image, GLuint *_texture, unsigned int _off
 void PBRViewport::init(bool _pbr)
 {
 	m_pbr = _pbr;
-	//	std::cerr << "OpenGL Version :" << glGetString(GL_VERSION) << std::endl;
 	std::string shadersAddress = "shaders/";
 
 	if(_pbr)
@@ -142,15 +145,15 @@ void PBRViewport::init(bool _pbr)
 	glGenBuffers( 1, &m_nbo );
 	glGenBuffers( 1, &m_tbo );
 
-	int amountVertexData = m_mesh.getAmountVertexData();
-
-	m_mesh.setBufferIndex( 0 );
+	int amountVertexData = m_plane.getAmountVertexData() + m_mesh.getAmountVertexData();
+	m_plane.setBufferIndex( 0 );
+	m_mesh.setBufferIndex( m_plane.getAmountVertexData() );
 
 	// load vertices
 	glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
-	glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float), 0, GL_STATIC_DRAW );
-	glBufferSubData( GL_ARRAY_BUFFER, 0, m_mesh.getAmountVertexData() * sizeof(float), &m_mesh.getVertexData() );
-
+	glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float) * 3.f, 0, GL_STATIC_DRAW );
+	glBufferSubData( GL_ARRAY_BUFFER, m_plane.getBufferIndex() * sizeof(float), m_plane.getAmountVertexData() * sizeof(float), &m_plane.getVertexData() );
+	glBufferSubData( GL_ARRAY_BUFFER, m_mesh.getBufferIndex() * sizeof(float), m_mesh.getAmountVertexData() * sizeof(float), &m_mesh.getVertexData() );
 
 	// pass vertices to shader
 	GLint pos = glGetAttribLocation( m_shader.getShaderProgram(), "VertexPosition" );
@@ -160,7 +163,8 @@ void PBRViewport::init(bool _pbr)
 	// load normals
 	glBindBuffer( GL_ARRAY_BUFFER,	m_nbo );
 	glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float) * 3.f, 0, GL_STATIC_DRAW );
-	glBufferSubData( GL_ARRAY_BUFFER, 0, m_mesh.getAmountVertexData() * sizeof(float), &m_mesh.getNormalsData() );
+	glBufferSubData( GL_ARRAY_BUFFER, m_plane.getBufferIndex() * sizeof(float), m_plane.getAmountVertexData() * sizeof(float), &m_plane.getNormalsData() );
+	glBufferSubData( GL_ARRAY_BUFFER, m_mesh.getBufferIndex() * sizeof(float), m_mesh.getAmountVertexData() * sizeof(float), &m_mesh.getNormalsData() );
 
 	// pass normals to shader
 	GLint n = glGetAttribLocation( m_shader.getShaderProgram(), "VertexNormal" );
@@ -170,7 +174,8 @@ void PBRViewport::init(bool _pbr)
 	// load texture coordinates
 	glBindBuffer( GL_ARRAY_BUFFER,	m_tbo );
 	glBufferData( GL_ARRAY_BUFFER, amountVertexData * sizeof(float) * 2.f, 0, GL_STATIC_DRAW) ;
-	glBufferSubData( GL_ARRAY_BUFFER, 0, m_mesh.getAmountVertexData() * sizeof(float), &m_mesh.getUVsData() );
+	glBufferSubData( GL_ARRAY_BUFFER, m_plane.getBufferIndex() * sizeof(float), m_plane.getAmountVertexData() * sizeof(float), &m_plane.getUVsData() );
+	glBufferSubData( GL_ARRAY_BUFFER, m_mesh.getBufferIndex()/3*2 * sizeof(float), m_mesh.getAmountVertexData() * sizeof(float), &m_mesh.getUVsData() );
 
 	// pass texture coords to shader
 	GLint t = glGetAttribLocation( m_shader.getShaderProgram(), "TexCoord" );
@@ -308,8 +313,9 @@ void PBRViewport::paintGL()
 	{
 		glBindVertexArray(m_vao);
 		glUseProgram( m_gradient.getShaderProgram() );
-		glDrawArrays( GL_TRIANGLES, 0, 9 );
+		glDrawArrays( GL_TRIANGLES, m_plane.getBufferIndex()/3, m_plane.getAmountVertexData()/3 );
 	}
+
 	else
 	{
 		m_camera.update();
@@ -321,7 +327,6 @@ void PBRViewport::paintGL()
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemapTexture);
 		glDrawArrays( GL_TRIANGLES, 0, 36 );
 	}
-
 
 	renderScene();
 }
@@ -347,7 +352,7 @@ void PBRViewport::renderScene()
 	glUniformMatrix4fv( m_MVAddress, 1, GL_FALSE, glm::value_ptr( m_MV ) );
 	glUniformMatrix3fv( m_NAddress, 1, GL_FALSE, glm::value_ptr( N ) );
 
-	glDrawArrays( GL_TRIANGLES, m_mesh.getBufferIndex(), ( m_mesh.getAmountVertexData() / 3 ) );
+	glDrawArrays( GL_TRIANGLES, m_mesh.getBufferIndex()/3, ( m_mesh.getAmountVertexData() / 3 ) );
 
 }
 
@@ -416,7 +421,7 @@ void PBRViewport::calculateRoughness( int _brightness, int _contrast, bool _inve
   QImage glImage = QGLWidget::convertToGLFormat( tmp );
 
   if( glImage.isNull() )
-    qWarning("IMAGE IS NULL");
+    qWarning( "IMAGE IS NULL" );
 
   glBindTexture( GL_TEXTURE_2D, m_roughnessTexture );
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glImage.width(), glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
