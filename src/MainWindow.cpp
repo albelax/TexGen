@@ -28,10 +28,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   makeSpecularMenu();
   makeNormalMenu();
   makeRoughnessMenu();
+  makeMetallicMenu();
   m_currentMenu = &m_originalMenu;
 
   // specular
-  //	connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), m_gl, SLOT(selectImage(int)));
+  //connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), m_gl, SLOT(selectImage(int)));
   //connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLayout(int)));
   //connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLayout(int)));
   connect(m_ui->viewport, SIGNAL(currentIndexChanged(int)), this, SLOT(swapView(int)));
@@ -57,6 +58,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   connect((QCheckBox *)m_roughnessMenu[9], SIGNAL(clicked(bool)), this, SLOT(updateRoughness()));
   connect((QPushButton *)m_roughnessMenu[10], SIGNAL(released()), this, SLOT(resetRoughnessSettings()));
 
+  connect((QCheckBox *)m_metallicMenu[1], SIGNAL(clicked(bool)), this, SLOT(pickingMetallic()));
+  connect((QSlider *)m_metallicMenu[3], SIGNAL(sliderReleased() ), this, SLOT(recalculateMetallic()));
+
   QWidget * diffuseTab = new QWidget;
 
   //  QWidget * specularTab = new QWidget;
@@ -71,18 +75,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   //  specularTab->setLayout(specularLayout);
 
   QWidget * normalTab = new QWidget;
-  QVBoxLayout *normalLayout = new QVBoxLayout;
-  for ( auto &_widget : m_normalMenu)
+  QVBoxLayout * normalLayout = new QVBoxLayout;
+
+  for ( auto &_widget : m_normalMenu )
   {
-    _widget->setParent(normalTab);
+    _widget->setParent( normalTab );
     normalLayout->setAlignment( this, Qt::AlignTop );
     normalLayout->addWidget( _widget ); // probably should be added only once?
     _widget->show();
   }
-  normalTab->setLayout(normalLayout);
+
+  normalTab->setLayout( normalLayout );
 
   QWidget * roughnessTab = new QWidget;
-  QVBoxLayout *roughnessLayout = new QVBoxLayout;
+  QVBoxLayout * roughnessLayout = new QVBoxLayout;
+
   for ( auto &_widget : m_roughnessMenu)
   {
     _widget->setParent(roughnessTab);
@@ -92,11 +99,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   }
   roughnessTab->setLayout(roughnessLayout);
 
+  QWidget * metallicTab = new QWidget;
+  QVBoxLayout * metallicLayout = new QVBoxLayout;
+
+  for ( auto &_widget : m_metallicMenu )
+  {
+    _widget->setParent( metallicTab );
+    metallicLayout->setAlignment( this, Qt::AlignTop );
+    metallicLayout->addWidget( _widget );
+    _widget->show();
+  }
+  metallicTab->setLayout(metallicLayout);
+
   m_ui->tabWidget->removeTab(0);
   m_ui->tabWidget->removeTab(0);
-  m_ui->tabWidget->addTab(diffuseTab,tr("Diffuse"));
-  m_ui->tabWidget->addTab(normalTab,tr("Normal"));
-  m_ui->tabWidget->addTab(roughnessTab,tr("Roughness"));
+  m_ui->tabWidget->addTab(diffuseTab, tr("Diffuse"));
+  m_ui->tabWidget->addTab(normalTab, tr("Normal"));
+  m_ui->tabWidget->addTab(roughnessTab, tr("Roughness"));
+  m_ui->tabWidget->addTab(metallicTab, tr("Metallic"));
 
   tabsInitialized = true;
 }
@@ -141,6 +161,18 @@ void MainWindow::mousePressEvent(QMouseEvent * _event)
 void MainWindow::mouseReleaseEvent(QMouseEvent * _event)
 {
   m_activeScene->mouseClick(_event);
+
+  if ( static_cast<QCheckBox *>( m_metallicMenu[1] )->isChecked() )
+  {
+    glm::vec2 tmp( _event->pos().x() - 5, _event->pos().y() - 35 );
+    auto ratio = dynamic_cast<GLWindow*>(m_activeScene)->getRatio();
+
+    m_metallicPixel[0] = tmp.x * ratio[0];
+    m_metallicPixel[1] = tmp.y * ratio[1];
+
+    dynamic_cast<GLWindow*>(m_activeScene)->calculateMetallic( m_metallicPixel[0], m_metallicPixel[1], static_cast<QSlider *>(m_metallicMenu[3])->value() );
+    static_cast<QCheckBox *>( m_metallicMenu[1] )->setChecked( false );
+  }
 }
 
 //------------------------------------------------------------------------
@@ -178,7 +210,7 @@ void MainWindow::open()
 {
   QString fileName = QFileDialog::getOpenFileName( this, tr("Open File"), QDir::currentPath() );
 
-  if( !fileName.isEmpty() && dynamic_cast<GLWindow *>( m_activeScene ) )//w-discrepancy sample i of the total sample set of size
+  if( !fileName.isEmpty() && dynamic_cast<GLWindow *>( m_activeScene ) ) //w-discrepancy sample i of the total sample set of size
   {
     dynamic_cast<GLWindow *>( m_activeScene )->loadImage( fileName.toLatin1().data() );
   }
@@ -210,6 +242,7 @@ void MainWindow::save()
     dynamic_cast<GLWindow *>( m_activeScene )->save( fileName.toLatin1().data() );
   }
 }
+
 //------------------------------------------------------------------------
 
 void MainWindow::changeLayout( int _n )
@@ -328,7 +361,7 @@ void MainWindow::makeRoughnessMenu()
   m_roughnessMenu.push_back( new QCheckBox() );
 
   // 10
-  m_roughnessMenu.push_back( new QPushButton("Reset",nullptr));
+  m_roughnessMenu.push_back( new QPushButton( "Reset", nullptr ) );
 }
 
 //------------------------------------------------------------------------
@@ -352,8 +385,17 @@ void MainWindow::makeNormalMenu()
 
 void MainWindow::makeMetallicMenu()
 {
-  m_metallicMenu.push_back( new QLabel( "Pick", 0, 0 ) );
+  QSlider * range = new QSlider( Qt::Horizontal, Q_NULLPTR );
+  range->setMinimum(0);
+  range->setMaximum(255);
+  range->setValue(125);
+
+  m_metallicMenu.push_back( new QLabel( "Picking Color", 0, 0 ) );
   m_metallicMenu.push_back( new QCheckBox() );
+
+  m_metallicMenu.push_back( new QLabel( "Range", 0, 0 ) );
+  m_metallicMenu.push_back(range);
+
 }
 
 //------------------------------------------------------------------------
@@ -417,3 +459,20 @@ void MainWindow::resetRoughnessSettings()
       static_cast<QSlider *>(m_roughnessMenu[7])->value(),
       static_cast<QCheckBox *>(m_roughnessMenu[9])->isChecked());
 }
+
+//------------------------------------------------------------------------
+
+void MainWindow::pickingMetallic()
+{
+  dynamic_cast<GLWindow *>( m_activeScene )->showOriginalImage();
+}
+
+//------------------------------------------------------------------------
+
+void MainWindow::recalculateMetallic()
+{
+  dynamic_cast<GLWindow*>(m_activeScene)->calculateMetallic( m_metallicPixel[0], m_metallicPixel[1], static_cast<QSlider *>(m_metallicMenu[3])->value() );
+  static_cast<QCheckBox *>( m_metallicMenu[1] )->setChecked( false );
+}
+
+//------------------------------------------------------------------------

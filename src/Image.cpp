@@ -699,7 +699,7 @@ float Image::clampI(int value, int high, int low)
   return newValue;
 }
 
-void Image::equalizeHistogram(map _map)
+void Image::equalizeHistogram( map _map )
 {
 
   std::vector<std::vector<float>> * activeMap;
@@ -890,6 +890,23 @@ QImage Image::getRoughness()
 
 //---------------------------------------------------------------------------------------------------------------------
 
+QImage Image::getMetallic()
+{
+  QImage out;
+  out = m_image.copy();
+  for ( int i = 0; i < width; ++i )
+  {
+    for ( int j = 0; j < height; ++j )
+    {
+      float pixel = m_metallic[i][j];
+      out.setPixel(i, j, qRgb( pixel, pixel, pixel));
+    }
+  }
+  return out;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
 QImage Image::getIntensity()
 {
   QImage out;
@@ -907,7 +924,7 @@ QImage Image::getIntensity()
 
 //---------------------------------------------------------------------------------------------------------------------
 
-void Image::metallic( int _x, int _y, std::array<int, 3> _lowerBound, std::array<int, 3> _upperBound )
+void Image::metallic( int _x, int _y, float _range )
 {
   float r = 0;
   float g = 0;
@@ -915,7 +932,7 @@ void Image::metallic( int _x, int _y, std::array<int, 3> _lowerBound, std::array
 
   for ( int i = -1; i < 2; ++i )
   {
-    for ( int j = -0; j < 2; ++j )
+    for ( int j = -1; j < 2; ++j )
     {
       r += m_image.pixelColor( _x + i, _y + j ).red();
       g += m_image.pixelColor( _x + i, _y + j ).green();
@@ -923,38 +940,31 @@ void Image::metallic( int _x, int _y, std::array<int, 3> _lowerBound, std::array
     }
   }
 
-  QColor sample;// = m_image.pixelColor( _x, _y );
+  QColor sample;
   sample.setRed( r / 9.0f);
   sample.setGreen( g / 9.0f);
   sample.setBlue( b / 9.0f);
+  float sampleIntensity = desaturate( sample.red(), sample.green(), sample.blue() );
 
   for ( int i = 0; i < width; ++i )
   {
     for ( int j = 0; j < height; ++j )
     {
       QColor pixel = m_image.pixelColor( i, j );
-      if ( inRange( sample, pixel, _lowerBound, _upperBound )  )
+      float pixelIntensity = desaturate(pixel.red(), pixel.green(), pixel.blue() );
+      if ( pixelIntensity <= sampleIntensity + _range && pixelIntensity >= sampleIntensity - _range )
+      {
         m_metallic[i][j] = 255;
+      }
       else
         m_metallic[i][j] = 0;
     }
   }
-  QImage out;
-  out = m_image.copy();
-  for ( int i = 0; i < width; ++i )
-  {
-    for ( int j = 0; j < height; ++j )
-    {
-      float pixel = m_metallic[i][j];
-      out.setPixel(i, j, qRgb( pixel, pixel, pixel));
-    }
-  }
-  out.save( "pippo.jpg", 0, -1);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 
-bool Image::inRange( QColor & _sample, QColor & _color,  std::array<int, 3> _lowerBound, std::array<int, 3> _upperBound )
+bool Image::inRange( QColor & _sample, QColor & _color, std::array<int, 3> _lowerBound, std::array<int, 3> _upperBound )
 {
   bool inRange = false;
   bool r = _color.red() < _sample.red() + _upperBound[0] && _color.red() > _sample.red() - _lowerBound[0];

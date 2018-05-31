@@ -19,6 +19,7 @@
 #include <string>
 #include "Image.h"
 #include "Scene.h"
+#include <array>
 
 class GLWindow : public Scene
 {
@@ -42,6 +43,8 @@ public :
   void mouseClick( QMouseEvent * _event ) override;
   std::vector<std::vector<float>> intensity();
   std::vector< std::vector< std::vector<float> > > chroma(std::vector<std::vector<float> > &_intensity );
+  std::array<float, 2> getRatio() const { return m_ratio; }
+  void showOriginalImage();
 
 public slots:
   void selectImage( int _i );
@@ -50,6 +53,7 @@ public slots:
   void calculateSeparation();
   void calculateSpecular( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
   void calculateRoughness( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
+  void calculateMetallic( int _x, int _y, float _range );
 
 protected:
   /// @brief  The following methods must be implimented in the sub class
@@ -63,7 +67,6 @@ protected:
   void exportCSV( std::string _file );
   void drawStroke( QPainter & _p , std::array<float, 2> & _ratio );
 
-  void showOriginalImage();
   void showAlbedoMap();
   void showGrayscale();
   void showShadingMap();

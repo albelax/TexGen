@@ -26,7 +26,7 @@ public:
   void strokeRefinement( QImage _stroke );
   void specular(float _brightness, float _contrast, bool _invert, int _sharpness, bool _equalize, Image::map _map );
 
-  void metallic(int _x, int _y, std::array<int, 3> _lowerBound, std::array<int, 3> _upperBound );
+  void metallic(int _x, int _y, float _range );
   float contrast( float _amount, float _value );
   float desaturate( float _r, float _g, float _b );
   void equalizeHistogram( map _map );
@@ -44,6 +44,7 @@ public:
   QImage getSpecular();
   QImage getRoughness();
   QImage getIntensity();
+  QImage getMetallic();
   QImage getNormal() { return m_normal; }
 
   bool isNull() {return m_image.isNull();}
