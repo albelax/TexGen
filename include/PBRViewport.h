@@ -27,8 +27,6 @@ public:
   void init( bool _pbr );
   unsigned int loadCubemap(std::vector<std::string> faces);
 
-
-
 protected:
   /// @brief  The following methods must be implimented in the sub class
   /// this is called when the window is created
@@ -58,6 +56,7 @@ private :
   std::vector<float> m_grid;
   Shader m_gradient;
   Shader m_skybox;
+  Mesh m_plane;
   QImage m_normal;
 
   GLuint m_skyboxVAO;
@@ -66,7 +65,7 @@ private :
 
   // Which shader to use
   bool m_pbr;
-  bool m_isSkybox = true;
+  bool m_isSkybox = false;
 
   float skyboxSize = 10.0f;
 
