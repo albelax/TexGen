@@ -54,6 +54,8 @@ Image::Image( QImage & _image )
     whichPixelWhichRegion[i].resize( int(regionHeight) );
     numberOfPixelsInChromaRegions[i].resize( int(regionHeight) );
   }
+
+  m_diffuse = m_image;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -124,6 +126,8 @@ void Image::loadImage( QImage _image )
     whichPixelWhichRegion[i].resize( int(regionHeight) );
     numberOfPixelsInChromaRegions[i].resize( int(regionHeight) );
   }
+
+  m_diffuse = m_image;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -699,9 +703,101 @@ float Image::clampI(int value, int high, int low)
   return newValue;
 }
 
-void Image::equalizeHistogram( map _map )
+void Image::equalizeDiffuseHistogram()
 {
 
+  for(int i = 0 ; i< width; ++i)
+  {
+    for(int j = 0 ; j< height; ++j)
+    {
+      QColor tmpColor = m_image.pixel(i,j);
+      QColor tmpColor2 = m_image.pixel(i,j);
+      tmpColor2.setRed(0.299*tmpColor.red() + 0.587*tmpColor.green() + 0.114*tmpColor.blue());
+      tmpColor2.setGreen(128 - 0.168736*tmpColor.red() - 0.331264*tmpColor.green() + 0.5*tmpColor.blue());
+      tmpColor2.setBlue(128 + 0.5*tmpColor.red() - 0.418688*tmpColor.green() - 0.081312*tmpColor.blue());
+      m_diffuse.setPixelColor(i,j,tmpColor2);
+      std::cout<<"First"<<std::endl;
+    }
+  }
+
+  int max_val = 255;
+  int total = width*height;
+  int n_bins = max_val + 1;
+
+  // Compute histogram
+  std::vector<int> hist(n_bins, 0);
+  for (int i = 0; i < width; ++i)
+  {
+    for(int j = 0 ; j< height ; ++j)
+    {
+      hist[m_diffuse.pixelColor(i,j).red()]++;
+    }
+  }
+
+  // Build LUT from cumulative histrogram
+
+  // Find first non-zero bin
+  unsigned int p = 0;
+  while (!hist[p]) ++p;
+
+  if (hist[p] == total)
+  {
+    for (int i = 0; i < width; ++i)
+    {
+      for(int j = 0 ; j< height ; ++j)
+      {
+        QColor tmpColor = m_image.pixel(i,j);
+        tmpColor.setRed(p);
+        m_diffuse.setPixelColor(i,j,tmpColor);
+      }
+    }
+    return;
+  }
+
+  // Compute scale
+  float scale = (n_bins - 1.f) / (total - hist[p]);
+
+  // Initialize lut
+  std::vector<int> lut(n_bins, 0);
+  p++;
+
+  int sum = 0;
+  for (; p < hist.size(); ++p)
+  {
+    sum += hist[p];
+    // the value is saturated in range [0, max_val]
+    lut[p] = std::max(0, std::min(int(round(sum * scale)), max_val));
+  }
+
+  // Apply equalization
+  for (int i = 0; i < width; ++i)
+  {
+    for(int j = 0 ; j< height ; ++j)
+    {
+      QColor tmpColor = m_image.pixel(i,j);
+      tmpColor.setRed(lut[m_diffuse.pixelColor(i,j).red()]);
+      m_diffuse.setPixelColor(i,j,tmpColor);
+    }
+  }
+
+  for(int i = 0 ; i< width; ++i)
+  {
+    for(int j = 0 ; j< height; ++j)
+    {
+      QColor tmpColor = m_image.pixel(i,j);
+      QColor tmpColor2 = m_image.pixel(i,j);
+      tmpColor2.setRed( tmpColor.red() + 1.402*(tmpColor.blue()-128));
+      tmpColor2.setGreen( tmpColor.red() - 0.344136*(tmpColor.green() - 128 ) - 0.714136*(tmpColor.blue()-128) );
+      tmpColor2.setBlue( tmpColor.red() + 1.772*(tmpColor.green()-128) );
+      m_diffuse.setPixelColor(i,j,tmpColor2);
+      std::cout<<"Second"<<std::endl;
+    }
+  }
+
+}
+
+void Image::equalizeHistogram1f( map _map )
+{
   std::vector<std::vector<float>> * activeMap;
 
   switch ( _map )
@@ -768,10 +864,122 @@ void Image::equalizeHistogram( map _map )
   }
 }
 
+glm::vec3 Image::colorToVec3(QColor _col)
+{
+  return glm::vec3(_col.red(),_col.green(),_col.blue());
+}
+
+QColor Image::vec3ToColor(glm::vec3 _vec)
+{
+  QColor tmpColor = m_diffuse.pixelColor(0,0);
+  glm::vec3 tmpVec = _vec;
+  tmpVec = glm::clamp(tmpVec,0.0f,255.0f);
+  tmpColor.setRed(int(tmpVec.x));
+  tmpColor.setGreen(int(tmpVec.y));
+  tmpColor.setBlue(int(tmpVec.z));
+  return tmpColor;
+}
 
 //---------------------------------------------------------------------------------------------------------------------
 
-void Image::specular( float _brightness, float _contrast, bool _invert, int _sharpness, bool _equalize, Image::map _map )
+void Image::diffuse(float _brightness, float _contrast, int _sharpnessBlur, bool _equalize)
+{
+  m_diffuse = m_image;
+  //---SHARPEN-----------
+  if(_sharpnessBlur>0)
+  {
+    int k = 16;
+    for(int n = 0; n<_sharpnessBlur; ++n)
+    {
+      QImage diffuse2 = m_diffuse;
+
+      for (int i = 1; i < width-1; i++)
+      {
+        for (int j = 1; j < height-1; j++)
+        {
+          glm::vec3 sum = colorToVec3(m_diffuse.pixelColor(i,j))*glm::vec3(k);
+
+          double weight = k;
+
+          int l[3] = { -1, 0, 1 };
+          for (int m = 0; m < 3; m++)
+          {
+            for (int n = 0; n < 3; n++)
+            {
+              if ( l[m] + i != i && l[n] + j != j )
+              {
+                sum = sum + colorToVec3(diffuse2.pixelColor(l[m] + i, l[n] + j)) * glm::vec3(-k / 8);
+                weight = weight + (-k / 8);
+              }
+            }
+          }
+          sum = sum / glm::vec3(weight);
+          m_diffuse.setPixelColor(i,j,vec3ToColor(sum));
+
+        }
+      }
+    }
+  }
+  else if (_sharpnessBlur<0)
+  {
+    float kernel[9] = {
+      0.0625, 0.125, 0.0625,
+      0.125,  0.25,  0.125,
+      0.0625, 0.125, 0.0625
+    };
+    int blur = std::abs(_sharpnessBlur);
+
+    for(int n = 0; n<blur; ++n)
+    {
+      QImage diffuse2 = m_diffuse;
+      for (int i = 1; i < width-1; i++)
+      {
+        for (int j = 1; j < height-1; j++)
+        {
+          glm::vec3 sum = glm::vec3(0.0f,0.0f,0.0f);
+          int l[3] = { -1, 0, 1 };
+          for (int m = 0; m < 3; m++)
+          {
+            for (int n = 0; n < 3; n++)
+            {
+              sum = sum + colorToVec3(diffuse2.pixelColor(l[m] + i, l[n] + j)) * kernel[m*3 + n];
+            }
+          }
+          m_diffuse.setPixelColor(i,j,vec3ToColor(sum));
+        }
+      }
+    }
+  }
+
+  float newContrast = clampF(_contrast,1.0f,0.0f);
+  newContrast*=5;
+  float newBrightness = clampF(_brightness,1.0f,0.0f);
+  newBrightness = (newBrightness*2) - 1;
+
+  for( int i = 0; i < width; ++i )
+  {
+    for( int j = 0 ; j < height; ++j )
+    {
+      //---BRIGHTNESS & CONTRAST--------------
+      // https://math.stackexchange.com/a/906280
+      glm::vec3 pixelCol = colorToVec3(m_diffuse.pixelColor(i,j));
+
+      glm::vec3 tmp = newContrast*(pixelCol - glm::vec3(128)) + glm::vec3(128) + glm::vec3(newBrightness*255);
+
+      m_diffuse.setPixelColor(i,j,vec3ToColor(tmp));
+    }
+  }
+  std::cout<<"HERE BRO"<<newContrast<<std::endl;
+
+  if(_equalize)
+  {
+    equalizeDiffuseHistogram();
+  }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+void Image::specular( float _brightness, float _contrast, bool _invert, int _sharpnessBlur, bool _equalize, Image::map _map )
 {
   std::vector<std::vector<float>> * activeMap;
 
@@ -794,33 +1002,65 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
     }
   }
   //---SHARPEN-----------
-  int k = 16;
-
-  for(int n = 0; n<_sharpness; ++n)
+  if(_sharpnessBlur>0)
   {
-    std::vector<std::vector<float>> m_specular2 = ( *activeMap );
-    for (int i = 1; i < width-1; i++)
+    int k = 16;
+    for(int n = 0; n<_sharpnessBlur; ++n)
     {
-      for (int j = 1; j < height-1; j++)
+      std::vector<std::vector<float>> m_activeMap2 = ( *activeMap );
+      for (int i = 1; i < width-1; i++)
       {
-        double sum = ( *activeMap )[i][j] * k;
-
-        double weight = k;
-
-        int l[3] = { -1, 0, 1 };
-        for (int m = 0; m < 3; m++)
+        for (int j = 1; j < height-1; j++)
         {
-          for (int n = 0; n < 3; n++)
+          double sum = ( *activeMap )[i][j] * k;
+
+          double weight = k;
+
+          int l[3] = { -1, 0, 1 };
+          for (int m = 0; m < 3; m++)
           {
-            if ( l[m] + i != i && l[n] + j != j )
+            for (int n = 0; n < 3; n++)
             {
-              sum = sum + m_specular2[l[m] + i][ l[n] + j] * (-k / 8);
-              weight = weight + (-k / 8);
+              if ( l[m] + i != i && l[n] + j != j )
+              {
+                sum = sum + m_activeMap2[l[m] + i][ l[n] + j] * (-k / 8);
+                weight = weight + (-k / 8);
+              }
             }
           }
+          sum = sum / weight;
+          ( *activeMap )[i][j] = sum;
         }
-        sum = sum / weight;
-        ( *activeMap )[i][j] = sum;
+      }
+    }
+  }
+  else if (_sharpnessBlur<0)
+  {
+    float kernel[9] = {
+      0.0625, 0.125, 0.0625,
+      0.125,  0.25,  0.125,
+      0.0625, 0.125, 0.0625
+    };
+    int blur = std::abs(_sharpnessBlur);
+
+    for(int n = 0; n<blur; ++n)
+    {
+      std::vector<std::vector<float>> m_activeMap2 = ( *activeMap );
+      for (int i = 1; i < width-1; i++)
+      {
+        for (int j = 1; j < height-1; j++)
+        {
+          double sum = 0;
+          int l[3] = { -1, 0, 1 };
+          for (int m = 0; m < 3; m++)
+          {
+            for (int n = 0; n < 3; n++)
+            {
+              sum = sum + m_activeMap2[l[m] + i][ l[n] + j] * kernel[m*3 + n];
+            }
+          }
+          ( *activeMap )[i][j] = sum;
+        }
       }
     }
   }
@@ -850,7 +1090,7 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
 
   if( _equalize )
   {
-    equalizeHistogram(_map);
+    equalizeHistogram1f(_map);
   }
 }
 
@@ -887,6 +1127,8 @@ QImage Image::getRoughness()
   }
   return out;
 }
+
+
 
 //---------------------------------------------------------------------------------------------------------------------
 

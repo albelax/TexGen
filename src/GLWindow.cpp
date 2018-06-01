@@ -477,16 +477,44 @@ void GLWindow::calculateSpecular( int _brightness, int _contrast, bool _invert, 
   update();
 }
 
+void GLWindow::calculateDiffuse(int _brightness, int _contrast, int _sharpness, bool _equalize)
+{
+  float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
+  float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
+  float tmpSharpnessBlur = _sharpness-5;
+
+  if( m_editedImage->isNull() ) return;
+
+  m_editedImage->diffuse( tmpBrightness, tmpContrast, tmpSharpnessBlur, _equalize );
+  m_preview = m_editedImage->getDiffuse();
+  m_glImage = QGLWidget::convertToGLFormat( m_preview );
+
+  if( m_glImage.isNull() )
+    qWarning("IMAGE IS NULL");
+
+  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
+
+  glUniform1i( m_colourTextureAddress, 0 );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+
+  update();
+}
+
 //------------------------------------------------------------------------------------------------------------------------------
 
 void GLWindow::calculateRoughness( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize)
 {
   float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
   float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
+  float tmpSharpnessBlur = _sharpness-5;
 
   if( m_editedImage->isNull() ) return;
 
-  m_editedImage->specular( tmpBrightness, tmpContrast, _invert, _sharpness, _equalize, Image::ROUGHNESS );
+  m_editedImage->specular( tmpBrightness, tmpContrast, _invert, tmpSharpnessBlur, _equalize, Image::ROUGHNESS );
   m_preview = m_editedImage->getRoughness();
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
 

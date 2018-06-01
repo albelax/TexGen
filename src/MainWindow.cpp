@@ -24,18 +24,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
 
   createActions();
   createMenus();
+  makeDiffuseMenu();
   makeSpecularMenu();
   makeNormalMenu();
   makeRoughnessMenu();
   makeMetallicMenu();
-  m_currentMenu = &m_originalMenu;
+  m_currentMenu = &m_diffuseMenu;
 
-  // specular
-  //connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), m_gl, SLOT(selectImage(int)));
-  //connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLayout(int)));
-  //connect(m_ui->m_selectImage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLayout(int)));
+  // tabs and viewport mode
   connect(m_ui->viewport, SIGNAL(currentIndexChanged(int)), this, SLOT(swapView(int)));
   connect(m_ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeLayout(int)));
+
+  // diffuse
+  connect((QSlider *)m_diffuseMenu[1], SIGNAL(sliderReleased() ), this, SLOT(updateDiffuse()));
+  connect((QSlider *)m_diffuseMenu[3], SIGNAL(sliderReleased() ), this, SLOT(updateDiffuse()));
+  connect((QSlider *)m_diffuseMenu[5], SIGNAL(sliderReleased() ), this, SLOT(updateDiffuse()));
+  connect((QCheckBox *)m_diffuseMenu[7], SIGNAL(clicked(bool)), this, SLOT(updateDiffuse()));
+  connect((QPushButton *)m_diffuseMenu[8], SIGNAL(released()), this, SLOT(resetDiffuseSettings()));
 
   // specular
   connect((QSlider *)m_specularMenu[3], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
@@ -57,11 +62,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   connect((QCheckBox *)m_roughnessMenu[9], SIGNAL(clicked(bool)), this, SLOT(updateRoughness()));
   connect((QPushButton *)m_roughnessMenu[10], SIGNAL(released()), this, SLOT(resetRoughnessSettings()));
 
+  //metallic
   connect((QCheckBox *)m_metallicMenu[1], SIGNAL(clicked(bool)), this, SLOT(pickingMetallic()));
   connect((QSlider *)m_metallicMenu[3], SIGNAL(sliderReleased() ), this, SLOT(recalculateMetallic()));
   connect((QSlider *)m_metallicMenu[5], SIGNAL(clicked(bool) ), this, SLOT(toggleMetallic()));
 
   QWidget * diffuseTab = new QWidget;
+  QVBoxLayout * diffuseLayout = new QVBoxLayout;
+
+  for ( auto &_widget : m_diffuseMenu)
+  {
+    _widget->setParent(diffuseTab);
+    diffuseLayout->setAlignment( this, Qt::AlignTop );
+    diffuseLayout->addWidget( _widget ); // probably should be added only once?
+    _widget->show();
+  }
+  diffuseLayout->addSpacing(150);
+  diffuseTab->setLayout(diffuseLayout);
 
   //  QWidget * specularTab = new QWidget;
   //  QVBoxLayout *specularLayout = new QVBoxLayout;
@@ -341,8 +358,8 @@ void MainWindow::makeRoughnessMenu()
 
   QSlider * sharpness = new QSlider( Qt::Horizontal, Q_NULLPTR );
   sharpness->setMinimum(0);
-  sharpness->setMaximum(5);
-  sharpness->setValue(1);
+  sharpness->setMaximum(10);
+  sharpness->setValue(5);
 
   //0-1
   m_roughnessMenu.push_back( new QLabel( "Invert", 0, 0 ) );
@@ -357,7 +374,7 @@ void MainWindow::makeRoughnessMenu()
   m_roughnessMenu.push_back( brightness );
 
   //6-7
-  m_roughnessMenu.push_back( new QLabel( "Sharpness", 0, 0 ) );
+  m_roughnessMenu.push_back( new QLabel( "Blur/Sharpen", 0, 0 ) );
   m_roughnessMenu.push_back( sharpness );
 
   //8-9
@@ -366,6 +383,43 @@ void MainWindow::makeRoughnessMenu()
 
   // 10
   m_roughnessMenu.push_back( new QPushButton( "Reset", nullptr ) );
+}
+
+void MainWindow::makeDiffuseMenu()
+{
+  QSlider * contrast = new QSlider( Qt::Horizontal, Q_NULLPTR );
+  contrast->setMinimum(0);
+  contrast->setMaximum(100);
+  contrast->setValue(20);
+
+  QSlider * brightness = new QSlider( Qt::Horizontal, Q_NULLPTR );
+  brightness->setMinimum(0);
+  brightness->setMaximum(100);
+  brightness->setValue(50);
+
+  QSlider * sharpness = new QSlider( Qt::Horizontal, Q_NULLPTR );
+  sharpness->setMinimum(0);
+  sharpness->setMaximum(10);
+  sharpness->setValue(5);
+
+  //0-1
+  m_diffuseMenu.push_back( new QLabel( "Contrast", 0, 0 ) );
+  m_diffuseMenu.push_back( contrast );
+
+  //2-3
+  m_diffuseMenu.push_back( new QLabel( "Brightness", 0, 0 ) );
+  m_diffuseMenu.push_back( brightness );
+
+  //4-5
+  m_diffuseMenu.push_back( new QLabel( "Blur/Sharpen", 0, 0 ) );
+  m_diffuseMenu.push_back( sharpness );
+
+  //6-7
+  m_diffuseMenu.push_back( new QLabel( "Histogram equalization", 0, 0 ) );
+  m_diffuseMenu.push_back( new QCheckBox() );
+
+  //8
+  m_diffuseMenu.push_back( new QPushButton( "Reset", nullptr ) );
 }
 
 //------------------------------------------------------------------------
@@ -434,6 +488,14 @@ void MainWindow::updateRoughness()
       static_cast<QCheckBox *>(m_roughnessMenu[9])->isChecked());
 }
 
+void MainWindow::updateDiffuse()
+{
+  m_activeScene->calculateDiffuse(static_cast<QSlider *>(m_diffuseMenu[3])->value(), // BRIGHTNESS
+      static_cast<QSlider *>(m_diffuseMenu[1])->value(), // CONTRAST
+      static_cast<QSlider *>(m_diffuseMenu[5])->value(), // SHARPNESS
+      static_cast<QCheckBox *>(m_diffuseMenu[7])->isChecked()); // EQUALIZE
+}
+
 //------------------------------------------------------------------------
 
 void MainWindow::resetSpecularSettings()
@@ -443,11 +505,7 @@ void MainWindow::resetSpecularSettings()
   static_cast<QCheckBox *>(m_specularMenu[1])->setChecked(false);
   static_cast<QCheckBox *>(m_specularMenu[9])->setChecked(false);
 
-  m_activeScene->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),
-      static_cast<QSlider *>(m_specularMenu[3])->value(),
-      static_cast<QCheckBox *>(m_specularMenu[1])->isChecked(),
-      static_cast<QSlider *>(m_specularMenu[7])->value(),
-      static_cast<QCheckBox *>(m_specularMenu[9])->isChecked());
+  updateSpecular();
 }
 
 //------------------------------------------------------------------------
@@ -456,15 +514,21 @@ void MainWindow::resetRoughnessSettings()
 {
   static_cast<QSlider *>(m_roughnessMenu[3])->setValue(20);
   static_cast<QSlider *>(m_roughnessMenu[5])->setValue(50);
-  static_cast<QSlider *>(m_roughnessMenu[7])->setValue(1);
+  static_cast<QSlider *>(m_roughnessMenu[7])->setValue(5);
   static_cast<QCheckBox *>(m_roughnessMenu[1])->setChecked(false);
   static_cast<QCheckBox *>(m_roughnessMenu[9])->setChecked(false);
 
-  m_activeScene->calculateSpecular(static_cast<QSlider *>(m_specularMenu[5])->value(),
-      static_cast<QSlider *>(m_roughnessMenu[3])->value(),
-      static_cast<QCheckBox *>(m_roughnessMenu[1])->isChecked(),
-      static_cast<QSlider *>(m_roughnessMenu[7])->value(),
-      static_cast<QCheckBox *>(m_roughnessMenu[9])->isChecked());
+  updateRoughness();
+}
+
+void MainWindow::resetDiffuseSettings()
+{
+  static_cast<QSlider *>(m_diffuseMenu[1])->setValue(20);
+  static_cast<QSlider *>(m_diffuseMenu[3])->setValue(50);
+  static_cast<QSlider *>(m_diffuseMenu[5])->setValue(5);
+  static_cast<QCheckBox *>(m_diffuseMenu[7])->setChecked(false);
+
+  updateDiffuse();
 }
 
 //------------------------------------------------------------------------

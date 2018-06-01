@@ -39,10 +39,12 @@ private slots:
   void updateSpecular();
   void updateNormal();
   void updateRoughness();
+  void updateDiffuse();
   void pickingMetallic();
   void recalculateMetallic();
   void resetSpecularSettings();
   void resetRoughnessSettings();
+  void resetDiffuseSettings();
   void swapView( int _n );
 
   void toggleMetallic();
@@ -68,7 +70,7 @@ private:
   std::array<int, 2> m_metallicPixel;
   std::vector<QLayoutItem *> m_originalLayout;
   std::vector<QWidget *> * m_currentMenu;
-  std::vector<QWidget *> m_originalMenu;
+  std::vector<QWidget *> m_diffuseMenu;
   std::vector<QWidget *> m_normalMenu;
   std::vector<QWidget *> m_specularMenu;
   std::vector<QWidget *> m_roughnessMenu;
@@ -86,6 +88,7 @@ private:
   void makeRoughnessMenu();
   void makeNormalMenu();
   void makeMetallicMenu();
+  void makeDiffuseMenu();
 
   bool tabsInitialized = false;
 

@@ -24,6 +24,7 @@ public:
   void calculateSpecular( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
   void calculateRoughness( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
   void calculateMetallic(int _x, int _y, float _range);
+  void calculateDiffuse(int _brightness, int _contrast, int _sharpness, bool _equalize);
   void changeMesh( std::string _filename );
   void init( bool _pbr );
   unsigned int loadCubemap(std::vector<std::string> faces);
@@ -41,7 +42,6 @@ protected:
   void makeGrid( GLfloat _size, size_t _steps );
 
 private :
-  GLint m_colorAddress;
   GLint m_specularTextureAddress;
   GLint m_normalTextureAddress;
   GLint m_colourTextureAddress;

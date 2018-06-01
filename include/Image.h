@@ -25,16 +25,21 @@ public:
   void shading();
   void strokeRefinement( QImage _stroke );
   void specular(float _brightness, float _contrast, bool _invert, int _sharpness, bool _equalize, Image::map _map );
+  void diffuse(float _brightness, float _contrast, int _sharpness, bool _equalize);
 
   void metallic(int _x, int _y, float _range );
   float contrast( float _amount, float _value );
   float desaturate( float _r, float _g, float _b );
-  void equalizeHistogram( map _map );
+  void equalizeHistogram1f( map _map );
+  void equalizeDiffuseHistogram();
 
   void toggleMetallic(bool _b) {m_noMetallic = _b;}
 
   float clampF(float value, float high, float low);
   float clampI(int value, int high, int low);
+
+  glm::vec3 colorToVec3(QColor _col);
+  QColor vec3ToColor(glm::vec3 _vec);
 
   void save( std::vector<std::vector<std::vector<float>>> & _image, std::string _destination );
   void save( std::vector<std::vector<float>> & _image, std::string _destination );
@@ -42,7 +47,7 @@ public:
   void vectorAdd();
   void loadImage( QImage _image );
   QImage calculateNormalMap( QImage & image, int _depth, bool _invert );
-  QImage getDiffuse() { return m_image; }
+  QImage getDiffuse() { return m_diffuse; }
   QImage getSpecular();
   QImage getRoughness();
   QImage getIntensity();
@@ -79,6 +84,7 @@ private:
   std::vector<std::vector<float>> m_specular;
   std::vector<std::vector<float>> m_roughness;
   std::vector<std::vector<float>> m_metallic;
+  QImage m_diffuse;
   std::vector<std::vector<float>> B;
   std::vector<std::vector<std::vector<float>>> A;
   std::vector<std::vector<std::vector<float>>> m_chroma;
