@@ -125,7 +125,10 @@ void PBRViewport::init(bool _pbr)
 
 	if(_pbr)
 	{
-		m_shader = Shader( "m_pbrShader", shadersAddress + "pbr_vert.glsl", shadersAddress + "pbr_frag.glsl" );
+		//		m_shader = Shader( "m_pbrShader", shadersAddress + "pbr_vert.glsl", shadersAddress + "pbr_frag.glsl" );
+		m_shader.createProgram();
+		m_shader.addVertex( shadersAddress + "pbr_vert.glsl" );
+		m_shader.addFragment( shadersAddress + "pbr_frag.glsl" );
 	}
 	else
 	{
@@ -306,7 +309,10 @@ void PBRViewport::init(bool _pbr)
 
 	m_cubemapTexture = loadCubemap(faces);
 
-	glUniform1i(glGetUniformLocation( m_skybox.getShaderProgram(), "skybox" ),0);
+	glUniform1i(glGetUniformLocation( m_skybox.getShaderProgram(), "skybox" ), 0);
+
+  glUniform1i(glGetUniformLocation( m_shader.getShaderProgram(), "skybox" ), 6);
+
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -320,7 +326,7 @@ void PBRViewport::paintGL()
 	glDisable(GL_CULL_FACE);
 
 
-	if(!m_isSkybox)
+	if( !m_isSkybox )
 	{
 		glBindVertexArray(m_vao);
 		glUseProgram( m_gradient.getShaderProgram() );
@@ -506,6 +512,8 @@ void PBRViewport::calculateRoughness( int _brightness, int _contrast, bool _inve
   update();
 }
 
+//----------------------------------------------------------------------------------------------------------------------
+
 void PBRViewport::calculateMetallic(int _x, int _y, float _range)
 {
   m_editedImage->metallic( _x, _y, _range );
@@ -525,6 +533,8 @@ void PBRViewport::calculateMetallic(int _x, int _y, float _range)
   update();
 }
 
+//----------------------------------------------------------------------------------------------------------------------
+
 unsigned int PBRViewport::loadCubemap(std::vector<std::string> faces)
 {
   unsigned int textureID;
@@ -540,12 +550,16 @@ unsigned int PBRViewport::loadCubemap(std::vector<std::string> faces)
                  0, GL_RGBA, image2.width(), image2.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image2.bits()
                  );
   }
-  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+  glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
+  GLfloat anisotropy;
+  glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisotropy);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
   return textureID;
 }
 
