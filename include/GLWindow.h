@@ -55,6 +55,7 @@ public slots:
   void calculateRoughness( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
   void calculateMetallic( int _x, int _y, float _range );
   void calculateDiffuse(int _brightness, int _contrast, int _sharpness, bool _equalize);
+  void calculateAO(int _depth, int _contrast, int _brightness);
 
 protected:
   /// @brief  The following methods must be implimented in the sub class

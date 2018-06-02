@@ -335,7 +335,7 @@ void GLWindow::showSpecular()
 void GLWindow::showNormalMap()
 {
   glActiveTexture( GL_TEXTURE0 );
-  m_preview = m_editedImage->calculateNormalMap( m_image, 1, false );
+  m_preview = m_editedImage->calculateNormalMap( m_image, 1, false, Image::NORMAL );
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
   if(m_glImage.isNull())
     qWarning("IMAGE IS NULL");
@@ -425,7 +425,7 @@ void GLWindow::calculateNormals( int _depth , bool _invert )
 
   if(m_image.isNull()) return;
 
-  m_preview = m_editedImage->calculateNormalMap( m_image, _depth, _invert );
+  m_preview = m_editedImage->calculateNormalMap( m_image, _depth, _invert, Image::NORMAL );
 
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
 
@@ -451,6 +451,30 @@ void GLWindow::calculateSeparation()
   m_editedImage->chroma();
   m_editedImage->separation();
   m_editedImage->shading();
+}
+
+void GLWindow::calculateAO(int _depth, int _contrast, int _brightness)
+{
+  float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
+  float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
+
+  m_editedImage->calculateNormalMap(m_image, _depth, false, Image::AO);
+  m_editedImage->specular( tmpBrightness, tmpContrast, false, 0, false, Image::AO );
+
+  m_preview = m_editedImage->getAO();
+  m_glImage = QGLWidget::convertToGLFormat( m_preview );
+  if(m_glImage.isNull())
+    qWarning("IMAGE IS NULL");
+  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
+
+  glUniform1i( m_colourTextureAddress, 0 );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+
+  update();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------

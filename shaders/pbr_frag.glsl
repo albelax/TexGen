@@ -12,8 +12,8 @@ uniform sampler2D ColourTexture;
 uniform sampler2D RoughnessTexture;
 uniform sampler2D NormalTexture;
 uniform sampler2D MetallicTexture;
+uniform sampler2D AOTexture;
 
-const float ao = 1.0;
 // camera parameters
 uniform vec3 camPos;
 
@@ -176,9 +176,11 @@ void main()
     Lo += (kD * albedo / PI + brdf) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
   }
 
+  float ao = texture(AOTexture,TexCoords).r;
+
   // ambient lighting (note that the next IBL tutorial will replace
   // this ambient lighting with environment lighting).
-  vec3 ambient = vec3(0.03) * albedo * ao;
+  vec3 ambient = vec3(0.5) * albedo * ao;
 
   vec3 color = ambient + Lo;
 

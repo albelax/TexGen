@@ -25,6 +25,8 @@ public:
   void calculateRoughness( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
   void calculateMetallic(int _x, int _y, float _range);
   void calculateDiffuse(int _brightness, int _contrast, int _sharpness, bool _equalize);
+  void calculateAO(int _depth, int _contrast, int _brightness);
+
   void changeMesh( std::string _filename );
   void init( bool _pbr );
   unsigned int loadCubemap(std::vector<std::string> faces);
@@ -48,12 +50,14 @@ private :
   GLuint m_depthTexture;
   GLuint m_metallicTextureAddress;
   GLuint m_roughnessTextureAddress;
+  GLuint m_aoTextureAddress;
 
   GLuint m_diffuseTexture;
   GLuint m_normalTexture;
   GLuint m_specularTexture;
   GLuint m_roughnessTexture;
   GLuint m_metallicTexture;
+  GLuint m_aoTexture;
   std::vector<float> m_grid;
   Shader m_gradient;
   Shader m_skybox;

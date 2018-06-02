@@ -201,6 +201,7 @@ void PBRViewport::init(bool _pbr)
 	//	 textures --------------------
 	m_colourTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "ColourTexture" );
 	m_normalTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "NormalTexture" );
+	m_aoTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "AOTexture" );
 
 	//// load color texture
 	addTexture( m_editedImage->getDiffuse(), &m_diffuseTexture, 0 );
@@ -259,6 +260,17 @@ void PBRViewport::init(bool _pbr)
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 		glGenerateMipmap( GL_TEXTURE_2D );
+
+		addTexture( m_editedImage->getAO(), &m_aoTexture, 5 );
+		glUniform1i( m_aoTextureAddress, 5 );
+
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+		glGenerateMipmap( GL_TEXTURE_2D );
+
+
 	}
 
 	GLuint tmpTexture;
@@ -360,7 +372,7 @@ void PBRViewport::renderScene()
 void PBRViewport::calculateNormals(int _depth , bool _invert )
 {
   auto tmp = m_editedImage->getDiffuse();
-  tmp = m_editedImage->calculateNormalMap( tmp, _depth, _invert );
+  tmp = m_editedImage->calculateNormalMap( tmp, _depth, _invert, Image::NORMAL );
   QImage glImage = QGLWidget::convertToGLFormat( tmp );
 
   if( glImage.isNull() )
@@ -371,6 +383,36 @@ void PBRViewport::calculateNormals(int _depth , bool _invert )
 
   glUniform1i( m_normalTextureAddress, 1 );
 
+
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+  glGenerateMipmap( GL_TEXTURE_2D );
+
+  update();
+}
+
+void PBRViewport::calculateAO(int _depth, int _contrast, int _brightness)
+{
+  float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
+  float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
+
+  auto tmp = m_editedImage->getDiffuse();
+  m_editedImage->calculateNormalMap( tmp, _depth, false, Image::AO);
+  m_editedImage->specular( tmpBrightness, tmpContrast, false, 0, false, Image::AO );
+
+  tmp = m_editedImage->getAO();
+
+  QImage glImage = QGLWidget::convertToGLFormat( tmp );
+
+  if( glImage.isNull() )
+    qWarning( "IMAGE IS NULL" );
+
+  glBindTexture( GL_TEXTURE_2D, m_aoTexture );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glImage.width(), glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
+
+  glUniform1i( m_aoTextureAddress, 5 );
 
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );

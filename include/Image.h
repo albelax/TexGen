@@ -15,7 +15,7 @@
 class Image
 {
 public:
-  enum map { ORIGINAL, INTENSITY, ALBEDO, SHADING, NORMAL, SPECULAR, ROUGHNESS, CHROMA };
+  enum map { ORIGINAL, INTENSITY, ALBEDO, SHADING, NORMAL, SPECULAR, ROUGHNESS, CHROMA, AO };
   Image();
   Image( QImage & _image );
   void threshold();
@@ -34,6 +34,7 @@ public:
   void equalizeDiffuseHistogram();
 
   void toggleMetallic(bool _b) {m_noMetallic = _b;}
+  void toggleAO(bool _b) {m_noAO = _b;}
 
   float clampF(float value, float high, float low);
   float clampI(int value, int high, int low);
@@ -46,13 +47,14 @@ public:
   void save( map _image, std::string _destination );
   void vectorAdd();
   void loadImage( QImage _image );
-  QImage calculateNormalMap( QImage & image, int _depth, bool _invert );
+  QImage calculateNormalMap( QImage & image, int _depth, bool _invert, map _map);
   QImage getDiffuse() { return m_diffuse; }
   QImage getSpecular();
   QImage getRoughness();
   QImage getIntensity();
   QImage getMetallic();
   QImage getNormal() { return m_normal; }
+  QImage getAO();
 
   bool isNull() {return m_image.isNull();}
 private:
@@ -67,6 +69,7 @@ private:
   void rgbToHsv();
 
   bool m_noMetallic = false;
+  bool m_noAO = false;
 
   // CL
   cl::Platform m_CLPlatform;
@@ -84,7 +87,9 @@ private:
   std::vector<std::vector<float>> m_specular;
   std::vector<std::vector<float>> m_roughness;
   std::vector<std::vector<float>> m_metallic;
+  std::vector<std::vector<float>> m_ao;
   QImage m_diffuse;
+  QImage m_aoNormal;
   std::vector<std::vector<float>> B;
   std::vector<std::vector<std::vector<float>>> A;
   std::vector<std::vector<std::vector<float>>> m_chroma;

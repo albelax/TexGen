@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   makeNormalMenu();
   makeRoughnessMenu();
   makeMetallicMenu();
+  makeAOMenu();
   m_currentMenu = &m_diffuseMenu;
 
   // tabs and viewport mode
@@ -67,6 +68,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   connect((QSlider *)m_metallicMenu[3], SIGNAL(sliderReleased() ), this, SLOT(recalculateMetallic()));
   connect((QSlider *)m_metallicMenu[5], SIGNAL(clicked(bool) ), this, SLOT(toggleMetallic()));
 
+  //AO
+  connect((QSlider *)m_AOMenu[1], SIGNAL(sliderReleased() ), this, SLOT(updateAO()));
+  connect((QSlider *)m_AOMenu[3], SIGNAL(sliderReleased() ), this, SLOT(updateAO()));
+  connect((QSlider *)m_AOMenu[5], SIGNAL(sliderReleased() ), this, SLOT(updateAO()));
+  connect((QCheckBox *)m_AOMenu[7], SIGNAL(clicked(bool)), this, SLOT(toggleAO()));
+  connect((QPushButton *)m_AOMenu[8], SIGNAL(released()), this, SLOT(resetAOSettings()));
+
+  // DIFFUSE ------------
   QWidget * diffuseTab = new QWidget;
   QVBoxLayout * diffuseLayout = new QVBoxLayout;
 
@@ -80,17 +89,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   diffuseLayout->addSpacing(150);
   diffuseTab->setLayout(diffuseLayout);
 
-  //  QWidget * specularTab = new QWidget;
-  //  QVBoxLayout *specularLayout = new QVBoxLayout;
-  //  for ( auto &_widget : m_specularMenu)
-  //  {
-  //    _widget->setParent(specularTab);
-  //    specularLayout->setAlignment( this, Qt::AlignTop );
-  //    specularLayout->addWidget( _widget ); // probably should be added only once?
-  //    _widget->show();
-  //  }
-  //  specularTab->setLayout(specularLayout);
-
+  // NORMAL ------------
   QWidget * normalTab = new QWidget;
   QVBoxLayout * normalLayout = new QVBoxLayout;
 
@@ -105,6 +104,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   normalLayout->addSpacing(250);
   normalTab->setLayout( normalLayout );
 
+  // ROUGHNESS ------------
   QWidget * roughnessTab = new QWidget;
   QVBoxLayout * roughnessLayout = new QVBoxLayout;
 
@@ -118,6 +118,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   roughnessLayout->addSpacing(100);
   roughnessTab->setLayout(roughnessLayout);
 
+  // METALLIC ------------
   QWidget * metallicTab = new QWidget;
   QVBoxLayout * metallicLayout = new QVBoxLayout;
 
@@ -129,8 +130,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
     _widget->show();
   }
   metallicLayout->addSpacing(250);
-
   metallicTab->setLayout(metallicLayout);
+
+  // AO ------------
+  QWidget * aoTab = new QWidget;
+  QVBoxLayout * aoLayout = new QVBoxLayout;
+
+  for ( auto &_widget : m_AOMenu )
+  {
+    _widget->setParent( aoTab );
+    aoLayout->setAlignment( this, Qt::AlignTop );
+    aoLayout->addWidget( _widget );
+    _widget->show();
+  }
+  aoLayout->addSpacing(250);
+  aoTab->setLayout(aoLayout);
 
   m_ui->tabWidget->removeTab(0);
   m_ui->tabWidget->removeTab(0);
@@ -138,6 +152,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   m_ui->tabWidget->addTab(normalTab, tr("Normal"));
   m_ui->tabWidget->addTab(roughnessTab, tr("Roughness"));
   m_ui->tabWidget->addTab(metallicTab, tr("Metallic"));
+  m_ui->tabWidget->addTab(aoTab, tr("AO"));
 
   tabsInitialized = true;
 }
@@ -385,6 +400,43 @@ void MainWindow::makeRoughnessMenu()
   m_roughnessMenu.push_back( new QPushButton( "Reset", nullptr ) );
 }
 
+void MainWindow::makeAOMenu()
+{
+  QSlider * contrast = new QSlider( Qt::Horizontal, Q_NULLPTR );
+  contrast->setMinimum(0);
+  contrast->setMaximum(100);
+  contrast->setValue(20);
+
+  QSlider * brightness = new QSlider( Qt::Horizontal, Q_NULLPTR );
+  brightness->setMinimum(0);
+  brightness->setMaximum(100);
+  brightness->setValue(50);
+
+  QSlider * depth = new QSlider( Qt::Horizontal, Q_NULLPTR );
+  depth->setMinimum(0);
+  depth->setMaximum(20);
+  depth->setValue(1);
+
+  //0-1
+  m_AOMenu.push_back( new QLabel( "Depth", 0, 0 ) );
+  m_AOMenu.push_back( depth );
+
+  //2-3
+  m_AOMenu.push_back( new QLabel( "Contrast", 0, 0 ) );
+  m_AOMenu.push_back( contrast );
+
+  //4-5
+  m_AOMenu.push_back( new QLabel( "Brightness", 0, 0 ) );
+  m_AOMenu.push_back( brightness );
+
+  //6-7
+  m_AOMenu.push_back( new QLabel( "No Map", 0, 0 ) );
+  m_AOMenu.push_back( new QCheckBox() );
+
+  //8
+  m_AOMenu.push_back( new QPushButton( "Reset", nullptr ) );
+}
+
 void MainWindow::makeDiffuseMenu()
 {
   QSlider * contrast = new QSlider( Qt::Horizontal, Q_NULLPTR );
@@ -496,6 +548,14 @@ void MainWindow::updateDiffuse()
       static_cast<QCheckBox *>(m_diffuseMenu[7])->isChecked()); // EQUALIZE
 }
 
+void MainWindow::updateAO()
+{
+  m_activeScene->calculateAO(static_cast<QSlider *>(m_AOMenu[1])->value(), // DEPTH
+      static_cast<QSlider *>(m_AOMenu[3])->value(), // CONTRAST
+      static_cast<QSlider *>(m_AOMenu[5])->value() // BRIGHTNESS
+        );
+}
+
 //------------------------------------------------------------------------
 
 void MainWindow::resetSpecularSettings()
@@ -531,6 +591,16 @@ void MainWindow::resetDiffuseSettings()
   updateDiffuse();
 }
 
+void MainWindow::resetAOSettings()
+{
+  static_cast<QSlider *>(m_AOMenu[1])->setValue(1);
+  static_cast<QSlider *>(m_AOMenu[3])->setValue(20);
+  static_cast<QSlider *>(m_AOMenu[5])->setValue(50);
+  static_cast<QCheckBox *>(m_AOMenu[7])->setChecked(false);
+
+  updateAO();
+}
+
 //------------------------------------------------------------------------
 
 void MainWindow::pickingMetallic()
@@ -552,4 +622,10 @@ void MainWindow::toggleMetallic()
 {
   m_activeScene->toggleMetallic(static_cast<QCheckBox *>(m_metallicMenu[5])->isChecked());
   m_activeScene->calculateMetallic( m_metallicPixel[0], m_metallicPixel[1], static_cast<QSlider *>(m_metallicMenu[3])->value() );
+}
+
+void MainWindow::toggleAO()
+{
+  m_activeScene->toggleAO(static_cast<QCheckBox *>(m_AOMenu[7])->isChecked());
+  updateAO();
 }

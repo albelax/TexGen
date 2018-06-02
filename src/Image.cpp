@@ -100,6 +100,7 @@ void Image::loadImage( QImage _image )
   m_specular.resize( width );
   m_roughness.resize( width );
   m_metallic.resize( width );
+  m_ao.resize(width);
 
   for( int i = 0; i < width; ++i )
   {
@@ -109,6 +110,7 @@ void Image::loadImage( QImage _image )
     m_specular[i].resize( height );
     m_roughness[i].resize( height );
     m_metallic[i].resize( height );
+    m_ao[i].resize(height);
 
   }
 
@@ -177,8 +179,18 @@ void Image::vectorAdd()
 
 //---------------------------------------------------------------------------------------------------------------------
 
-QImage Image::calculateNormalMap( QImage & image, int _depth, bool _invert )
+QImage Image::calculateNormalMap( QImage & image, int _depth, bool _invert, map _map)
 {
+  QImage * theImage;
+
+  switch(_map)
+  {
+    case Image::NORMAL: theImage = &m_normal; break;
+    case Image::AO: theImage = &m_aoNormal; break;
+
+    default: break;
+  }
+
   float * r = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
   float * g = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
   float * b = static_cast<float *>( malloc( width * height * sizeof( float ) ) );
@@ -253,14 +265,13 @@ QImage Image::calculateNormalMap( QImage & image, int _depth, bool _invert )
 
   queue.finish();
 
-  //  QImage out;
-  m_normal = image.copy();
+  (* theImage) = image.copy();
 
   for ( int i = 0; i < width; ++i )
   {
     for ( int j = 0; j < height; ++j )
     {
-      m_normal.setPixel(i,j,qRgb( r[j * width + i]*255, g[j * width + i]*255, b[j * width + i]*255 ));
+      theImage->setPixel(i,j,qRgb( r[j * width + i]*255, g[j * width + i]*255, b[j * width + i]*255 ));
     }
   }
 
@@ -271,7 +282,7 @@ QImage Image::calculateNormalMap( QImage & image, int _depth, bool _invert )
   free( o_g );
   free( o_b );
 
-  return m_normal;
+  return (* theImage);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -981,12 +992,26 @@ void Image::diffuse(float _brightness, float _contrast, int _sharpnessBlur, bool
 
 void Image::specular( float _brightness, float _contrast, bool _invert, int _sharpnessBlur, bool _equalize, Image::map _map )
 {
+
+  if(_map == Image::AO && m_noAO)
+  {
+    for( int i = 0; i < width; ++i )
+    {
+      for( int j = 0 ; j < height; ++j )
+      {
+        m_ao[i][j] = 1.0f;
+      }
+    }
+    return;
+  }
+
   std::vector<std::vector<float>> * activeMap;
 
   switch ( _map )
   {
     case Image::SPECULAR: activeMap = &m_specular; break;
     case Image::ROUGHNESS: activeMap = &m_roughness; break;
+    case Image::AO: activeMap = &m_ao; break;
     default: break;
   }
 
@@ -994,7 +1019,9 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
   {
     for( int j = 0 ; j < height; ++j )
     {
-      QColor myColor = m_image.pixelColor( i, j );
+      QColor myColor;
+      if(_map != Image::AO) myColor = m_image.pixelColor( i, j );
+      else myColor = m_aoNormal.pixelColor( i, j );
 
       //---DESATURATE---------------
       // https://stackoverflow.com/a/28873770
@@ -1158,6 +1185,21 @@ QImage Image::getIntensity()
     for ( int j = 0; j < height; ++j )
     {
       float pixel = m_intensity[i][j] * 255;
+      out.setPixel( i, j, qRgb( pixel, pixel, pixel ) );
+    }
+  }
+  return out;
+}
+
+QImage Image::getAO()
+{
+  QImage out;
+  out = m_image.copy();
+  for ( int i = 0; i < width; ++i )
+  {
+    for ( int j = 0; j < height; ++j )
+    {
+      float pixel = m_ao[i][j] * 255;
       out.setPixel( i, j, qRgb( pixel, pixel, pixel ) );
     }
   }
