@@ -187,7 +187,7 @@ void main()
 	vec3 color = ambient + Lo;
 
 	vec3 lookup = reflect( -V, N ); // R
-	float lod = textureQueryLod(skybox, lookup).x;
+//	float lod = textureQueryLod(skybox, lookup).x;
 
 	float gloss = ( 1 - texture(RoughnessTexture, TexCoords).r ) * 16;
 	vec3 reflectionColor = textureLod( skybox, lookup, gloss).rgb;
@@ -201,9 +201,9 @@ void main()
 	color = pow( color, vec3( 1.0 / 2.2 ) );
 
 	vec3 b = vec3(0, 0, 1);
-	fragColour = vec4( mix( color, reflectionColor, roughness ), 1);
-	fragColour = vec4( mix( reflectionColor.rgb, b, 1 - roughness), 1);
-	fragColour = vec4( color, 1.0f );
-	fragColour = vec4( reflectionColor, 1 );
+	b = mix( reflectionColor.rgb, b, 1 - roughness);
+	fragColour = vec4( mix( texture( ColourTexture, TexCoords ).rgb, reflectionColor, roughness ), 1);
+//	fragColour = vec4( color, 1.0f );
+//	fragColour = vec4( reflectionColor, 1 );
 }
 
