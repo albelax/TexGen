@@ -300,7 +300,7 @@ void PBRViewport::init(bool _pbr)
 
 	glUniform1i(glGetUniformLocation( m_skybox.getShaderProgram(), "skybox" ), 0);
 
-	glUniform1i(glGetUniformLocation( m_shader.getShaderProgram(), "skybox" ), 0);
+  glUniform1i(glGetUniformLocation( m_shader.getShaderProgram(), "skybox" ), 5);
 
 
 }
@@ -488,6 +488,7 @@ unsigned int PBRViewport::loadCubemap(std::vector<std::string> faces)
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
   glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
   GLfloat anisotropy;
   glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisotropy);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);

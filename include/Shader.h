@@ -39,11 +39,11 @@ private:
 	GLint m_geometry;
 	GLint m_tessellationControl;
 	GLint m_tessellationEvaluation;
-	GLchar * m_fragmentSource;
-	GLchar * m_vertexSource;
-	GLchar * m_geometrySource;
-	GLchar * m_TessellationControlSource;
-	GLchar * m_TessellationEvaluationSource;
+  const GLchar * m_fragmentSource;
+  const GLchar * m_vertexSource;
+  const GLchar * m_geometrySource;
+  const GLchar * m_TessellationControlSource;
+  const GLchar * m_TessellationEvaluationSource;
 	std::string m_name;
 
 };

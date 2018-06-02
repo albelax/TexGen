@@ -100,7 +100,7 @@ void Shader::addFragment( std::string _path )
 	auto tmp = loadShader( _path );
 	m_fragmentSource = (GLchar *)tmp.c_str();
 	m_fragment = glCreateShader( GL_FRAGMENT_SHADER );
-	glShaderSource( m_fragment, 1, &m_fragmentSource, NULL );
+  glShaderSource( m_fragment, 1, &m_fragmentSource, NULL );
 	glCompileShader( m_fragment );
 	glAttachShader( m_shaderProgram, m_fragment );
 	errorCheck( m_fragment, ShaderType::FRAGMENT );
