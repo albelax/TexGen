@@ -66,7 +66,7 @@ private :
 
   // Which shader to use
   bool m_pbr;
-  bool m_isSkybox = false;
+  bool m_isSkybox = true;
 
   float skyboxSize = 10.0f;
 

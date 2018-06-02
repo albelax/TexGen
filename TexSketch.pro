@@ -35,23 +35,24 @@ SOURCES += src/main.cpp \
            src/Camera.cpp \
            src/TrackballCamera.cpp \
            src/Image.cpp \
-    src/PBRViewport.cpp \
-    src/Scene.cpp \
-    src/CameraStates.cpp
+            src/PBRViewport.cpp \
+            src/Scene.cpp \
+            src/CameraStates.cpp
 
 FORMS += ui/MainWindow.ui
 
 OTHER_FILES += shaders/* \
                images/* \
                cl/include/* \
-               cl/src/*
+               cl/src/* \
+               models/*
 
 UI_HEADERS_DIR = ui
 OBJECTS_DIR = obj
 MOC_DIR = moc
 UI_DIR = ui
 
-linux:LIBS +=  -lGLEW
+linux:LIBS += -lGLEW
 
 # CL
 macx: LIBS += -framework OpenCL

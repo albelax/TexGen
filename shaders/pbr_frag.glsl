@@ -1,4 +1,4 @@
-#version 420 // Keeping you on the bleeding edge!
+#version 410 // Keeping you on the bleeding edge!
 #extension GL_EXT_gpu_shader4 : enable
 // This code is based on code from here https://learnopengl.com/#!PBR/Lighting
 layout (location = 0) out vec4 fragColour;
@@ -12,6 +12,8 @@ uniform sampler2D ColourTexture;
 uniform sampler2D RoughnessTexture;
 uniform sampler2D NormalTexture;
 uniform sampler2D MetallicTexture;
+uniform samplerCube skybox;
+const int envMaxLOD = 8;
 
 const float ao = 1.0;
 // camera parameters
@@ -76,7 +78,9 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 
   return ggx1 * ggx2;
 }
-// ----------------------------------------------------------------------------
+
+//----------------------------------------------------------------------------
+
 vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
   return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
@@ -86,30 +90,30 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 /** From http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/ */
 mat4 rotationMatrix( vec3 axis, float angle )
 {
-    //axis = normalize(axis);
-    float s = sin( angle );
-    float c = cos( angle );
-    float oc = 1.0 - c;
-    return mat4(oc * axis.x * axis.x + c, oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
-                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
-                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
-                0.0,                                0.0,                                0.0,                                1.0 );
+  //axis = normalize(axis);
+  float s = sin( angle );
+  float c = cos( angle );
+  float oc = 1.0 - c;
+  return mat4(oc * axis.x * axis.x + c, oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+              oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+              oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+              0.0,                                0.0,                                0.0,                                1.0 );
 }
 
 // ----------------------------------------------------------------------------
 
 vec3 rotateVector( vec3 src, vec3 tgt, vec3 vec )
 {
-    float angle = acos( dot( src, tgt ) );
+  float angle = acos( dot( src, tgt ) );
 
-    if ( angle == 0 )
-    {
-        return vec;
-    }
-    vec3 axis = normalize( cross( src, tgt ) );
-    mat4 R = rotationMatrix( axis, angle );
-    vec4 norm = R * vec4( vec, 1.0f );
-    return norm.xyz / norm.w;
+  if ( angle == 0 )
+  {
+    return vec;
+  }
+  vec3 axis = normalize( cross( src, tgt ) );
+  mat4 R = rotationMatrix( axis, angle );
+  vec4 norm = R * vec4( vec, 1.0f );
+  return norm.xyz / norm.w;
 }
 
 // ----------------------------------------------------------------------------
@@ -178,15 +182,34 @@ void main()
 
   // ambient lighting (note that the next IBL tutorial will replace
   // this ambient lighting with environment lighting).
-  vec3 ambient = vec3(0.03) * albedo * ao;
+  vec3 ambient = vec3( 0.03 ) * albedo * ao;
 
   vec3 color = ambient + Lo;
 
+  vec3 lookup = reflect( -V, N ); // R
+  float lod = textureQueryLod(skybox, lookup).x;
+
+  float gloss = ( texture(RoughnessTexture, TexCoords).r);// * float( 160 );
+  vec4 reflectionColor = texture(skybox, lookup);
+  //  vec4 reflectionColor = textureLod( skybox, lookup, gloss);
+
+  //  color = mix(color,reflectionColor,1);
+
+
   // HDR tonemapping
-  color = color / (color + vec3(1.0));
+  color = color / ( color + vec3(1.0) );
   // gamma correct
   color = pow( color, vec3( 1.0 / 2.2 ) );
 
-  fragColour = vec4(color, 1.0);
+    vec3 a = /*normalize(color);*/vec3(color.r, color.g ,color.b);
+  //  vec3 b = /*normalize( reflectionColor );*/vec3(0, 0, 1);
+
+//    fragColour = vec4( color, 1.0f);
+
+    fragColour = vec4(mix( reflectionColor.rgb, a, roughness), 1);
+  //    fragColour = vec4(a, 1.0f);
+
+  //  fragColour = vec4( color, 1.0f);// texture(skybox, lookup).rgba;
+  //  fragColour = texture(RoughnessTexture, TexCoords).rgba;
 }
 
