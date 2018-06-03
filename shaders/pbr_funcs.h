@@ -118,7 +118,9 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 f0, float roughness)
 
 // ----------------------------------------------------------------------------
 
-vec3 diffuseTerm(vec3 f, float metallic)
+vec3 diffuseTerm( vec3 f, float metallic )
 {
     return (1.0 - f) * (1.0 - metallic);
 }
+
+// ----------------------------------------------------------------------------

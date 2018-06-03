@@ -61,13 +61,13 @@ INCLUDEPATH += /usr/include/CL /usr/local/include/ cl/include/
 
 RESOURCES += $$PWD/Style/style.qrc
 
-DISTFILES += \
-    shaders/pbr_frag.glsl \
-    shaders/pbr_vert.glsl \
-    shaders/renderedVert.glsl \
-    shaders/renderedFrag.glsl \
-    shaders/gradientVert.glsl \
-    shaders/gradientFrag.glsl \
-    shaders/skyboxFrag.glsl \
-		shaders/skyboxVert.glsl \
-		shaders/pbr_funcs.h
+DISTFILES += shaders/*
+#    shaders/pbr_frag.glsl \
+#    shaders/pbr_vert.glsl \
+#    shaders/renderedVert.glsl \
+#    shaders/renderedFrag.glsl \
+#    shaders/gradientVert.glsl \
+#    shaders/gradientFrag.glsl \
+#    shaders/skyboxFrag.glsl \
+#		shaders/skyboxVert.glsl \
+#		shaders/pbr_funcs.h

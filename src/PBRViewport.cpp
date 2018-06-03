@@ -93,7 +93,7 @@ void PBRViewport::addTexture( QImage _image )
 
 	QImage image = QGLWidget::convertToGLFormat( _image );
 	if( _image.isNull() )
-		qWarning( "IMAGE IS NULL" );
+		qWarning( "IMAGE IS NULLZ" );
 	glBindTexture( GL_TEXTURE_2D, m_textures[m_textures.size() - 1] );
 	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits() );
 }
@@ -136,11 +136,21 @@ void PBRViewport::init(bool _pbr)
 	}
 	m_gradient = Shader( "m_gradient", shadersAddress + "gradientVert.glsl", shadersAddress + "gradientFrag.glsl" );
 	m_skybox = Shader( "m_skybox", shadersAddress + "skyboxVert.glsl", shadersAddress + "skyboxFrag.glsl" );
+	m_tess.createProgram();
+	m_tess.addVertex(shadersAddress + "tessvert.glsl");
+	m_tess.addFragment( shadersAddress + "tessfrag.glsl" );
+	m_tess.addTessellationControl( shadersAddress + "tesscontrol.glsl");
+	m_tess.addTessellationEvaluation( shadersAddress + "tesseval.glsl" );
+	m_tess.addGeometry( shadersAddress + "tessgeom.glsl" );
+
+	glLinkProgram( m_tess.getShaderProgram() );
+
 
 	glLinkProgram( m_skybox.getShaderProgram() );
 	glLinkProgram( m_gradient.getShaderProgram() );
-	glLinkProgram( m_shader.getShaderProgram() );
-	glUseProgram( m_shader.getShaderProgram() );
+//	glLinkProgram( m_shader.getShaderProgram() );
+//	glUseProgram( m_shader.getShaderProgram() );
+		glUseProgram( m_tess.getShaderProgram() );
 
 	glGenVertexArrays( 1, &m_vao );
 	glBindVertexArray( m_vao );
@@ -159,7 +169,9 @@ void PBRViewport::init(bool _pbr)
 	glBufferSubData( GL_ARRAY_BUFFER, m_mesh.getBufferIndex() * sizeof(float), m_mesh.getAmountVertexData() * sizeof(float), &m_mesh.getVertexData() );
 
 	// pass vertices to shader
-	GLint pos = glGetAttribLocation( m_shader.getShaderProgram(), "VertexPosition" );
+//	GLint pos = glGetAttribLocation( m_shader.getShaderProgram(), "VertexPosition" );
+	GLint pos = glGetAttribLocation( m_tess.getShaderProgram(), "VertexPosition" );
+
 	glEnableVertexAttribArray( pos );
 	glVertexAttribPointer( pos, 3, GL_FLOAT, GL_FALSE, 0, 0 );
 
@@ -170,7 +182,9 @@ void PBRViewport::init(bool _pbr)
 	glBufferSubData( GL_ARRAY_BUFFER, m_mesh.getBufferIndex() * sizeof(float), m_mesh.getAmountVertexData() * sizeof(float), &m_mesh.getNormalsData() );
 
 	// pass normals to shader
-	GLint n = glGetAttribLocation( m_shader.getShaderProgram(), "VertexNormal" );
+//	GLint n = glGetAttribLocation( m_shader.getShaderProgram(), "VertexNormal" );
+	GLint n = glGetAttribLocation( m_tess.getShaderProgram(), "VertexNormal" );
+
 	glEnableVertexAttribArray( n );
 	glVertexAttribPointer( n, 3, GL_FLOAT, GL_FALSE, 0, 0 );
 
@@ -181,30 +195,41 @@ void PBRViewport::init(bool _pbr)
 	glBufferSubData( GL_ARRAY_BUFFER, m_mesh.getBufferIndex()/3*2 * sizeof(float), m_mesh.getAmountVertexData() * sizeof(float), &m_mesh.getUVsData() );
 
 	// pass texture coords to shader
-	GLint t = glGetAttribLocation( m_shader.getShaderProgram(), "TexCoord" );
+//	GLint t = glGetAttribLocation( m_shader.getShaderProgram(), "TexCoord" );
+	GLint t = glGetAttribLocation( m_tess.getShaderProgram(), "TexCoord" );
+
 	glEnableVertexAttribArray( t );
 	glVertexAttribPointer( t, 2, GL_FLOAT, GL_FALSE, 0, (void*) 0 );
 
 	// link matrices with shader locations
 	if(_pbr)
 	{
-		m_roughnessTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "RoughnessTexture" );
-		m_metallicTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "MetallicTexture" );
+//		m_roughnessTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "RoughnessTexture" );
+//		m_metallicTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "MetallicTexture" );
+		m_roughnessTextureAddress = glGetUniformLocation( m_tess.getShaderProgram(), "RoughnessTexture" );
+		m_metallicTextureAddress = glGetUniformLocation( m_tess.getShaderProgram(), "MetallicTexture" );
 	}
 
 	else
 	{
-		m_specularTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "SpecularTexture" );
+//		m_specularTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "SpecularTexture" );
+		m_specularTextureAddress = glGetUniformLocation( m_tess.getShaderProgram(), "SpecularTexture" );
+
 	}
 
-	m_MVAddress = glGetUniformLocation( m_shader.getShaderProgram(), "MV" );
-	m_MVPAddress = glGetUniformLocation( m_shader.getShaderProgram(), "MVP" );
-	m_NAddress = glGetUniformLocation( m_shader.getShaderProgram(), "N" );
+//	m_MVAddress = glGetUniformLocation( m_shader.getShaderProgram(), "MV" );
+//	m_MVPAddress = glGetUniformLocation( m_shader.getShaderProgram(), "MVP" );
+//	m_NAddress = glGetUniformLocation( m_shader.getShaderProgram(), "N" );
+
+
+	m_MVAddress = glGetUniformLocation( m_tess.getShaderProgram(), "MV" );
+	m_MVPAddress = glGetUniformLocation( m_tess.getShaderProgram(), "MVP" );
+	m_NAddress = glGetUniformLocation( m_tess.getShaderProgram(), "N" );
 
 	//	 textures --------------------
-	m_colourTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "ColourTexture" );
-	m_normalTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "NormalTexture" );
-	m_aoTextureAddress = glGetUniformLocation( m_shader.getShaderProgram(), "AOTexture" );
+	m_colourTextureAddress = glGetUniformLocation( m_tess.getShaderProgram(), "ColourTexture" );
+	m_normalTextureAddress = glGetUniformLocation( m_tess.getShaderProgram(), "NormalTexture" );
+	m_aoTextureAddress = glGetUniformLocation( m_tess.getShaderProgram(), "AOTexture" );
 
 	//// load color texture
 	addTexture( m_editedImage->getDiffuse(), &m_diffuseTexture, 0 );
@@ -279,11 +304,11 @@ void PBRViewport::init(bool _pbr)
 	GLuint tmpTexture;
 	addTexture( m_editedImage->getDiffuse(), &tmpTexture, 25 ); // void one, for some reason is needed ....
 	auto camPos = m_camera.getCameraEye();
-	glUniform3f( glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ), camPos.x, camPos.y, camPos.z);
+	glUniform3f( glGetUniformLocation( m_tess.getShaderProgram(), "camPos" ), camPos.x, camPos.y, camPos.z);
 
 	if(_pbr)
 	{
-		glUniform1f( glGetUniformLocation( m_shader.getShaderProgram(), "ao"), 1.0f );
+		glUniform1f( glGetUniformLocation( m_tess.getShaderProgram(), "ao"), 1.0f );
 	}
 
 	// SKYBOX
@@ -311,7 +336,7 @@ void PBRViewport::init(bool _pbr)
 
 	glUniform1i(glGetUniformLocation( m_skybox.getShaderProgram(), "skybox" ), 0);
 
-  glUniform1i(glGetUniformLocation( m_shader.getShaderProgram(), "skybox" ), 6);
+	glUniform1i(glGetUniformLocation( m_tess.getShaderProgram(), "skybox" ), 6);
 
 }
 
@@ -354,11 +379,14 @@ void PBRViewport::renderScene()
 {
 	glViewport( 0, 0, width(), height() );
 	glClear( GL_DEPTH_BUFFER_BIT );
-	glUseProgram( m_shader.getShaderProgram() );
+	glUseProgram( m_tess.getShaderProgram() );
 	glBindVertexArray(m_vao);
-	glUseProgram( m_shader.getShaderProgram() );
+//	glUseProgram( m_shader.getShaderProgram() );
 	auto camPos = m_camera.getCameraEye();
-	glUniform3f( glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ), camPos.x, camPos.y, camPos.z );
+//	glUniform3f( glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ), camPos.x, camPos.y, camPos.z );
+
+//	glUniform3f( glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ), camPos.x, camPos.y, camPos.z );
+	glUniform3f( glGetUniformLocation( m_tess.getShaderProgram(), "camPos" ), camPos.x, camPos.y, camPos.z );
 
 	m_camera.update();
 
@@ -369,7 +397,10 @@ void PBRViewport::renderScene()
 	glUniformMatrix4fv( m_MVAddress, 1, GL_FALSE, glm::value_ptr( m_MV ) );
 	glUniformMatrix3fv( m_NAddress, 1, GL_FALSE, glm::value_ptr( N ) );
 
-	glDrawArrays( GL_TRIANGLES, m_mesh.getBufferIndex()/3, ( m_mesh.getAmountVertexData() / 3 ) );
+	glPatchParameteri(GL_PATCH_VERTICES, 3);       // tell OpenGL that every patch has 16 verts
+	glDrawArrays( GL_PATCHES, m_mesh.getBufferIndex()/3, ( m_mesh.getAmountVertexData() / 3 ) );
+//	glDrawArrays( GL_TRIANGLES, m_mesh.getBufferIndex()/3, ( m_mesh.getAmountVertexData() / 3 ) );
+
 
 }
 
@@ -382,7 +413,7 @@ void PBRViewport::calculateNormals(int _depth , bool _invert )
   QImage glImage = QGLWidget::convertToGLFormat( tmp );
 
   if( glImage.isNull() )
-    qWarning( "IMAGE IS NULL" );
+    qWarning( " Normal map IS NULL" );
 
   glBindTexture( GL_TEXTURE_2D, m_normalTexture );
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glImage.width(), glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
@@ -413,7 +444,7 @@ void PBRViewport::calculateAO(int _depth, int _contrast, int _brightness)
   QImage glImage = QGLWidget::convertToGLFormat( tmp );
 
   if( glImage.isNull() )
-    qWarning( "IMAGE IS NULL" );
+    qWarning( "AO IS NULL" );
 
   glBindTexture( GL_TEXTURE_2D, m_aoTexture );
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glImage.width(), glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
@@ -440,7 +471,7 @@ void PBRViewport::calculateSpecular( int _brightness, int _contrast, bool _inver
   auto tmp = m_editedImage->getSpecular();
   QImage glImage = QGLWidget::convertToGLFormat( tmp );
   if(glImage.isNull())
-    qWarning("IMAGE IS NULL");
+    qWarning("Spec IS NULL");
 
   glBindTexture( GL_TEXTURE_2D, m_metallicTexture );
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glImage.width(), glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
@@ -469,7 +500,7 @@ void PBRViewport::calculateDiffuse(int _brightness, int _contrast, int _sharpnes
   QImage glImage = QGLWidget::convertToGLFormat( tmp );
 
   if( glImage.isNull() )
-    qWarning( "IMAGE IS NULL" );
+    qWarning( "diffuse IS NULL" );
 
   glBindTexture( GL_TEXTURE_2D, m_diffuseTexture );
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glImage.width(), glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
@@ -496,7 +527,7 @@ void PBRViewport::calculateRoughness( int _brightness, int _contrast, bool _inve
   QImage glImage = QGLWidget::convertToGLFormat( tmp );
 
   if( glImage.isNull() )
-    qWarning( "IMAGE IS NULL" );
+    qWarning( "rough IS NULL" );
 
   glBindTexture( GL_TEXTURE_2D, m_roughnessTexture );
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glImage.width(), glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
@@ -520,7 +551,7 @@ void PBRViewport::calculateMetallic(int _x, int _y, float _range)
   auto tmp = m_editedImage->getMetallic();
   QImage glImage = QGLWidget::convertToGLFormat( tmp );
   if(glImage.isNull())
-    qWarning("IMAGE IS NULL");
+    qWarning("metallic IS NULL");
   glBindTexture( GL_TEXTURE_2D, m_metallicTexture );
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glImage.width(), glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
 

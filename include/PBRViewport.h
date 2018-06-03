@@ -61,6 +61,8 @@ private :
   std::vector<float> m_grid;
   Shader m_gradient;
   Shader m_skybox;
+  Shader m_tess;
+
   Mesh m_plane;
   QImage m_normal;
 

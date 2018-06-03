@@ -247,6 +247,7 @@ void main()
 
   //  fragColour = vec4( mix( x, color, roughness ), 1 );
     fragColour = vec4( color, 1.0f );
-//    fragColour = vec4( x, 1.0f );
+//    fragColour = texture(NormalTexture, TexCoords);
+//    fragColour = vec4(Normal, 1.0);
 }
 
