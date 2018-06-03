@@ -1,5 +1,6 @@
-#version 410 // Keeping you on the bleeding edge!
+#version 410
 #extension GL_EXT_gpu_shader4 : enable
+
 // this demo is based on code from here https://learnopengl.com/#!PBR/Lighting
 /// @brief the vertex passed in
 layout (location = 0) in vec3 VertexPosition;

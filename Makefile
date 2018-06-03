@@ -89,6 +89,7 @@ DIST          = shaders/pbr_frag.glsl \
 		shaders/gradientFrag.glsl \
 		shaders/skyboxFrag.glsl \
 		shaders/skyboxVert.glsl \
+		shaders/pbr_funcs.h \
 		/usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt5/mkspecs/common/unix.conf \
 		/usr/lib64/qt5/mkspecs/common/linux.conf \

@@ -69,4 +69,5 @@ DISTFILES += \
     shaders/gradientVert.glsl \
     shaders/gradientFrag.glsl \
     shaders/skyboxFrag.glsl \
-    shaders/skyboxVert.glsl
+		shaders/skyboxVert.glsl \
+		shaders/pbr_funcs.h

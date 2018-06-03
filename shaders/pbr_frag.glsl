@@ -1,5 +1,6 @@
 #version 410
 #extension GL_EXT_gpu_shader4 : enable
+
 // This code is based on code from here https://learnopengl.com/#!PBR/Lighting
 layout (location = 0) out vec4 fragColour;
 
@@ -81,10 +82,33 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 
 //----------------------------------------------------------------------------
 
-vec3 fresnelSchlick(float cosTheta, vec3 F0)
+//vec3 fresnelSchlick(float cosTheta, vec3 F0)
+//{
+//	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+//}
+
+// ----------------------------------------------------------------------------
+
+vec3 fresnelSchlickCommon(float cosTheta, vec3 f0, vec3 base)
 {
-	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+	return f0 + (base - f0) * pow(1.0 - cosTheta, 5.0);
+
 }
+
+// ----------------------------------------------------------------------------
+
+vec3 fresnelSchlick( float cosTheta, vec3 f0 )
+{
+	return fresnelSchlickCommon(cosTheta, f0, vec3(1.0));
+}
+
+// ----------------------------------------------------------------------------
+
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 f0, float roughness)
+{
+	return fresnelSchlickCommon(cosTheta, f0, max(vec3(1.0 - roughness), f0));
+}
+
 // ----------------------------------------------------------------------------
 
 /** From http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/ */
@@ -131,7 +155,6 @@ void main()
 	N = rotateVector( src, tgt, N);
 
 	// other textures
-
 	vec3 albedo = texture( ColourTexture, TexCoords ).rgb;
 	float metallic = texture( MetallicTexture, TexCoords ).r;
 	float roughness = texture( RoughnessTexture, TexCoords ).r;
@@ -181,32 +204,37 @@ void main()
 		Lo += (kD * albedo / PI + brdf) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 	}
 
+	// irradiance
+//	vec3 f = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+//	vec3 irradiance = texture( u_irradianceMap, n ).rgb;
+//	vec3 diffuse = diffuseTerm( f, metallic ) * ( irradiance * eyeAlbedo );
+
+//	const float MAX_REFLECTION_LOD = 4.0;
+//	vec3 prefilteredColor = textureLod(u_prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;
+//	vec2 envBRDF  = texture(u_brdfMap, vec2( max( dot(N, V), 0.0), roughness )).rg;
+//	vec3 specular = prefilteredColor * ( f * envBRDF.x + envBRDF.y );
+	// irradiance
+
+
 	// ambient lighting (note that the next IBL tutorial will replace
 	// this ambient lighting with environment lighting).
-	float ao = texture(AOTexture,TexCoords).r;
-
+	float ao = texture( AOTexture, TexCoords ).r;
 	vec3 ambient = vec3( 0.5 ) * albedo * ao;
-
 	vec3 color = ambient + Lo;
 
+	// cubemap reflection
 	vec3 lookup = reflect( -V, N ); // R
-//	float lod = textureQueryLod(skybox, lookup).x;
-
 	float gloss = ( 1 - texture(RoughnessTexture, TexCoords).r ) * 16;
 	vec3 reflectionColor = textureLod( skybox, lookup, gloss).rgb;
-
-	//  color = mix(color,reflectionColor,1);
-
+	// cubemap reflection
 
 	// HDR tonemapping
 	color = color / ( color + vec3(1.0) );
 	// gamma correct
 	color = pow( color, vec3( 1.0 / 2.2 ) );
 
-	vec3 b = vec3(0, 0, 1);
-	b = mix( reflectionColor.rgb, b, 1 - roughness);
-//	fragColour = vec4( mix( texture( ColourTexture, TexCoords ).rgb, reflectionColor, roughness ), 1);
-//	fragColour = vec4( color, 1.0f );
-	fragColour = vec4( reflectionColor, 1 );
+	//	fragColour = vec4( mix( texture( ColourTexture, TexCoords ).rgb, reflectionColor, roughness ), 1);
+	fragColour = vec4( color, 1.0f );
+//	fragColour = vec4( reflectionColor, 1 );
 }
 
