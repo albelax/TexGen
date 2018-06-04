@@ -41,12 +41,14 @@ private slots:
   void updateRoughness();
   void updateDiffuse();
   void updateAO();
+  void updateDisplacement();
   void pickingMetallic();
   void recalculateMetallic();
   void resetSpecularSettings();
   void resetRoughnessSettings();
   void resetDiffuseSettings();
   void resetAOSettings();
+  void resetDisplacementSettings();
   void swapView( int _n );
 
   void toggleMetallic();
@@ -79,6 +81,7 @@ private:
   std::vector<QWidget *> m_roughnessMenu;
   std::vector<QWidget *> m_metallicMenu;
   std::vector<QWidget *> m_AOMenu;
+  std::vector<QWidget *> m_displacementMenu;
 
   QTabWidget * m_tabWidget;
 
@@ -94,6 +97,7 @@ private:
   void makeMetallicMenu();
   void makeDiffuseMenu();
   void makeAOMenu();
+  void makeDisplacementMenu();
 
   bool tabsInitialized = false;
 

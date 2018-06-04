@@ -104,6 +104,7 @@ void Image::loadImage( QImage _image )
   m_roughness.resize( width );
   m_metallic.resize( width );
   m_ao.resize(width);
+  m_displacement.resize(width);
 
   for( int i = 0; i < width; ++i )
   {
@@ -114,6 +115,7 @@ void Image::loadImage( QImage _image )
     m_roughness[i].resize( height );
     m_metallic[i].resize( height );
     m_ao[i].resize(height);
+    m_displacement[i].resize(height);
 
   }
 
@@ -1015,7 +1017,7 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
     case Image::SPECULAR: activeMap = &m_specular; break;
     case Image::ROUGHNESS: activeMap = &m_roughness; break;
     case Image::AO: activeMap = &m_ao; break;
-    case Image::SPECULAR: activeMap = &m_specular; break;
+    case Image::DISPLACEMENT: activeMap = &m_displacement; break;
     default: break;
   }
 

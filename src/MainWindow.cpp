@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   makeRoughnessMenu();
   makeMetallicMenu();
   makeAOMenu();
+  makeDisplacementMenu();
   m_currentMenu = &m_diffuseMenu;
 
   // tabs and viewport mode
@@ -74,6 +75,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   connect((QSlider *)m_AOMenu[5], SIGNAL(sliderReleased() ), this, SLOT(updateAO()));
   connect((QCheckBox *)m_AOMenu[7], SIGNAL(clicked(bool)), this, SLOT(toggleAO()));
   connect((QPushButton *)m_AOMenu[8], SIGNAL(released()), this, SLOT(resetAOSettings()));
+
+  // displacement
+  connect((QSlider *)m_displacementMenu[3], SIGNAL(sliderReleased() ), this, SLOT(updateDisplacement()));
+  connect((QSlider *)m_displacementMenu[5], SIGNAL(sliderReleased() ), this, SLOT(updateDisplacement()));
+  connect((QSlider *)m_displacementMenu[7], SIGNAL(sliderReleased() ), this, SLOT(updateDisplacement()));
+  connect((QCheckBox *)m_displacementMenu[1], SIGNAL(clicked(bool)), this, SLOT(updateDisplacement()));
+  connect((QCheckBox *)m_displacementMenu[9], SIGNAL(clicked(bool)), this, SLOT(updateDisplacement()));
+  connect((QPushButton *)m_displacementMenu[10], SIGNAL(released()), this, SLOT(resetDisplacementSettings()));
+
 
   // DIFFUSE ------------
   QWidget * diffuseTab = new QWidget;
@@ -146,6 +156,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   aoLayout->addSpacing(250);
   aoTab->setLayout(aoLayout);
 
+  // DISPLACEMENT ------------
+  QWidget * displacementTab = new QWidget;
+  QVBoxLayout * displacementLayout = new QVBoxLayout;
+
+  for ( auto &_widget : m_displacementMenu)
+  {
+    _widget->setParent(displacementTab);
+    displacementLayout->setAlignment( this, Qt::AlignTop );
+    displacementLayout->addWidget( _widget ); // probably should be added only once?
+    _widget->show();
+  }
+  displacementLayout->addSpacing(100);
+  displacementTab->setLayout(displacementLayout);
+
   m_ui->tabWidget->removeTab(0);
   m_ui->tabWidget->removeTab(0);
   m_ui->tabWidget->addTab(diffuseTab, tr("Diffuse"));
@@ -153,6 +177,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   m_ui->tabWidget->addTab(roughnessTab, tr("Roughness"));
   m_ui->tabWidget->addTab(metallicTab, tr("Metallic"));
   m_ui->tabWidget->addTab(aoTab, tr("AO"));
+  m_ui->tabWidget->addTab(displacementTab, tr("Displacement"));
 
   tabsInitialized = true;
 }
@@ -400,6 +425,47 @@ void MainWindow::makeRoughnessMenu()
   m_roughnessMenu.push_back( new QPushButton( "Reset", nullptr ) );
 }
 
+void MainWindow::makeDisplacementMenu()
+{
+  QSlider * contrast = new QSlider( Qt::Horizontal, Q_NULLPTR );
+  contrast->setMinimum(0);
+  contrast->setMaximum(100);
+  contrast->setValue(20);
+
+  QSlider * brightness = new QSlider( Qt::Horizontal, Q_NULLPTR );
+  brightness->setMinimum(0);
+  brightness->setMaximum(100);
+  brightness->setValue(50);
+
+  QSlider * sharpness = new QSlider( Qt::Horizontal, Q_NULLPTR );
+  sharpness->setMinimum(0);
+  sharpness->setMaximum(10);
+  sharpness->setValue(5);
+
+  //0-1
+  m_displacementMenu.push_back( new QLabel( "Invert", 0, 0 ) );
+  m_displacementMenu.push_back( new QCheckBox() );
+
+  //2-3
+  m_displacementMenu.push_back( new QLabel( "Contrast", 0, 0 ) );
+  m_displacementMenu.push_back( contrast );
+
+  //4-5
+  m_displacementMenu.push_back( new QLabel( "Brightness", 0, 0 ) );
+  m_displacementMenu.push_back( brightness );
+
+  //6-7
+  m_displacementMenu.push_back( new QLabel( "Blur/Sharpen", 0, 0 ) );
+  m_displacementMenu.push_back( sharpness );
+
+  //8-9
+  m_displacementMenu.push_back( new QLabel( "Histogram equalization", 0, 0 ) );
+  m_displacementMenu.push_back( new QCheckBox() );
+
+  // 10
+  m_displacementMenu.push_back( new QPushButton( "Reset", nullptr ) );
+}
+
 void MainWindow::makeAOMenu()
 {
   QSlider * contrast = new QSlider( Qt::Horizontal, Q_NULLPTR );
@@ -540,6 +606,15 @@ void MainWindow::updateRoughness()
       static_cast<QCheckBox *>(m_roughnessMenu[9])->isChecked());
 }
 
+void MainWindow::updateDisplacement()
+{
+  m_activeScene->calculateDisplacement(static_cast<QSlider *>(m_displacementMenu[5])->value(),
+      static_cast<QSlider *>(m_displacementMenu[3])->value(),
+      static_cast<QCheckBox *>(m_displacementMenu[1])->isChecked(),
+      static_cast<QSlider *>(m_displacementMenu[7])->value(),
+      static_cast<QCheckBox *>(m_displacementMenu[9])->isChecked());
+}
+
 void MainWindow::updateDiffuse()
 {
   m_activeScene->calculateDiffuse(static_cast<QSlider *>(m_diffuseMenu[3])->value(), // BRIGHTNESS
@@ -579,6 +654,17 @@ void MainWindow::resetRoughnessSettings()
   static_cast<QCheckBox *>(m_roughnessMenu[9])->setChecked(false);
 
   updateRoughness();
+}
+
+void MainWindow::resetDisplacementSettings()
+{
+  static_cast<QSlider *>(m_displacementMenu[3])->setValue(20);
+  static_cast<QSlider *>(m_displacementMenu[5])->setValue(50);
+  static_cast<QSlider *>(m_displacementMenu[7])->setValue(5);
+  static_cast<QCheckBox *>(m_displacementMenu[1])->setChecked(false);
+  static_cast<QCheckBox *>(m_displacementMenu[9])->setChecked(false);
+
+  updateDisplacement();
 }
 
 void MainWindow::resetDiffuseSettings()
