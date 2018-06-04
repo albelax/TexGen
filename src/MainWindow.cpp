@@ -603,6 +603,8 @@ void MainWindow::updateRoughness()
       static_cast<QCheckBox *>(m_roughnessMenu[9])->isChecked());
 }
 
+//------------------------------------------------------------------------
+
 void MainWindow::updateDisplacement()
 {
   m_activeScene->calculateDisplacement(static_cast<QSlider *>(m_displacementMenu[5])->value(),
@@ -612,12 +614,16 @@ void MainWindow::updateDisplacement()
       static_cast<QCheckBox *>(m_displacementMenu[9])->isChecked());
 }
 
+//------------------------------------------------------------------------
+
 void MainWindow::updateDiffuse()
 {
   m_activeScene->calculateDiffuse(static_cast<QSlider *>(m_diffuseMenu[3])->value(), // BRIGHTNESS
       static_cast<QSlider *>(m_diffuseMenu[1])->value(), // CONTRAST
       static_cast<QSlider *>(m_diffuseMenu[5])->value()); // SHARPNESS
 }
+
+//------------------------------------------------------------------------
 
 void MainWindow::updateAO()
 {
