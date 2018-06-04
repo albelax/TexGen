@@ -16,11 +16,13 @@ out vec3 Normal;
 out vec2 TexCoords;
 
 uniform sampler2D ColourTexture;
+uniform sampler2D DisplacementTexture;
+
 
 void main()
 {
   float dispScale = 0.2;
-  float displacement = texture(ColourTexture, teUV[0]).r * dispScale;
+  float displacement = texture(DisplacementTexture, teUV[0]).r * dispScale;
   Normal = normalize(teNormal[0]);
   vec4 newPos =  vec4(tePosition[0] +Normal * displacement, 1.0);
   WorldPos = vec3(MV * newPos);
@@ -28,7 +30,7 @@ void main()
   gl_Position = MVP * newPos; EmitVertex();
 
 
-  displacement = texture(ColourTexture, teUV[1]).r * dispScale;
+  displacement = texture(DisplacementTexture, teUV[1]).r * dispScale;
   Normal = normalize(teNormal[1]);
   newPos = vec4(tePosition[1] + Normal * displacement, 1.0);
   WorldPos = vec3(MV * newPos);
@@ -36,7 +38,7 @@ void main()
   gl_Position = MVP * newPos; EmitVertex();
 
 
-  displacement = texture(ColourTexture, teUV[2]).r * dispScale;
+  displacement = texture(DisplacementTexture, teUV[2]).r * dispScale;
   Normal = normalize(teNormal[2]);
   newPos =  vec4(tePosition[2] + Normal * displacement, 1.0);
   WorldPos = vec3(MV * newPos);

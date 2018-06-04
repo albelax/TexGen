@@ -28,6 +28,7 @@ Image::Image( QImage & _image )
   m_specular.resize( width );
   m_roughness.resize( width );
   m_metallic.resize( width );
+  m_displacement.resize( width );
 
 
   for( int i = 0; i < width; ++i )
@@ -38,6 +39,8 @@ Image::Image( QImage & _image )
     m_specular[i].resize( height );
     m_roughness[i].resize( height );
     m_metallic[i].resize( height );
+    m_displacement[i].resize( height );
+
   }
 
   B.resize( int(regionWidth) );
@@ -699,7 +702,7 @@ float Image::contrast(float _amount, float _value)
 
 float Image::desaturate(float _r, float _g, float _b)
 {
-  return (std::min(_r, std::min(_g, _b)) + std::max(_r,std:: max(_g, _b))) * 0.5f;
+  return (std::min(_r, std::min(_g, _b)) + std::max(_r, std::max(_g, _b))) * 0.5f;
 }
 
 float Image::clampF(float value, float high, float low)
@@ -1191,6 +1194,8 @@ QImage Image::getIntensity()
   return out;
 }
 
+//---------------------------------------------------------------------------------------------------------------------
+
 QImage Image::getAO()
 {
   QImage out;
@@ -1205,6 +1210,24 @@ QImage Image::getAO()
   }
   return out;
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+
+QImage Image::getDisplacement()
+{
+  QImage out;
+  out = m_image.copy();
+  for ( int i = 0; i < width; ++i )
+  {
+    for ( int j = 0; j < height; ++j )
+    {
+      float pixel = m_displacement[i][j] * 255;
+      out.setPixel( i, j, qRgb( pixel, pixel, pixel ) );
+    }
+  }
+  return out;
+}
+
 
 //---------------------------------------------------------------------------------------------------------------------
 
@@ -1274,3 +1297,15 @@ bool Image::inRange( QColor & _sample, QColor & _color, std::array<int, 3> _lowe
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+
+void Image::displacement()
+{
+//  for ( int i = 0; i < width; ++i )
+//  {
+//    for ( int j = 0; j < height; ++j )
+//    {
+//      QColor pixel = m_normal.pixelColor( i, j );
+//      m_displacement[i][j] = desaturate(pixel.red(), pixel.green(), pixel.blue() );
+//    }
+  }
+}

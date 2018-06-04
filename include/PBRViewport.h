@@ -51,6 +51,8 @@ private :
   GLuint m_metallicTextureAddress;
   GLuint m_roughnessTextureAddress;
   GLuint m_aoTextureAddress;
+  GLuint m_displacementTextureAddress;
+
 
   GLuint m_diffuseTexture;
   GLuint m_normalTexture;
@@ -58,6 +60,7 @@ private :
   GLuint m_roughnessTexture;
   GLuint m_metallicTexture;
   GLuint m_aoTexture;
+  GLuint m_displacementTexture;
   std::vector<float> m_grid;
   Shader m_gradient;
   Shader m_skybox;

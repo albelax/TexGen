@@ -230,6 +230,7 @@ void PBRViewport::init(bool _pbr)
 	m_colourTextureAddress = glGetUniformLocation( m_tess.getShaderProgram(), "ColourTexture" );
 	m_normalTextureAddress = glGetUniformLocation( m_tess.getShaderProgram(), "NormalTexture" );
 	m_aoTextureAddress = glGetUniformLocation( m_tess.getShaderProgram(), "AOTexture" );
+	m_displacementTextureAddress = glGetUniformLocation( m_tess.getShaderProgram(), "DisplacementTexture" );
 
 	//// load color texture
 	addTexture( m_editedImage->getDiffuse(), &m_diffuseTexture, 0 );
@@ -299,6 +300,14 @@ void PBRViewport::init(bool _pbr)
 		glGenerateMipmap( GL_TEXTURE_2D );
 
 
+		addTexture( m_editedImage->getDisplacement(), &m_displacementTexture, 6 );
+		glUniform1i( m_displacementTextureAddress, 6 );
+
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+		glGenerateMipmap( GL_TEXTURE_2D );
 	}
 
 	GLuint tmpTexture;
