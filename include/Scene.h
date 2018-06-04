@@ -27,6 +27,7 @@ public:
   virtual void calculateMetallic(int _x, int _y, float _range ) = 0;
   virtual void calculateDiffuse(int _brightness, int _contrast, int _sharpness, bool _equalize) = 0;
   virtual void calculateAO(int _depth, int _contrast, int _brightness) = 0;
+  virtual void calculateDisplacement( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) = 0;
   void toggleMetallic(bool _b);
   void toggleAO(bool _b);
 protected:

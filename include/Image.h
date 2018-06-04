@@ -16,7 +16,7 @@
 class Image
 {
 public:
-  enum map { ORIGINAL, INTENSITY, ALBEDO, SHADING, NORMAL, SPECULAR, ROUGHNESS, CHROMA, AO };
+  enum map { ORIGINAL, INTENSITY, ALBEDO, SHADING, NORMAL, SPECULAR, ROUGHNESS, CHROMA, AO, DISPLACEMENT };
   Image();
   Image( QImage & _image );
   void threshold();
@@ -27,7 +27,6 @@ public:
   void strokeRefinement( QImage _stroke );
   void specular(float _brightness, float _contrast, bool _invert, int _sharpness, bool _equalize, Image::map _map );
   void diffuse(float _brightness, float _contrast, int _sharpness, bool _equalize);
-  void displacement();
 
   void metallic(int _x, int _y, float _range );
   float contrast( float _amount, float _value );

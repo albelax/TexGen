@@ -1015,6 +1015,7 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
     case Image::SPECULAR: activeMap = &m_specular; break;
     case Image::ROUGHNESS: activeMap = &m_roughness; break;
     case Image::AO: activeMap = &m_ao; break;
+    case Image::SPECULAR: activeMap = &m_specular; break;
     default: break;
   }
 
@@ -1297,15 +1298,3 @@ bool Image::inRange( QColor & _sample, QColor & _color, std::array<int, 3> _lowe
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-
-void Image::displacement()
-{
-//  for ( int i = 0; i < width; ++i )
-//  {
-//    for ( int j = 0; j < height; ++j )
-//    {
-//      QColor pixel = m_normal.pixelColor( i, j );
-//      m_displacement[i][j] = desaturate(pixel.red(), pixel.green(), pixel.blue() );
-//    }
-  }
-}

@@ -525,6 +525,37 @@ void PBRViewport::calculateDiffuse(int _brightness, int _contrast, int _sharpnes
   update();
 }
 
+//----------------------------------------------------------------------------------------------------------------------
+
+void PBRViewport::calculateDisplacement( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize )
+{
+  float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
+  float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
+  float tmpSharpnessBlur = _sharpness-5;
+
+  m_editedImage->specular( tmpBrightness, tmpContrast, _invert, tmpSharpnessBlur, _equalize, Image::DISPLACEMENT );
+  auto tmp = m_editedImage->getDisplacement();
+  QImage glImage = QGLWidget::convertToGLFormat( tmp );
+
+  if( glImage.isNull() )
+    qWarning( "rough IS NULL" );
+
+  glBindTexture( GL_TEXTURE_2D, m_displacementTexture );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glImage.width(), glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
+
+  glUniform1i( m_displacementTextureAddress, 6 );
+
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+  glGenerateMipmap( GL_TEXTURE_2D );
+
+  update();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 void PBRViewport::calculateRoughness( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize )
 {
   float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
@@ -650,3 +681,4 @@ void PBRViewport::makeGrid( GLfloat _size, size_t _steps )
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+
