@@ -719,99 +719,6 @@ float Image::clampI(int value, int high, int low)
   return newValue;
 }
 
-void Image::equalizeDiffuseHistogram()
-{
-
-  for(int i = 0 ; i< width; ++i)
-  {
-    for(int j = 0 ; j< height; ++j)
-    {
-      QColor tmpColor = m_image.pixel(i,j);
-      QColor tmpColor2 = m_image.pixel(i,j);
-      tmpColor2.setRed(0.299*tmpColor.red() + 0.587*tmpColor.green() + 0.114*tmpColor.blue());
-      tmpColor2.setGreen(128 - 0.168736*tmpColor.red() - 0.331264*tmpColor.green() + 0.5*tmpColor.blue());
-      tmpColor2.setBlue(128 + 0.5*tmpColor.red() - 0.418688*tmpColor.green() - 0.081312*tmpColor.blue());
-      m_diffuse.setPixelColor(i,j,tmpColor2);
-      std::cout<<"First"<<std::endl;
-    }
-  }
-
-  int max_val = 255;
-  int total = width*height;
-  int n_bins = max_val + 1;
-
-  // Compute histogram
-  std::vector<int> hist(n_bins, 0);
-  for (int i = 0; i < width; ++i)
-  {
-    for(int j = 0 ; j< height ; ++j)
-    {
-      hist[m_diffuse.pixelColor(i,j).red()]++;
-    }
-  }
-
-  // Build LUT from cumulative histrogram
-
-  // Find first non-zero bin
-  unsigned int p = 0;
-  while (!hist[p]) ++p;
-
-  if (hist[p] == total)
-  {
-    for (int i = 0; i < width; ++i)
-    {
-      for(int j = 0 ; j< height ; ++j)
-      {
-        QColor tmpColor = m_image.pixel(i,j);
-        tmpColor.setRed(p);
-        m_diffuse.setPixelColor(i,j,tmpColor);
-      }
-    }
-    return;
-  }
-
-  // Compute scale
-  float scale = (n_bins - 1.f) / (total - hist[p]);
-
-  // Initialize lut
-  std::vector<int> lut(n_bins, 0);
-  p++;
-
-  int sum = 0;
-  for (; p < hist.size(); ++p)
-  {
-    sum += hist[p];
-    // the value is saturated in range [0, max_val]
-    lut[p] = std::max(0, std::min(int(round(sum * scale)), max_val));
-  }
-
-  // Apply equalization
-  for (int i = 0; i < width; ++i)
-  {
-    for(int j = 0 ; j< height ; ++j)
-    {
-      QColor tmpColor = m_image.pixel(i,j);
-      tmpColor.setRed(lut[m_diffuse.pixelColor(i,j).red()]);
-      m_diffuse.setPixelColor(i,j,tmpColor);
-    }
-  }
-
-  for(int i = 0 ; i< width; ++i)
-  {
-    for(int j = 0 ; j< height; ++j)
-    {
-      QColor tmpColor = m_image.pixel(i,j);
-      QColor tmpColor2 = m_image.pixel(i,j);
-      tmpColor2.setRed( tmpColor.red() + 1.402*(tmpColor.blue()-128));
-      tmpColor2.setGreen( tmpColor.red() - 0.344136*(tmpColor.green() - 128 ) - 0.714136*(tmpColor.blue()-128) );
-      tmpColor2.setBlue( tmpColor.red() + 1.772*(tmpColor.green()-128) );
-      m_diffuse.setPixelColor(i,j,tmpColor2);
-      std::cout<<"Second"<<std::endl;
-    }
-  }
-
-}
-
 void Image::equalizeHistogram1f( map _map )
 {
   std::vector<std::vector<float>> * activeMap;
@@ -898,7 +805,7 @@ QColor Image::vec3ToColor(glm::vec3 _vec)
 
 //---------------------------------------------------------------------------------------------------------------------
 
-void Image::diffuse(float _brightness, float _contrast, int _sharpnessBlur, bool _equalize)
+void Image::diffuse(float _brightness, float _contrast, int _sharpnessBlur)
 {
   m_diffuse = m_image;
   //---SHARPEN-----------
@@ -984,12 +891,6 @@ void Image::diffuse(float _brightness, float _contrast, int _sharpnessBlur, bool
 
       m_diffuse.setPixelColor(i,j,vec3ToColor(tmp));
     }
-  }
-  std::cout<<"HERE BRO"<<newContrast<<std::endl;
-
-  if(_equalize)
-  {
-    equalizeDiffuseHistogram();
   }
 }
 

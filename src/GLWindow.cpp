@@ -510,7 +510,7 @@ void GLWindow::calculateSpecular( int _brightness, int _contrast, bool _invert, 
 
 //------------------------------------------------------------------------------------------------------------------------------
 
-void GLWindow::calculateDiffuse(int _brightness, int _contrast, int _sharpness, bool _equalize)
+void GLWindow::calculateDiffuse(int _brightness, int _contrast, int _sharpness)
 {
   float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
   float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
@@ -518,7 +518,7 @@ void GLWindow::calculateDiffuse(int _brightness, int _contrast, int _sharpness, 
 
   if( m_editedImage->isNull() ) return;
 
-  m_editedImage->diffuse( tmpBrightness, tmpContrast, tmpSharpnessBlur, _equalize );
+  m_editedImage->diffuse( tmpBrightness, tmpContrast, tmpSharpnessBlur);
   m_preview = m_editedImage->getDiffuse();
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
 
@@ -593,8 +593,9 @@ void GLWindow::calculateDisplacement( int _brightness, int _contrast, bool _inve
 {
   float tmpBrightness = static_cast<float>( _brightness ) / 100.0f;
   float tmpContrast = static_cast<float>( _contrast ) / 100.0f;
+  float tmpSharpnessBlur = _sharpness-5;
 
-  m_editedImage->specular( tmpBrightness, tmpContrast, _invert, _sharpness, _equalize, Image::DISPLACEMENT );
+  m_editedImage->specular( tmpBrightness, tmpContrast, _invert, tmpSharpnessBlur, _equalize, Image::DISPLACEMENT );
   m_preview = m_editedImage->getDisplacement();
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
   if(m_glImage.isNull())

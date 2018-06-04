@@ -41,8 +41,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   connect((QSlider *)m_diffuseMenu[1], SIGNAL(sliderReleased() ), this, SLOT(updateDiffuse()));
   connect((QSlider *)m_diffuseMenu[3], SIGNAL(sliderReleased() ), this, SLOT(updateDiffuse()));
   connect((QSlider *)m_diffuseMenu[5], SIGNAL(sliderReleased() ), this, SLOT(updateDiffuse()));
-  connect((QCheckBox *)m_diffuseMenu[7], SIGNAL(clicked(bool)), this, SLOT(updateDiffuse()));
-  connect((QPushButton *)m_diffuseMenu[8], SIGNAL(released()), this, SLOT(resetDiffuseSettings()));
+  connect((QPushButton *)m_diffuseMenu[6], SIGNAL(released()), this, SLOT(resetDiffuseSettings()));
 
   // specular
   connect((QSlider *)m_specularMenu[3], SIGNAL(sliderReleased() ), this, SLOT(updateSpecular()));
@@ -532,11 +531,7 @@ void MainWindow::makeDiffuseMenu()
   m_diffuseMenu.push_back( new QLabel( "Blur/Sharpen", 0, 0 ) );
   m_diffuseMenu.push_back( sharpness );
 
-  //6-7
-  m_diffuseMenu.push_back( new QLabel( "Histogram equalization", 0, 0 ) );
-  m_diffuseMenu.push_back( new QCheckBox() );
-
-  //8
+  //6
   m_diffuseMenu.push_back( new QPushButton( "Reset", nullptr ) );
 }
 
@@ -619,8 +614,7 @@ void MainWindow::updateDiffuse()
 {
   m_activeScene->calculateDiffuse(static_cast<QSlider *>(m_diffuseMenu[3])->value(), // BRIGHTNESS
       static_cast<QSlider *>(m_diffuseMenu[1])->value(), // CONTRAST
-      static_cast<QSlider *>(m_diffuseMenu[5])->value(), // SHARPNESS
-      static_cast<QCheckBox *>(m_diffuseMenu[7])->isChecked()); // EQUALIZE
+      static_cast<QSlider *>(m_diffuseMenu[5])->value()); // SHARPNESS
 }
 
 void MainWindow::updateAO()
@@ -672,7 +666,6 @@ void MainWindow::resetDiffuseSettings()
   static_cast<QSlider *>(m_diffuseMenu[1])->setValue(20);
   static_cast<QSlider *>(m_diffuseMenu[3])->setValue(50);
   static_cast<QSlider *>(m_diffuseMenu[5])->setValue(5);
-  static_cast<QCheckBox *>(m_diffuseMenu[7])->setChecked(false);
 
   updateDiffuse();
 }

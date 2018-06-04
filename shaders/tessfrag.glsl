@@ -168,6 +168,11 @@ void main()
   float metallic = texture( MetallicTexture, TexCoords ).r;
   float roughness = texture( RoughnessTexture, TexCoords ).r;
 
+  if(roughness < 0.001f) roughness = 0.001f;
+  if(roughness > 0.999f) roughness = 0.999f;
+  roughness = 1.0f - roughness;
+
+
   // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0
   // of 0.04 and if it's a metal, use their albedo color as F0 (metallic workflow)
   vec3 F0 = vec3( 0.04 );
