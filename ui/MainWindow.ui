@@ -17,6 +17,12 @@
    <string>TexSketch</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="minimumSize">
+    <size>
+     <width>1000</width>
+     <height>600</height>
+    </size>
+   </property>
    <layout class="QGridLayout" name="s_mainWindowGridLayout">
     <item row="0" column="3">
      <spacer name="horizontalSpacer_5">
@@ -115,14 +121,31 @@
     </item>
     <item row="1" column="6">
      <widget class="QTabWidget" name="tabWidget">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>150</width>
+        <height>15077215</height>
+       </size>
+      </property>
       <property name="currentIndex">
        <number>0</number>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>16</width>
+        <height>16</height>
+       </size>
       </property>
       <widget class="QWidget" name="diffuseTab">
        <attribute name="title">
         <string>Tab 1</string>
        </attribute>
-       <zorder>verticalSpacer</zorder>
       </widget>
       <widget class="QWidget" name="normalTab">
        <attribute name="title">

@@ -23,9 +23,10 @@ public:
   void calculateNormals( int _depth, bool _invert ) override;
   void calculateSpecular( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
   void calculateRoughness( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
-  void calculateMetallic(int _x, int _y, float _range);
-  void calculateDiffuse(int _brightness, int _contrast, int _sharpness);
-  void calculateAO(int _depth, int _contrast, int _brightness);
+  void calculateMetallic(int _x, int _y, float _range) override;
+  void calculateDiffuse(int _brightness, int _contrast, int _sharpness ) override;
+  void calculateAO(int _depth, int _contrast, int _brightness) override;
+
   void calculateDisplacement( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
 
   void changeMesh( std::string _filename );
@@ -76,7 +77,7 @@ private :
 
   // Which shader to use
   bool m_pbr;
-  bool m_isSkybox = true;
+  bool m_isSkybox = false;
 
   float skyboxSize = 10.0f;
 

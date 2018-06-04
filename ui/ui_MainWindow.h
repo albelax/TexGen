@@ -56,6 +56,7 @@ public:
         MainWindow->resize(800, 600);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QStringLiteral("centralwidget"));
+        centralwidget->setMinimumSize(QSize(1000, 600));
         s_mainWindowGridLayout = new QGridLayout(centralwidget);
         s_mainWindowGridLayout->setObjectName(QStringLiteral("s_mainWindowGridLayout"));
         horizontalSpacer_5 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
@@ -97,6 +98,9 @@ public:
 
         tabWidget = new QTabWidget(centralwidget);
         tabWidget->setObjectName(QStringLiteral("tabWidget"));
+        tabWidget->setMinimumSize(QSize(0, 0));
+        tabWidget->setMaximumSize(QSize(150, 15077215));
+        tabWidget->setIconSize(QSize(16, 16));
         diffuseTab = new QWidget();
         diffuseTab->setObjectName(QStringLiteral("diffuseTab"));
         tabWidget->addTab(diffuseTab, QString());

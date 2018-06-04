@@ -58,6 +58,8 @@ void PBRViewport::resizeGL( int _w, int _h )
 {
 	makeCurrent();
 	m_camera.resize(_w, _h);
+	addTexture( m_editedImage->getDiffuse(), &m_diffuseTexture, 0 );
+	glUniform1i( m_colourTextureAddress, 0 );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -407,10 +409,9 @@ void PBRViewport::renderScene()
 	glUniformMatrix4fv( m_MVAddress, 1, GL_FALSE, glm::value_ptr( m_MV ) );
 	glUniformMatrix3fv( m_NAddress, 1, GL_FALSE, glm::value_ptr( N ) );
 
-	glPatchParameteri(GL_PATCH_VERTICES, 3);       // tell OpenGL that every patch has 16 verts
+	glPatchParameteri(GL_PATCH_VERTICES, 3);       // tell OpenGL that every patch has 3 verts
 	glDrawArrays( GL_PATCHES, m_mesh.getBufferIndex()/3, ( m_mesh.getAmountVertexData() / 3 ) );
 //	glDrawArrays( GL_TRIANGLES, m_mesh.getBufferIndex()/3, ( m_mesh.getAmountVertexData() / 3 ) );
-
 
 }
 

@@ -169,6 +169,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   displacementLayout->addSpacing(100);
   displacementTab->setLayout(displacementLayout);
 
+  m_ui->tabWidget->setFixedWidth(440);
+
   m_ui->tabWidget->removeTab(0);
   m_ui->tabWidget->removeTab(0);
   m_ui->tabWidget->addTab(diffuseTab, tr("Diffuse"));
