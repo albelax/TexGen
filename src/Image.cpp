@@ -1015,7 +1015,7 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
     case Image::SPECULAR: activeMap = &m_specular; break;
     case Image::ROUGHNESS: activeMap = &m_roughness; break;
     case Image::AO: activeMap = &m_ao; break;
-    case Image::SPECULAR: activeMap = &m_specular; break;
+    case Image::DISPLACEMENT: activeMap = &m_specular; break;
     default: break;
   }
 
