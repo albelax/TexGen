@@ -181,7 +181,7 @@ void GLWindow::resizeGL( int _w, int _h )
 
 void GLWindow::paintGL()
 {
-  QPainter p( this );
+//  QPainter p( this );
 
   glClearColor( 1, 1, 1, 1.0f );
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -191,8 +191,10 @@ void GLWindow::paintGL()
     glBindTexture( GL_TEXTURE_2D, m_renderedTexture);
     renderTexture();
   }
-  std::array<float, 2> ratio = { 1, 1 };
-  drawStroke( p, ratio );
+//  std::array<float, 2> ratio = { 1, 1 };
+//  drawStroke( p, ratio );
+  if ( m_canUpdate )
+  update();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------

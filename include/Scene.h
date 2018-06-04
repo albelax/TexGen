@@ -30,7 +30,10 @@ public:
   virtual void calculateDisplacement( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) = 0;
   void toggleMetallic(bool _b);
   void toggleAO(bool _b);
+  void setUpdate( bool _canUpdate ) { m_canUpdate = _canUpdate; }
+  bool canUpdate() { return m_canUpdate; }
 protected:
+  bool m_canUpdate;
   GLuint m_vao;
   GLuint m_nbo;
   GLuint m_vbo;

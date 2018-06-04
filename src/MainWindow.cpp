@@ -253,7 +253,6 @@ void MainWindow::createMenus()
 
   m_ui->menuFiles->addAction(openAct);
   m_ui->menuFiles->addAction(saveAct);
-//  m_ui->m_editMenu->addAction(loadMeshAct);
   m_ui->menuedit->addAction(loadMeshAct);
 }
 
@@ -278,30 +277,38 @@ void MainWindow::createActions()
 
 void MainWindow::open()
 {
+  m_activeScene->setUpdate( false );
   QString fileName = QFileDialog::getOpenFileName( this, tr("Open File"), QDir::currentPath() );
 
   if( !fileName.isEmpty() && dynamic_cast<GLWindow *>( m_activeScene ) ) //w-discrepancy sample i of the total sample set of size
   {
     dynamic_cast<GLWindow *>( m_activeScene )->loadImage( fileName.toLatin1().data() );
   }
+  m_activeScene->setUpdate( true );
 }
 
 //------------------------------------------------------------------------
 
 void MainWindow::changeMesh()
 {
+  m_activeScene->setUpdate( false );
   QString fileName = QFileDialog::getOpenFileName( this, tr("Open File"), QDir::currentPath() );
 
   if( !fileName.isEmpty() && dynamic_cast<PBRViewport *>( m_activeScene ) )
   {
     dynamic_cast<PBRViewport *>( m_activeScene )->changeMesh(fileName.toStdString() );
   }
+  m_activeScene->setUpdate( true );
+
 }
 
 //------------------------------------------------------------------------
 
 void MainWindow::save()
 {
+  // setting the update to false prevents the
+  // viweport to cause a racing condition while opening files
+  m_activeScene->setUpdate( false );
   QString fileFormat = "jpg";
   QString initialPath = QDir::currentPath() + "/untitled." + fileFormat;
 
@@ -311,6 +318,7 @@ void MainWindow::save()
   {
     dynamic_cast<GLWindow *>( m_activeScene )->save( fileName.toLatin1().data() );
   }
+  m_activeScene->setUpdate( true );
   updateNormal();
   updateRoughness();
   updateDiffuse();

@@ -390,6 +390,7 @@ void PBRViewport::paintGL()
 	}
 
 	renderScene();
+  if ( m_canUpdate ) update();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -400,13 +401,9 @@ void PBRViewport::renderScene()
 	glClear( GL_DEPTH_BUFFER_BIT );
 	glUseProgram( m_tess.getShaderProgram() );
 	glBindVertexArray(m_vao);
-//	glUniform1i( glGetUniformLocation( m_tess.getShaderProgram(), "tiles" ), m_tiles );
 	glUniform1i( m_tilingAddress, m_tiles );
-//	glUseProgram( m_shader.getShaderProgram() );
 	auto camPos = m_camera.getCameraEye();
-//	glUniform3f( glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ), camPos.x, camPos.y, camPos.z );
 
-//	glUniform3f( glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ), camPos.x, camPos.y, camPos.z );
 	glUniform3f( glGetUniformLocation( m_tess.getShaderProgram(), "camPos" ), camPos.x, camPos.y, camPos.z );
 
 	m_camera.update();
