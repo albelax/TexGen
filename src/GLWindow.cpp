@@ -89,8 +89,8 @@ void GLWindow::mouseMove( QMouseEvent * _event )
     m_ratio[1] = m_image.height() / height();
 
 
-    glm::vec2 tmp( _event->pos().x() - 5 , _event->pos().y() - 35 );
-    m_stroke.push_back( tmp );
+//    glm::vec2 tmp( _event->pos().x() - 5 , _event->pos().y() - 35 );
+//    m_stroke.push_back( tmp );
   }
 
   update();
@@ -105,15 +105,15 @@ void GLWindow::mouseClick(QMouseEvent * _event)
     m_ratio[0] = static_cast<float>( m_image.width() ) / static_cast<float>( width() ) ;
     m_ratio[1] = static_cast<float>( m_image.height() ) / static_cast<float>(  height() );
 
-    QImage strokedImage = m_image;
-    strokedImage.fill( Qt::white );
+//    QImage strokedImage = m_image;
+//    strokedImage.fill( Qt::white );
 
-    QPainter newP( &strokedImage );
-    drawStroke( newP, m_ratio );
+//    QPainter newP( &strokedImage );
+//    drawStroke( newP, m_ratio );
 
-    strokedImage.save( "images/testy.png", 0, -1 );
-    m_stroke.clear();
-    glm::vec2 tmp( _event->pos().x() - 5, _event->pos().y() - 35 );
+//    strokedImage.save( "images/testy.png", 0, -1 );
+//    m_stroke.clear();
+//    glm::vec2 tmp( _event->pos().x() - 5, _event->pos().y() - 35 );
 
   }
   m_camera.handleMouseClick( *_event );
