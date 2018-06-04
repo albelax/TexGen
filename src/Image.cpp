@@ -727,6 +727,7 @@ void Image::equalizeHistogram1f( map _map )
   {
     case Image::SPECULAR: activeMap = &m_specular; break;
     case Image::ROUGHNESS: activeMap = &m_roughness; break;
+    case Image::DISPLACEMENT: activeMap = &m_displacement; break;
     default: break;
   }
 
@@ -998,7 +999,6 @@ void Image::specular( float _brightness, float _contrast, bool _invert, int _sha
       }
     }
   }
-
 
   float newContrast = clampF(_contrast,1.0f,0.0f);
   newContrast*=5;

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>1000</width>
+    <height>626</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,49 +36,6 @@
        </size>
       </property>
      </spacer>
-    </item>
-    <item row="0" column="6">
-     <widget class="QGroupBox" name="s_transformGB">
-      <property name="title">
-       <string/>
-      </property>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="2" column="0">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Viewport Mode</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QComboBox" name="viewport">
-         <item>
-          <property name="text">
-           <string>2D</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>3D</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="2" column="3">
-        <spacer name="horizontalSpacer_4">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
     </item>
     <item row="0" column="2">
      <spacer name="horizontalSpacer_2">
@@ -146,12 +103,71 @@
        <attribute name="title">
         <string>Tab 1</string>
        </attribute>
+       <zorder>s_transformGB</zorder>
       </widget>
       <widget class="QWidget" name="normalTab">
        <attribute name="title">
         <string>Tab 2</string>
        </attribute>
       </widget>
+     </widget>
+    </item>
+    <item row="0" column="6">
+     <widget class="QGroupBox" name="s_transformGB">
+      <property name="title">
+       <string/>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="2" column="1">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Skybox</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QSpinBox" name="tilingSpinBox">
+         <property name="value">
+          <number>1</number>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Viewport Mode</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QComboBox" name="viewport">
+         <item>
+          <property name="text">
+           <string>2D</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>3D</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Tiling</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QCheckBox" name="skyboxCheckbox">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>
@@ -161,7 +177,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>1000</width>
      <height>26</height>
     </rect>
    </property>

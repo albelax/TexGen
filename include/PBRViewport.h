@@ -28,10 +28,13 @@ public:
   void calculateAO(int _depth, int _contrast, int _brightness) override;
 
   void calculateDisplacement( int _brightness, int _contrast, bool _invert, int _sharpness, bool _equalize ) override;
+  void setTiling(int _t);
+
 
   void changeMesh( std::string _filename );
   void init( bool _pbr );
   unsigned int loadCubemap(std::vector<std::string> faces);
+  void setSkybox(bool _b);
 
 protected:
   /// @brief  The following methods must be implimented in the sub class

@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   // tabs and viewport mode
   connect(m_ui->viewport, SIGNAL(currentIndexChanged(int)), this, SLOT(swapView(int)));
   connect(m_ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeLayout(int)));
+  connect(m_ui->tilingSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setTiling()));
 
   // diffuse
   connect((QSlider *)m_diffuseMenu[1], SIGNAL(sliderReleased() ), this, SLOT(updateDiffuse()));
@@ -181,6 +182,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   m_ui->tabWidget->addTab(displacementTab, tr("Displacement"));
 
   tabsInitialized = true;
+
+  m_ui->tilingSpinBox->setMinimum(1);
+
+
 }
 
 //------------------------------------------------------------------------
@@ -303,6 +308,12 @@ void MainWindow::save()
   {
     dynamic_cast<GLWindow *>( m_activeScene )->save( fileName.toLatin1().data() );
   }
+  updateNormal();
+  updateRoughness();
+  updateDiffuse();
+  updateAO();
+  updateDisplacement();
+
 }
 
 //------------------------------------------------------------------------
@@ -316,15 +327,18 @@ void MainWindow::changeLayout( int _n )
     dynamic_cast<GLWindow *>( m_activeScene )->selectImage(_n);
   }
 
-  if ( _n == 1 )
+  switch(_n)
   {
-    updateNormal();
+    case 0 : updateDiffuse(); break;
+    case 1 : updateNormal(); break;
+    case 2 : updateRoughness(); break;
+    case 3 : recalculateMetallic(); break;
+    case 4 : updateAO(); break;
+    case 5 : updateDisplacement(); break;
+    default: break;
   }
 
-  if ( _n == 2 )
-  {
-    updateRoughness();
-  }
+
 }
 
 //------------------------------------------------------------------------
@@ -335,14 +349,34 @@ void MainWindow::swapView( int _n )
   {
     delete m_activeScene;
     m_activeScene = new GLWindow(this, &m_imageProcessor);
+    int n = m_ui->tabWidget->currentIndex();
+    switch(n)
+    {
+      case 0 : updateDiffuse(); break;
+      case 1 : updateNormal(); break;
+      case 2 : updateRoughness(); break;
+      case 3 : recalculateMetallic(); break;
+      case 4 : updateAO(); break;
+      case 5 : updateDisplacement(); break;
+      default: break;
+    }
   }
 
   else if ( _n == 1 )
   {
     delete m_activeScene;
     m_activeScene = new PBRViewport( this, &m_imageProcessor ); // TODO: change constructor
+    setTiling();
+    updateNormal();
+    updateRoughness();
+    updateDiffuse();
+    updateAO();
+    updateDisplacement();
+    updateSkybox();
   }
   m_ui -> s_mainWindowGridLayout -> addWidget(m_activeScene, 0, 0, 3, 5);
+
+
 }
 
 //------------------------------------------------------------------------
@@ -624,7 +658,7 @@ void MainWindow::updateAO()
   m_activeScene->calculateAO(static_cast<QSlider *>(m_AOMenu[1])->value(), // DEPTH
       static_cast<QSlider *>(m_AOMenu[3])->value(), // CONTRAST
       static_cast<QSlider *>(m_AOMenu[5])->value() // BRIGHTNESS
-        );
+      );
 }
 
 //------------------------------------------------------------------------
@@ -709,4 +743,20 @@ void MainWindow::toggleAO()
 {
   m_activeScene->toggleAO(static_cast<QCheckBox *>(m_AOMenu[7])->isChecked());
   updateAO();
+}
+
+void MainWindow::setTiling()
+{
+  if(dynamic_cast<PBRViewport *>(m_activeScene))
+  {
+    dynamic_cast<PBRViewport *>(m_activeScene)->setTiling(m_ui->tilingSpinBox->value());
+  }
+}
+
+void MainWindow::updateSkybox()
+{
+  if(dynamic_cast<PBRViewport *>(m_activeScene))
+  {
+    dynamic_cast<PBRViewport *>(m_activeScene)->setSkybox(m_ui->skyboxCheckbox->isChecked());
+  }
 }

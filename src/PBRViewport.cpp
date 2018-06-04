@@ -684,3 +684,12 @@ void PBRViewport::makeGrid( GLfloat _size, size_t _steps )
 
 //----------------------------------------------------------------------------------------------------------------------
 
+void PBRViewport::setTiling(int _t)
+{
+	glUniform1i(glGetUniformLocation( m_tess.getShaderProgram(), "tiling" ),_t);
+}
+
+void PBRViewport::setSkybox(bool _b)
+{
+	m_isSkybox = _b;
+}

@@ -51,6 +51,10 @@ private slots:
   void resetDisplacementSettings();
   void swapView( int _n );
 
+  void updateSkybox();
+
+  void setTiling();
+
   void toggleMetallic();
   void toggleAO();
 
@@ -98,6 +102,7 @@ private:
   void makeDiffuseMenu();
   void makeAOMenu();
   void makeDisplacementMenu();
+
 
   bool tabsInitialized = false;
 

@@ -17,6 +17,8 @@ uniform sampler2D AOTexture;
 uniform samplerCube skybox;
 const int envMaxLOD = 8;
 
+uniform int tiling;
+
 // camera parameters
 uniform vec3 camPos;
 
@@ -164,7 +166,7 @@ void main()
   N = rotateVector( src, tgt, N);
 
   // other textures
-  vec3 albedo = texture( ColourTexture, TexCoords ).rgb;
+  vec3 albedo = texture( ColourTexture, TexCoords*tiling ).rgb;
   float metallic = texture( MetallicTexture, TexCoords ).r;
   float roughness = texture( RoughnessTexture, TexCoords ).r;
 
