@@ -9,6 +9,7 @@ PBRViewport::PBRViewport(QWidget *_parent) : Scene( _parent )
   m_camera.setMousePos(0,0);
   m_camera.setTarget(0.0f, 0.0f, -2.0f);
   m_camera.setOrigin(0.0f, 0.0f, 0.0f);
+  m_isSkybox = false;
 }
 
 PBRViewport::PBRViewport( QWidget *_parent, Image * _image ) : Scene( _parent )
@@ -21,6 +22,7 @@ PBRViewport::PBRViewport( QWidget *_parent, Image * _image ) : Scene( _parent )
   m_camera.setMousePos(0,0);
   m_camera.setTarget(0.0f, 0.0f, -2.0f);
   m_camera.setOrigin(0.0f, 0.0f, 0.0f);
+  m_isSkybox = false;
 }
 
 void PBRViewport::changeMesh(std::string _filename)
@@ -361,7 +363,7 @@ void PBRViewport::paintGL()
 	glClearColor( 1, 1, 1, 1.0f );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	glDisable(GL_CULL_FACE);
-
+	std::cout << m_isSkybox << "\n";
 
 	if( !m_isSkybox )
 	{
@@ -686,10 +688,14 @@ void PBRViewport::makeGrid( GLfloat _size, size_t _steps )
 
 void PBRViewport::setTiling(int _t)
 {
-	glUniform1i(glGetUniformLocation( m_tess.getShaderProgram(), "tiling" ),_t);
+	glUniform1i(glGetUniformLocation( m_tess.getShaderProgram(), "tiling" ) ,_t);
 }
 
-void PBRViewport::setSkybox(bool _b)
+//----------------------------------------------------------------------------------------------------------------------
+
+void PBRViewport::setSkybox( bool _b )
 {
 	m_isSkybox = _b;
 }
+
+//----------------------------------------------------------------------------------------------------------------------

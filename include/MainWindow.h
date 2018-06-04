@@ -35,6 +35,7 @@ private slots:
   void save();
   void changeMesh();
   void changeLayout( int _n );
+//  void enableSkybox();
 
   void updateSpecular();
   void updateNormal();

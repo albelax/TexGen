@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   connect(m_ui->viewport, SIGNAL(currentIndexChanged(int)), this, SLOT(swapView(int)));
   connect(m_ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeLayout(int)));
   connect(m_ui->tilingSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setTiling()));
+  connect( m_ui->skyboxCheckbox, SIGNAL(clicked(bool)), this, SLOT(updateSkybox()) );
 
   // diffuse
   connect((QSlider *)m_diffuseMenu[1], SIGNAL(sliderReleased() ), this, SLOT(updateDiffuse()));
@@ -763,6 +764,6 @@ void MainWindow::updateSkybox()
 {
   if(dynamic_cast<PBRViewport *>(m_activeScene))
   {
-    dynamic_cast<PBRViewport *>(m_activeScene)->setSkybox(m_ui->skyboxCheckbox->isChecked());
+    dynamic_cast<PBRViewport *>(m_activeScene)->setSkybox( m_ui->skyboxCheckbox->isChecked() );
   }
 }
