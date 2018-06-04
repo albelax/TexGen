@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.9.0
+** Created by: Qt User Interface Compiler version 5.9.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -135,7 +135,7 @@ public:
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
-        menubar->setGeometry(QRect(0, 0, 1000, 26));
+        menubar->setGeometry(QRect(0, 0, 1000, 25));
         menuFiles = new QMenu(menubar);
         menuFiles->setObjectName(QStringLiteral("menuFiles"));
         menuedit = new QMenu(menubar);
@@ -169,7 +169,7 @@ public:
         label_3->setText(QApplication::translate("MainWindow", "Tiling", Q_NULLPTR));
         skyboxCheckbox->setText(QString());
         menuFiles->setTitle(QApplication::translate("MainWindow", "File", Q_NULLPTR));
-        menuedit->setTitle(QApplication::translate("MainWindow", "Edit", Q_NULLPTR));
+        menuedit->setTitle(QApplication::translate("MainWindow", "Mesh", Q_NULLPTR));
     } // retranslateUi
 
 };

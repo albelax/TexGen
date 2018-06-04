@@ -103,7 +103,6 @@
        <attribute name="title">
         <string>Tab 1</string>
        </attribute>
-       <zorder>s_transformGB</zorder>
       </widget>
       <widget class="QWidget" name="normalTab">
        <attribute name="title">
@@ -178,7 +177,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>26</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFiles">
@@ -188,7 +187,7 @@
    </widget>
    <widget class="QMenu" name="menuedit">
     <property name="title">
-     <string>Edit</string>
+     <string>Mesh</string>
     </property>
    </widget>
    <addaction name="menuFiles"/>
