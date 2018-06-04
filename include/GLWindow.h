@@ -64,6 +64,7 @@ protected:
   void initializeGL() override;
   /// @brief this is the main gl drawing routine which is called whenever the window needs to
   void paintGL() override;
+  void resizeGL( int _w , int _h ) override;
   void addTexture( std::string _image );
   void renderTexture();
   void renderNormals();

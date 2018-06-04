@@ -56,7 +56,8 @@ void PBRViewport::initializeGL()
 
 void PBRViewport::resizeGL( int _w, int _h )
 {
-
+	makeCurrent();
+	m_camera.resize(_w, _h);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -371,11 +372,11 @@ void PBRViewport::paintGL()
 	{
 		m_camera.update();
 		m_MVP = m_camera.projMatrix() * m_camera.viewMatrix() * m_MV;
-		glBindVertexArray(m_skyboxVAO);
+		glBindVertexArray( m_skyboxVAO );
 		glUseProgram( m_skybox.getShaderProgram() );
 		glUniformMatrix4fv( glGetUniformLocation( m_skybox.getShaderProgram(), "MVP" ), 1, GL_FALSE, glm::value_ptr( m_MVP ) );
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemapTexture);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemapTexture );
 		glDrawArrays( GL_TRIANGLES, 0, 36 );
 	}
 
