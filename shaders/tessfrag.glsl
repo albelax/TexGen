@@ -155,20 +155,20 @@ vec3 rotateVector( vec3 src, vec3 tgt, vec3 vec )
 
 void main()
 {
-
+	vec2 texCoords = TexCoords * tiling;
   vec3 N = normalize( Normal );
   vec3 V = normalize( camPos - WorldPos );
   vec3 R = reflect( -V, N );
 
   // normal texture
-  vec3 tgt = normalize( texture( NormalTexture, TexCoords ).rgb * 2.0 - 1.0 );
+	vec3 tgt = normalize( texture( NormalTexture, texCoords ).rgb * 2.0 - 1.0 );
   vec3 src = vec3( 0.0, 0.0, 1.0 );
   N = rotateVector( src, tgt, N);
 
   // other textures
-  vec3 albedo = texture( ColourTexture, TexCoords*tiling ).rgb;
-  float metallic = texture( MetallicTexture, TexCoords ).r;
-  float roughness = texture( RoughnessTexture, TexCoords ).r;
+	vec3 albedo = texture( ColourTexture, texCoords ).rgb;
+	float metallic = texture( MetallicTexture, texCoords ).r;
+	float roughness = texture( RoughnessTexture, texCoords ).r;
 
   if(roughness < 0.001f) roughness = 0.001f;
   if(roughness > 0.999f) roughness = 0.999f;
@@ -241,7 +241,7 @@ void main()
   // ambient lighting (note that the next IBL tutorial will replace
   // this ambient lighting with environment lighting).
 
-  float ao = texture( AOTexture, TexCoords ).r;
+	float ao = texture( AOTexture, texCoords ).r;
   vec3 ambient = vec3( 0.03 ) * albedo * ao;
   vec3 color = ambient + Lo;
 
@@ -254,7 +254,7 @@ void main()
 
   //  fragColour = vec4( mix( x, color, roughness ), 1 );
     fragColour = vec4( color, 1.0f );
-//    fragColour = texture(NormalTexture, TexCoords);
+//    fragColour = texture(NormalTexture, texCoords);
 //    fragColour = vec4(Normal, 1.0);
 }
 
