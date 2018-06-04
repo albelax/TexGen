@@ -49,6 +49,7 @@ protected:
   void makeGrid( GLfloat _size, size_t _steps );
 
 private :
+  int m_tiles;
   GLint m_specularTextureAddress;
   GLint m_normalTextureAddress;
   GLint m_colourTextureAddress;
@@ -57,7 +58,7 @@ private :
   GLuint m_roughnessTextureAddress;
   GLuint m_aoTextureAddress;
   GLuint m_displacementTextureAddress;
-
+  GLuint m_tilingAddress;
 
   GLuint m_diffuseTexture;
   GLuint m_normalTexture;
@@ -70,6 +71,7 @@ private :
   Shader m_gradient;
   Shader m_skybox;
   Shader m_tess;
+
 
   Mesh m_plane;
   QImage m_normal;

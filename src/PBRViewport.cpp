@@ -10,6 +10,7 @@ PBRViewport::PBRViewport(QWidget *_parent) : Scene( _parent )
   m_camera.setTarget(0.0f, 0.0f, -2.0f);
   m_camera.setOrigin(0.0f, 0.0f, 0.0f);
   m_isSkybox = false;
+//    m_tiles = 1;
 }
 
 PBRViewport::PBRViewport( QWidget *_parent, Image * _image ) : Scene( _parent )
@@ -23,12 +24,13 @@ PBRViewport::PBRViewport( QWidget *_parent, Image * _image ) : Scene( _parent )
   m_camera.setTarget(0.0f, 0.0f, -2.0f);
   m_camera.setOrigin(0.0f, 0.0f, 0.0f);
   m_isSkybox = false;
+//  m_tiles = 1;
 }
 
 void PBRViewport::changeMesh(std::string _filename)
 {
   makeCurrent();
-  m_mesh = Mesh(_filename, "newMesh");
+  m_mesh = Mesh( _filename, "newMesh" );
   init( m_pbr );
 }
 
@@ -206,6 +208,9 @@ void PBRViewport::init(bool _pbr)
 	glEnableVertexAttribArray( t );
 	glVertexAttribPointer( t, 2, GL_FLOAT, GL_FALSE, 0, (void*) 0 );
 
+	m_tilingAddress = glGetUniformLocation( m_tess.getShaderProgram(), "tiling" );
+	setTiling( 1 );
+
 	// link matrices with shader locations
 	if(_pbr)
 	{
@@ -350,6 +355,7 @@ void PBRViewport::init(bool _pbr)
 
 	glUniform1i(glGetUniformLocation( m_skybox.getShaderProgram(), "skybox" ), 0);
 
+
 	glUniform1i(glGetUniformLocation( m_tess.getShaderProgram(), "skybox" ), 6);
 
 }
@@ -363,7 +369,6 @@ void PBRViewport::paintGL()
 	glClearColor( 1, 1, 1, 1.0f );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	glDisable(GL_CULL_FACE);
-	std::cout << m_isSkybox << "\n";
 
 	if( !m_isSkybox )
 	{
@@ -395,6 +400,8 @@ void PBRViewport::renderScene()
 	glClear( GL_DEPTH_BUFFER_BIT );
 	glUseProgram( m_tess.getShaderProgram() );
 	glBindVertexArray(m_vao);
+//	glUniform1i( glGetUniformLocation( m_tess.getShaderProgram(), "tiles" ), m_tiles );
+	glUniform1i( m_tilingAddress, m_tiles );
 //	glUseProgram( m_shader.getShaderProgram() );
 	auto camPos = m_camera.getCameraEye();
 //	glUniform3f( glGetUniformLocation( m_shader.getShaderProgram(), "camPos" ), camPos.x, camPos.y, camPos.z );
@@ -413,7 +420,6 @@ void PBRViewport::renderScene()
 
 	glPatchParameteri(GL_PATCH_VERTICES, 3);       // tell OpenGL that every patch has 3 verts
 	glDrawArrays( GL_PATCHES, m_mesh.getBufferIndex()/3, ( m_mesh.getAmountVertexData() / 3 ) );
-//	glDrawArrays( GL_TRIANGLES, m_mesh.getBufferIndex()/3, ( m_mesh.getAmountVertexData() / 3 ) );
 
 }
 
@@ -686,9 +692,9 @@ void PBRViewport::makeGrid( GLfloat _size, size_t _steps )
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void PBRViewport::setTiling(int _t)
+void PBRViewport::setTiling( int _t )
 {
-	glUniform1i(glGetUniformLocation( m_tess.getShaderProgram(), "tiling" ) ,_t);
+	m_tiles = _t;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

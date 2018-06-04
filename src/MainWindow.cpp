@@ -1,6 +1,9 @@
 #include "include/MainWindow.h"
 #include "ui_MainWindow.h"
 #include <memory>
+#include <QOpenGLWidget>
+#include <QGLWidget>
+#include <QEvent>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::MainWindow)
 {
@@ -37,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   connect(m_ui->viewport, SIGNAL(currentIndexChanged(int)), this, SLOT(swapView(int)));
   connect(m_ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeLayout(int)));
   connect(m_ui->tilingSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setTiling()));
-  connect( m_ui->skyboxCheckbox, SIGNAL(clicked(bool)), this, SLOT(updateSkybox()) );
+  connect(m_ui->skyboxCheckbox, SIGNAL(clicked(bool)), this, SLOT(updateSkybox()));
 
   // diffuse
   connect((QSlider *)m_diffuseMenu[1], SIGNAL(sliderReleased() ), this, SLOT(updateDiffuse()));
@@ -185,8 +188,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
   tabsInitialized = true;
 
   m_ui->tilingSpinBox->setMinimum(1);
-
-
 }
 
 //------------------------------------------------------------------------
@@ -248,11 +249,12 @@ void MainWindow::mouseReleaseEvent(QMouseEvent * _event)
 void MainWindow::createMenus()
 {
   m_fileMenu = new QMenu(tr("&File"), this);
-  m_editMenu = new QMenu(tr("&Edit"), this);
+  m_editMenu = new QMenu(tr("&Mesh"), this);
 
   m_ui->menuFiles->addAction(openAct);
   m_ui->menuFiles->addAction(saveAct);
-  m_ui->menuFiles->addAction(loadMeshAct);
+//  m_ui->m_editMenu->addAction(loadMeshAct);
+  m_ui->menuedit->addAction(loadMeshAct);
 }
 
 //------------------------------------------------------------------------
@@ -269,7 +271,7 @@ void MainWindow::createActions()
 
   saveAct = new QAction(tr("&Save..."), this);
   saveAct->setShortcuts(QKeySequence::Save);
-  connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
+  connect(saveAct, SIGNAL(triggered()), this, SLOT( save()) );
 }
 
 //------------------------------------------------------------------------
@@ -314,7 +316,6 @@ void MainWindow::save()
   updateDiffuse();
   updateAO();
   updateDisplacement();
-
 }
 
 //------------------------------------------------------------------------
@@ -376,7 +377,6 @@ void MainWindow::swapView( int _n )
     updateSkybox();
   }
   m_ui -> s_mainWindowGridLayout -> addWidget(m_activeScene, 0, 0, 3, 5);
-
 
 }
 
