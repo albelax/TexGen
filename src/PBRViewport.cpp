@@ -397,7 +397,7 @@ void PBRViewport::paintGL()
 
 void PBRViewport::renderScene()
 {
-	glViewport( 0, 0, width(), height() );
+//	glViewport( 0, 0, width(), height() );
 	glClear( GL_DEPTH_BUFFER_BIT );
 	glUseProgram( m_tess.getShaderProgram() );
 	glBindVertexArray(m_vao);
@@ -417,7 +417,6 @@ void PBRViewport::renderScene()
 
 	glPatchParameteri(GL_PATCH_VERTICES, 3);       // tell OpenGL that every patch has 3 verts
 	glDrawArrays( GL_PATCHES, m_mesh.getBufferIndex()/3, ( m_mesh.getAmountVertexData() / 3 ) );
-
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -443,7 +442,6 @@ void PBRViewport::calculateNormals(int _depth , bool _invert )
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
   glGenerateMipmap( GL_TEXTURE_2D );
 
-  update();
 }
 
 void PBRViewport::calculateAO(int _depth, int _contrast, int _brightness)
