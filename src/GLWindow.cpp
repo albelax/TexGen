@@ -89,8 +89,8 @@ void GLWindow::mouseMove( QMouseEvent * _event )
     m_ratio[1] = m_image.height() / height();
 
 
-//    glm::vec2 tmp( _event->pos().x() - 5 , _event->pos().y() - 35 );
-//    m_stroke.push_back( tmp );
+    //    glm::vec2 tmp( _event->pos().x() - 5 , _event->pos().y() - 35 );
+    //    m_stroke.push_back( tmp );
   }
 
   update();
@@ -105,15 +105,15 @@ void GLWindow::mouseClick(QMouseEvent * _event)
     m_ratio[0] = static_cast<float>( m_image.width() ) / static_cast<float>( width() ) ;
     m_ratio[1] = static_cast<float>( m_image.height() ) / static_cast<float>(  height() );
 
-//    QImage strokedImage = m_image;
-//    strokedImage.fill( Qt::white );
+    //    QImage strokedImage = m_image;
+    //    strokedImage.fill( Qt::white );
 
-//    QPainter newP( &strokedImage );
-//    drawStroke( newP, m_ratio );
+    //    QPainter newP( &strokedImage );
+    //    drawStroke( newP, m_ratio );
 
-//    strokedImage.save( "images/testy.png", 0, -1 );
-//    m_stroke.clear();
-//    glm::vec2 tmp( _event->pos().x() - 5, _event->pos().y() - 35 );
+    //    strokedImage.save( "images/testy.png", 0, -1 );
+    //    m_stroke.clear();
+    //    glm::vec2 tmp( _event->pos().x() - 5, _event->pos().y() - 35 );
 
   }
   m_camera.handleMouseClick( *_event );
@@ -181,7 +181,7 @@ void GLWindow::resizeGL( int _w, int _h )
 
 void GLWindow::paintGL()
 {
-//  QPainter p( this );
+  //  QPainter p( this );
 
   glClearColor( 1, 1, 1, 1.0f );
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -191,10 +191,10 @@ void GLWindow::paintGL()
     glBindTexture( GL_TEXTURE_2D, m_renderedTexture);
     renderTexture();
   }
-//  std::array<float, 2> ratio = { 1, 1 };
-//  drawStroke( p, ratio );
+  //  std::array<float, 2> ratio = { 1, 1 };
+  //  drawStroke( p, ratio );
   if ( m_canUpdate )
-  update();
+    update();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -268,20 +268,23 @@ void GLWindow::drawStroke( QPainter & _p, std::array<float, 2> & _ratio )
 void GLWindow::showOriginalImage()
 {
   glActiveTexture( GL_TEXTURE0 );
-  m_preview = m_image.copy();
-  m_glImage = QGLWidget::convertToGLFormat( m_preview );
-  if(m_glImage.isNull())
-    qWarning("IMAGE IS NULL");
-  glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
-  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
+  if ( !m_image.isNull() )
+  {
+    m_preview = m_image.copy();
+    m_glImage = QGLWidget::convertToGLFormat( m_preview );
+    if( m_glImage.isNull() )
+      qWarning("IMAGE IS NULL");
+    glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
 
-  glUniform1i( m_colourTextureAddress, 0 );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-  //  glActiveTexture( GL_TEXTURE0 );
-  m_textureLoaded = true;
+    glUniform1i( m_colourTextureAddress, 0 );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+    //  glActiveTexture( GL_TEXTURE0 );
+    m_textureLoaded = true;
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -602,6 +605,7 @@ void GLWindow::calculateDisplacement( int _brightness, int _contrast, bool _inve
   m_glImage = QGLWidget::convertToGLFormat( m_preview );
   if(m_glImage.isNull())
     qWarning("IMAGE IS NULL");
+
   glBindTexture( GL_TEXTURE_2D, m_renderedTexture );
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_glImage.width(), m_glImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_glImage.bits() );
 

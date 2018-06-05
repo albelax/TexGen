@@ -195,7 +195,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::Main
 MainWindow::~MainWindow()
 {
   delete m_ui;
-  delete m_tabWidget;
 }
 
 //------------------------------------------------------------------------
@@ -231,7 +230,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent * _event)
 {
   m_activeScene->mouseClick(_event);
 
-  if ( static_cast<QCheckBox *>( m_metallicMenu[1] )->isChecked() )
+  if ( static_cast<QCheckBox *>( m_metallicMenu[1] )->isChecked() && dynamic_cast<GLWindow*>(m_activeScene) )
   {
     glm::vec2 tmp( _event->pos().x() - 5, _event->pos().y() - 35 );
     auto ratio = dynamic_cast<GLWindow*>(m_activeScene)->getRatio();
@@ -735,6 +734,7 @@ void MainWindow::resetAOSettings()
 
 void MainWindow::pickingMetallic()
 {
+  if ( dynamic_cast<GLWindow *>( m_activeScene ) )
   dynamic_cast<GLWindow *>( m_activeScene )->showOriginalImage();
 }
 
