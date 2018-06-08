@@ -669,15 +669,53 @@ void Image::save( std::vector<std::vector<float>> & _image, std::string _destina
 
 //---------------------------------------------------------------------------------------------------------------------
 
-void Image::save( map _image, std::string _destination )
+void Image::save( map _image, std::string _destination, std::string _fileExtension )
 {
+
+  std::string name = _destination.substr(0, _destination.length() - ( _fileExtension.length()+1) );
+  std::string dot = ".";
+
   switch ( _image )
   {
-    case map::INTENSITY: this->save( m_intensity, _destination ); break;
-    case map::CHROMA: this->save( m_chroma, _destination ); break;
-    case map::ALBEDO: this->save( albedoIntensityMap, _destination ); break;
-    case map::SHADING: this->save( m_shadingMap, _destination ); break;
-    case map::SPECULAR: this->save( m_specular, _destination ); break;
+    case map::ALBEDO:
+      {
+        std::string diffuse = "_diffuse";
+        diffuse = name + diffuse + dot + _fileExtension;
+        m_diffuse.save( diffuse.c_str(), 0, -1);
+        break;
+      }
+    case map::NORMAL:
+      {
+        std::string normal = "_normal";
+        normal = name + normal + dot + _fileExtension;
+        m_normal.save( normal.c_str(), 0, -1);
+        break;
+      }
+    case map::SPECULAR:
+      {
+        std::string metallic = "_metallic";
+        metallic = name + metallic + dot + _fileExtension;
+        auto tmp = getMetallic();
+        tmp.save(metallic.c_str(), 0, -1);
+      }
+    case map::ROUGHNESS:
+      {
+        std::string roughness = "_roughness";
+        roughness = name + roughness + dot + _fileExtension;
+        this->save( m_roughness, roughness ); break;
+      }
+    case map::DISPLACEMENT:
+      {
+        std::string displacement = "_displacement";
+        displacement = name + displacement + dot + _fileExtension;
+        this->save( m_displacement, displacement ); break;
+      }
+    case map::AO:
+      {
+        std::string ao = "_ao";
+        ao = name + ao + dot + _fileExtension;
+        this->save( m_ao, ao ); break;
+      }
     default: break;
   }
 }
@@ -690,6 +728,7 @@ void Image::rgbToHsv()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+
 float Image::contrast(float _amount, float _value)
 {
   int specInt =  _value * 255;

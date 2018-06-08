@@ -35,6 +35,8 @@ private slots:
   void save();
   void changeMesh();
   void changeLayout( int _n );
+  void saveAll();
+
 //  void enableSkybox();
 
   void updateSpecular();
@@ -73,6 +75,7 @@ private:
 
   QAction * openAct;
   QAction * saveAct;
+  QAction * saveAllAct;
   QAction * loadMeshAct;
 
   QAction * exitAct;
@@ -103,7 +106,6 @@ private:
   void makeDiffuseMenu();
   void makeAOMenu();
   void makeDisplacementMenu();
-
 
   bool tabsInitialized = false;
 

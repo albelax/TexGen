@@ -16,7 +16,7 @@
 class Image
 {
 public:
-  enum map { ORIGINAL, INTENSITY, ALBEDO, SHADING, NORMAL, SPECULAR, ROUGHNESS, CHROMA, AO, DISPLACEMENT };
+  enum map  { ORIGINAL, INTENSITY, ALBEDO, SHADING, NORMAL, SPECULAR, ROUGHNESS, CHROMA, AO, DISPLACEMENT };
   Image();
   Image( QImage & _image );
   void threshold();
@@ -45,7 +45,7 @@ public:
 
   void save( std::vector<std::vector<std::vector<float>>> & _image, std::string _destination );
   void save( std::vector<std::vector<float>> & _image, std::string _destination );
-  void save( map _image, std::string _destination );
+  void save(map _image, std::string _destination , std::string _fileExtension);
   void vectorAdd();
   void loadImage( QImage _image );
   QImage calculateNormalMap( QImage & image, int _depth, bool _invert, map _map);

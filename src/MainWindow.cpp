@@ -4,6 +4,7 @@
 #include <QOpenGLWidget>
 #include <QGLWidget>
 #include <QEvent>
+#include <string>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_ui(new Ui::MainWindow)
 {
@@ -252,6 +253,8 @@ void MainWindow::createMenus()
 
   m_ui->menuFiles->addAction(openAct);
   m_ui->menuFiles->addAction(saveAct);
+  m_ui->menuFiles->addAction(saveAllAct);
+
   m_ui->menuedit->addAction(loadMeshAct);
 }
 
@@ -270,6 +273,10 @@ void MainWindow::createActions()
   saveAct = new QAction(tr("&Save..."), this);
   saveAct->setShortcuts(QKeySequence::Save);
   connect(saveAct, SIGNAL(triggered()), this, SLOT( save()) );
+
+  saveAllAct = new QAction(tr("&Save all..."), this);
+  saveAllAct->setShortcuts( QKeySequence::Save );
+  connect(saveAllAct, SIGNAL(triggered()), this, SLOT( saveAll()) );
 }
 
 //------------------------------------------------------------------------
@@ -298,7 +305,6 @@ void MainWindow::changeMesh()
     dynamic_cast<PBRViewport *>( m_activeScene )->changeMesh(fileName.toStdString() );
   }
   m_activeScene->setUpdate( true );
-
 }
 
 //------------------------------------------------------------------------
@@ -317,12 +323,38 @@ void MainWindow::save()
   {
     dynamic_cast<GLWindow *>( m_activeScene )->save( fileName.toLatin1().data() );
   }
+
   m_activeScene->setUpdate( true );
   updateNormal();
   updateRoughness();
   updateDiffuse();
   updateAO();
   updateDisplacement();
+}
+
+//------------------------------------------------------------------------
+
+void MainWindow::saveAll()
+{
+  m_activeScene->setUpdate( false );
+  QString fileFormat = "jpg";
+
+  QString initialPath = QDir::currentPath() + "/untitled." + fileFormat;
+  std::string format = fileFormat.toLatin1().data();
+
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save As"),
+                                                  initialPath ,tr("%1 Files (*.%2);;All Files (*)"));
+
+  if ( !fileName.isEmpty() )
+  {
+    Image::map map = Image::map::ORIGINAL;
+    for ( int i = 0; i < 10; ++i )
+    {
+      map = (Image::map) i;
+      m_imageProcessor.save(map , fileName.toLatin1().data(), format );
+    }
+  }
+  m_activeScene->setUpdate( true );
 }
 
 //------------------------------------------------------------------------
@@ -346,8 +378,6 @@ void MainWindow::changeLayout( int _n )
     case 5 : updateDisplacement(); break;
     default: break;
   }
-
-
 }
 
 //------------------------------------------------------------------------
