@@ -57,17 +57,10 @@ linux:LIBS += -lGLEW
 # CL
 macx: LIBS += -framework OpenCL
 linux: LIBS += -L/usr/lib64/nvidia -lOpenCL
+linux: LIBS += -L/usr/local/lib64 -lstdc++
 INCLUDEPATH += /usr/include/CL /usr/local/include/ cl/include/
 
 RESOURCES += $$PWD/Style/style.qrc
 
 DISTFILES += shaders/*
-#    shaders/pbr_frag.glsl \
-#    shaders/pbr_vert.glsl \
-#    shaders/renderedVert.glsl \
-#    shaders/renderedFrag.glsl \
-#    shaders/gradientVert.glsl \
-#    shaders/gradientFrag.glsl \
-#    shaders/skyboxFrag.glsl \
-#		shaders/skyboxVert.glsl \
-#		shaders/pbr_funcs.h
+

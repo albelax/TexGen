@@ -15,7 +15,6 @@ enum  class ShaderType : char {VERTEX,FRAGMENT,GEOMETRY,TESSCONTROL,TESSEVAL,COM
 
 class Shader
 {
-
 public:
 	Shader(std::string _name, std::string _vertexPath, std::string _fragmentPath);
 	Shader();
