@@ -135,7 +135,7 @@ public:
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
-        menubar->setGeometry(QRect(0, 0, 1000, 25));
+        menubar->setGeometry(QRect(0, 0, 1000, 26));
         menuFiles = new QMenu(menubar);
         menuFiles->setObjectName(QStringLiteral("menuFiles"));
         menuedit = new QMenu(menubar);
@@ -155,7 +155,7 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "TexSketch", Q_NULLPTR));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "TexGen", Q_NULLPTR));
         tabWidget->setTabText(tabWidget->indexOf(diffuseTab), QApplication::translate("MainWindow", "Tab 1", Q_NULLPTR));
         tabWidget->setTabText(tabWidget->indexOf(normalTab), QApplication::translate("MainWindow", "Tab 2", Q_NULLPTR));
         s_transformGB->setTitle(QString());
