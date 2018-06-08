@@ -3,7 +3,7 @@
 We propose the implementation of a software that aims at speeding up the work-flow of texture artists and that can help generalists to quickly generate texture maps without having to use multiple programs and complex procedures. 
 
 <p align="center">
-  <img width="256" height="256" src="readme_files/94427003.png">
+  <img width="1002" height="666" src="readme_files/94427003.png">
 </p>
 
 ### Dependencies
